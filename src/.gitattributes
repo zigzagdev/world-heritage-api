@@ -4,9 +4,12 @@
 *.html diff=html
 *.md diff=markdown
 *.php diff=php
+
 *.yml linguist-language=YAML
-*.js linguist-language=JavaScript
-*.environment/docker/Dockerfile linguist-language=Dockerfile
+
+laravel/**/*.js linguist-language=JavaScript
+
+environment/docker/Dockerfile linguist-language=Dockerfile
 
 /.github export-ignore
 CHANGELOG.md export-ignore
