@@ -10,6 +10,7 @@ class WorldHeritage extends Model
     protected $connection = 'mysql';
 
     protected $fillable = [
+        'id',
         'unesco_id',
         'official_name',
         'name',
