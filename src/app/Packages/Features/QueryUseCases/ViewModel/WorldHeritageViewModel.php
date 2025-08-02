@@ -104,4 +104,29 @@ class WorldHeritageViewModel
     {
         return $this->dto->getUnescoSiteUrl();
     }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'unesco_id' => $this->getUnescoId(),
+            'official_name' => $this->getOfficialName(),
+            'name' => $this->getName(),
+            'country' => $this->getCountry(),
+            'region' => $this->getRegion(),
+            'category' => $this->getCategory(),
+            'year_inscribed' => $this->getYearInscribed(),
+            'latitude' => $this->getLatitude(),
+            'longitude' => $this->getLongitude(),
+            'is_endangered' => $this->isEndangered(),
+            'name_jp' => $this->getNameJp(),
+            'state_party' => $this->getStateParty(),
+            'criteria' => $this->getCriteria(),
+            'area_hectares' => $this->getAreaHectares(),
+            'buffer_zone_hectares' => $this->getBufferZoneHectares(),
+            'short_description' => $this->getShortDescription(),
+            'image_url' => $this->getImageUrl(),
+            'unesco_site_url' => $this->getUnescoSiteUrl()
+        ];
+    }
 }
