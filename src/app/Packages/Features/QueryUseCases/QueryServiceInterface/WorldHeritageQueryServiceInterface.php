@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases;
+namespace App\Packages\Features\QueryUseCases\QueryServiceInterface;
 
 use App\Packages\Domains\WorldHeritageEntity;
 

@@ -3,7 +3,7 @@
 namespace App\Packages\Domains;
 
 use App\Models\WorldHeritage;
-use App\Packages\Features\QueryUseCases\WorldHeritageQueryServiceInterface;
+use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use RuntimeException;
 
 class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
