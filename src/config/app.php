@@ -4,7 +4,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application Name
+    | CommandUseCases Name
     |--------------------------------------------------------------------------
     |
     | This value is the name of your application, which will be used when the
@@ -13,11 +13,11 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'World Heritage Search'),
 
     /*
     |--------------------------------------------------------------------------
-    | Application Environment
+    | CommandUseCases Environment
     |--------------------------------------------------------------------------
     |
     | This value determines the "environment" your application is currently
@@ -30,7 +30,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application Debug Mode
+    | CommandUseCases Debug Mode
     |--------------------------------------------------------------------------
     |
     | When your application is in debug mode, detailed error messages with
@@ -43,7 +43,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application URL
+    | CommandUseCases URL
     |--------------------------------------------------------------------------
     |
     | This URL is used by the console to properly generate URLs when using
@@ -56,7 +56,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application Timezone
+    | CommandUseCases Timezone
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default timezone for your application, which
@@ -65,11 +65,11 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'timezone' => env('APP_TIMEZONE', 'Asia/Tokyo'),
 
     /*
     |--------------------------------------------------------------------------
-    | Application Locale Configuration
+    | CommandUseCases Locale Configuration
     |--------------------------------------------------------------------------
     |
     | The application locale determines the default locale that will be used
