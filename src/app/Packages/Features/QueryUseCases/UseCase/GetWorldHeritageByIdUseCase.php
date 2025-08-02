@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Packages\Features\CommandUseCases\UseCase;
+namespace App\Packages\Features\QueryUseCases\UseCase;
 
-use App\Packages\Features\CommandUseCases\Dto\WorldHeritageDto;
-use App\Packages\Features\QueryUseCases\WorldHeritageQueryServiceInterface;
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
+use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 
 class GetWorldHeritageByIdUseCase
 {

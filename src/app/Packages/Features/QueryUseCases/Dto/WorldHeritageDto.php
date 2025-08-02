@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Packages\Features\CommandUseCases\Dto;
+namespace App\Packages\Features\QueryUseCases\Dto;
 
-final class WorldHeritageDto
+class WorldHeritageDto
 {
     public function __construct(
         private readonly int $id,
