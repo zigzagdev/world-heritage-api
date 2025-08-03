@@ -14,6 +14,7 @@ services:
       - "8700:9000"
     depends_on:
       - mysql
+      - mysql-test
 
   mysql:
     image: mysql:8.0
@@ -29,6 +30,48 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
+  mysql-test:
+    image: mysql:8.0
+    container_name: heritage-mysql-test
+    restart: unless-stopped
+    ports:
+      - "2307:3306"
+    environment:
+      MYSQL_DATABASE: world-heritage-test
+      MYSQL_ROOT_PASSWORD: world-heritage
+      MYSQL_USER: world-heritage
+      MYSQL_PASSWORD: world-heritage
+    volumes:
+      - db_data_test:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: heritage-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: world-heritage
+      PMA_PASSWORD: world-heritage
+    depends_on:
+      - mysql
+
+  phpmyadmin-test:
+    image: phpmyadmin/phpmyadmin
+    container_name: heritage-phpmyadmin-test
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql-test
+      PMA_PORT: 3306
+      PMA_USER: world-heritage
+      PMA_PASSWORD: world-heritage
+    depends_on:
+      - mysql-test
+
   nginx:
     image: nginx:alpine
     container_name: heritage-nginx
@@ -42,3 +85,4 @@ services:
 
 volumes:
   db_data:
+  db_data_test:
