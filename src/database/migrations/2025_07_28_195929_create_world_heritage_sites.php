@@ -26,8 +26,8 @@ return new class extends Migration
             $table->float('area_hectares')->nullable();
             $table->float('buffer_zone_hectares')->nullable();
             $table->boolean('is_endangered')->default(false);
-            $table->decimal('latitude', 10, 6);
-            $table->decimal('longitude', 10, 6);
+            $table->decimal('latitude', 10, 6)->nullable();
+            $table->decimal('longitude', 10, 6)->nullable();
             $table->text('short_description')->nullable();
             $table->string('image_url')->nullable();
             $table->string('unesco_site_url')->nullable();

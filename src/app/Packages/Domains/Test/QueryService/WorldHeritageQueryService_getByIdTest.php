@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Packages\Domains\Test;
+namespace App\Packages\Domains\Test\QueryService;
 
-use Tests\TestCase;
-use Mockery;
-use App\Packages\Domains\WorldHeritageQueryService;
 use App\Packages\Domains\WorldHeritageEntity;
+use App\Packages\Domains\WorldHeritageQueryService;
+use Tests\TestCase;
 
-class WorldHeritageQueryServiceTest extends TestCase
+class WorldHeritageQueryService_getByIdTest extends TestCase
 {
     private $repository;
     protected function setUp(): void
@@ -44,17 +43,6 @@ class WorldHeritageQueryServiceTest extends TestCase
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
         ];
-    }
-
-    private function mockEntity(): WorldHeritageEntity
-    {
-        $heritage = Mockery::mock(WorldHeritageEntity::class);
-
-        $heritage
-            ->getId()
-            ->shouldReturn($this->arrayData()['id']);
-
-        return $heritage;
     }
 
     public function test_repository_check(): void
