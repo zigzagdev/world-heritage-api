@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Packages\Features\CommandUseCases;
+namespace App\Packages\Features\QueryUseCases\Tests;
 
-use Tests\TestCase;
-use Mockery;
-use App\Packages\Features\CommandUseCases\Dto\WorldHeritageDto;
-use App\Packages\Features\CommandUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageQueryService;
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
+use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
+use Mockery;
+use Tests\TestCase;
 
 final class GetWorldHeritageByIdUseCaseTest extends TestCase
 {

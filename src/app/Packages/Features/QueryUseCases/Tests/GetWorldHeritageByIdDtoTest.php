@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Packages\Features\CommandUseCases;
+namespace App\Packages\Features\QueryUseCases\Tests;
 
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use Tests\TestCase;
-use App\Packages\Features\CommandUseCases\Dto\WorldHeritageDto;
 
 class GetWorldHeritageByIdDtoTest extends TestCase
 {
