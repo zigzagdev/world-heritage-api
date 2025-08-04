@@ -10,6 +10,8 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
 {
 
     private $queryService;
+    private int $currentPage;
+    private int $perPage;
 
     protected function setUp(): void
     {
@@ -115,41 +117,42 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
     public function test_getByIds_count_objects(): void
     {
         $ids = [1, 2];
-        $result = $this->queryService->getHeritagesByIds($ids);
+        $result = $this->queryService->getHeritagesByIds($ids, 1, 10);
 
-        $this->assertCount(2, $result->getAllHeritages());
+        $this->assertCount(2, $result->getCollection());
     }
 
     public function test_getByIds_check_each_value(): void
     {
         $ids = [1, 2];
-        $result = $this->queryService->getHeritagesByIds($ids);
+        $result = $this->queryService->getHeritagesByIds($ids, 1, 10);
 
         $expectedMap = collect(self::arrayData())
             ->filter(fn($row) => in_array($row['id'], $ids))
             ->keyBy('id');
 
-        foreach ($result->getAllHeritages() as $entity) {
-            $id = $entity->getId();
+        foreach ($result->getCollection() as $entity) {
+            $id = $entity['id'];
             $expected = $expectedMap[$id] ?? null;
-            $this->assertSame($expected['unesco_id'], $entity->getUnescoId());
-            $this->assertSame($expected['official_name'], $entity->getOfficialName());
-            $this->assertSame($expected['name'], $entity->getName());
-            $this->assertSame($expected['name_jp'], $entity->getNameJp());
-            $this->assertSame($expected['country'], $entity->getCountry());
-            $this->assertSame($expected['region'], $entity->getRegion());
-            $this->assertSame($expected['state_party'], $entity->getStateParty());
-            $this->assertSame($expected['category'], $entity->getCategory());
-            $this->assertSame($expected['criteria'], $entity->getCriteria());
-            $this->assertSame($expected['year_inscribed'], $entity->getYearInscribed());
-            $this->assertSame($expected['area_hectares'], $entity->getAreaHectares());
-            $this->assertSame($expected['buffer_zone_hectares'], $entity->getBufferZoneHectares());
-            $this->assertSame($expected['is_endangered'], $entity->isEndangered());
-            $this->assertSame($expected['latitude'], $entity->getLatitude());
-            $this->assertSame($expected['longitude'], $entity->getLongitude());
-            $this->assertSame($expected['short_description'], $entity->getShortDescription());
-            $this->assertSame($expected['image_url'], $entity->getImageUrl());
-            $this->assertSame($expected['unesco_site_url'], $entity->getUnescoSiteUrl());
+            $this->assertSame($expected['id'], $entity['id']);
+            $this->assertEquals($expected['unesco_id'], $entity['unesco_id']);
+            $this->assertSame($expected['official_name'], $entity['official_name']);
+            $this->assertSame($expected['name'], $entity['name']);
+            $this->assertSame($expected['name_jp'], $entity['name_jp']);
+            $this->assertSame($expected['country'], $entity['country']);
+            $this->assertSame($expected['region'], $entity['region']);
+            $this->assertSame($expected['state_party'], $entity['state_party']);
+            $this->assertSame($expected['category'], $entity['category']);
+            $this->assertSame($expected['criteria'], $entity['criteria']);
+            $this->assertEquals($expected['year_inscribed'], $entity['year_inscribed']);
+            $this->assertSame($expected['area_hectares'], $entity['area_hectares']);
+            $this->assertSame($expected['buffer_zone_hectares'], $entity['buffer_zone_hectares']);
+            $this->assertIsBool($expected['is_endangered'], $entity['is_endangered']);
+            $this->assertIsFloat($expected['latitude'], $entity['latitude']);
+            $this->assertIsFloat($expected['longitude'], $entity['longitude']);
+            $this->assertSame($expected['short_description'], $entity['short_description']);
+            $this->assertSame($expected['image_url'], $entity['image_url']);
+            $this->assertSame($expected['unesco_site_url'], $entity['unesco_site_url']);
         }
     }
 }
