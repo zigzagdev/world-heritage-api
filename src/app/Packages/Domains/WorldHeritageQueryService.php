@@ -4,6 +4,8 @@ namespace App\Packages\Domains;
 
 use App\Common\Pagination\PaginationDto;
 use App\Models\WorldHeritage;
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+use App\Packages\Features\QueryUseCases\Factory\WorldHeritageDtoCollectionFactory;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use RuntimeException;
 
@@ -60,9 +62,16 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             )
             ->toArray();
 
+        $dtoCollection = $this->buildDtoFromCollection($heritages['data']);
+
         return new PaginationDto(
-            collection: $heritages['data'],
+            collection: $dtoCollection->toArray(),
             pagination: collect($heritages)->except('data')->toArray()
         );
+    }
+
+    private function buildDtoFromCollection(array $data): WorldHeritageDtoCollection
+    {
+        return WorldHeritageDtoCollectionFactory::build($data);
     }
 }

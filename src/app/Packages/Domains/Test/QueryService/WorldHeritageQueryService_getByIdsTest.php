@@ -155,4 +155,19 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
             $this->assertSame($expected['unesco_site_url'], $entity['unesco_site_url']);
         }
     }
+
+    public function test_getByIds_pagination_meta(): void
+    {
+        $ids = [1, 2];
+        $currentPage = 1;
+        $perPage = 1;
+
+        $result = $this->queryService->getHeritagesByIds($ids, $currentPage, $perPage);
+
+        $this->assertSame($currentPage, $result->getCurrentPage());
+        $this->assertSame($perPage, $result->getPerPage());
+
+        $this->assertSame(2, $result->getTotal());
+        $this->assertSame(2, $result->getLastPage());
+    }
 }
