@@ -3,7 +3,8 @@
 namespace App\Packages\Features\QueryUseCases\QueryServiceInterface;
 
 use App\Packages\Domains\WorldHeritageEntity;
-use App\Packages\Domains\WorldHeritageEntityCollection;
+use App\Common\Pagination\PaginationDto;
+
 
 interface WorldHeritageQueryServiceInterface
 {
@@ -12,6 +13,8 @@ interface WorldHeritageQueryServiceInterface
     ): WorldHeritageEntity;
 
     public function getHeritagesByIds(
-        array $ids
-    ): WorldHeritageEntityCollection;
+        array $ids,
+        int $currentPage,
+        int $perPage
+    ): PaginationDto;
 }

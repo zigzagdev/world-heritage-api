@@ -1,22 +1,19 @@
 <?php
 
-namespace App\Packages\Domains\Test\QueryService;
+namespace App\Packages\Features\QueryUseCases\Tests;
 
-use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageQueryService;
-use App\Models\WorldHeritage;
+use Tests\TestCase;
+use Mockery;
+use App\Packages\Features\QueryUseCases\Factory\WorldHeritageDtoCollectionFactory;
+use Illuminate\Support\Str;
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 
-class WorldHeritageQueryService_getByIdsTest extends TestCase
+class WorldHeritageDtoCollectionTest extends TestCase
 {
-
-    private $queryService;
-    private int $currentPage;
-    private int $perPage;
-
     protected function setUp(): void
     {
         parent::setUp();
-        $this->queryService = app(WorldHeritageQueryService::class);
     }
 
     protected function tearDown(): void
@@ -114,60 +111,28 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
         ];
     }
 
-    public function test_getByIds_count_objects(): void
+    public function test_collection_check_type(): void
     {
-        $ids = [1, 2];
-        $result = $this->queryService->getHeritagesByIds($ids, 1, 10);
+        $data = self::arrayData();
+        $dtoCollection = WorldHeritageDtoCollectionFactory::build($data);
 
-        $this->assertCount(2, $result->getCollection());
+        $this->assertInstanceOf(WorldHeritageDtoCollection::class, $dtoCollection);
     }
 
-    public function test_getByIds_check_each_value(): void
+    public function test_check_dto_collection_value(): void
     {
-        $ids = [1, 2];
-        $result = $this->queryService->getHeritagesByIds($ids, 1, 10);
+        $data = self::arrayData();
+        $dtoCollection = WorldHeritageDtoCollectionFactory::build($data);
 
-        $expectedMap = collect(self::arrayData())
-            ->filter(fn($row) => in_array($row['id'], $ids))
-            ->keyBy('id');
+        $arrayDtoCollection = count($dtoCollection->toArray());
 
-        foreach ($result->getCollection() as $entity) {
-            $id = $entity['id'];
-            $expected = $expectedMap[$id] ?? null;
-            $this->assertSame($expected['id'], $entity['id']);
-            $this->assertEquals($expected['unesco_id'], $entity['unesco_id']);
-            $this->assertSame($expected['official_name'], $entity['official_name']);
-            $this->assertSame($expected['name'], $entity['name']);
-            $this->assertSame($expected['name_jp'], $entity['name_jp']);
-            $this->assertSame($expected['country'], $entity['country']);
-            $this->assertSame($expected['region'], $entity['region']);
-            $this->assertSame($expected['state_party'], $entity['state_party']);
-            $this->assertSame($expected['category'], $entity['category']);
-            $this->assertSame($expected['criteria'], $entity['criteria']);
-            $this->assertEquals($expected['year_inscribed'], $entity['year_inscribed']);
-            $this->assertSame($expected['area_hectares'], $entity['area_hectares']);
-            $this->assertSame($expected['buffer_zone_hectares'], $entity['buffer_zone_hectares']);
-            $this->assertIsBool($expected['is_endangered'], $entity['is_endangered']);
-            $this->assertIsFloat($expected['latitude'], $entity['latitude']);
-            $this->assertIsFloat($expected['longitude'], $entity['longitude']);
-            $this->assertSame($expected['short_description'], $entity['short_description']);
-            $this->assertSame($expected['image_url'], $entity['image_url']);
-            $this->assertSame($expected['unesco_site_url'], $entity['unesco_site_url']);
-        }
-    }
+        $this->assertEquals(count($data), $arrayDtoCollection);
+        $actual = collect($dtoCollection->toArray())->map(function($item) {
+            return collect($item)->keyBy(function($value, $key) {
+                return Str::snake($key);
+            })->toArray();
+        })->toArray();
 
-    public function test_getByIds_pagination_meta(): void
-    {
-        $ids = [1, 2];
-        $currentPage = 1;
-        $perPage = 1;
-
-        $result = $this->queryService->getHeritagesByIds($ids, $currentPage, $perPage);
-
-        $this->assertSame($currentPage, $result->getCurrentPage());
-        $this->assertSame($perPage, $result->getPerPage());
-
-        $this->assertSame(2, $result->getTotal());
-        $this->assertSame(2, $result->getLastPage());
+        $this->assertEquals($this->arrayData(), $actual);
     }
 }

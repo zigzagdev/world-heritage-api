@@ -52,7 +52,7 @@ class GetWorldHeritageByIdTest extends TestCase
 
     public function test_ng_id_is_null(): void
     {
-        $this->id = 2;
+        $this->id = 299;
 
         $this->getJson("/api/v1/heritages/{$this->id}")
             ->assertStatus(404);
