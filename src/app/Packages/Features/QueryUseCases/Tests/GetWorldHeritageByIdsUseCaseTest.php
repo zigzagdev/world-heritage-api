@@ -190,7 +190,7 @@ class GetWorldHeritageByIdsUseCaseTest extends TestCase
 
     public function test_use_case_check_type(): void
     {
-        $ids = [1, 2, 3, 4];
+        $ids = array_column(self::arrayData(), 'id');
         $queryService = $this->mockQueryService();
         $useCase = new GetWorldHeritageByIdsUseCase($queryService);
 
@@ -201,7 +201,7 @@ class GetWorldHeritageByIdsUseCaseTest extends TestCase
 
     public function test_use_case_check_value(): void
     {
-        $ids = [1, 2, 3, 4];
+        $ids = array_column(self::arrayData(), 'id');
         $queryService = $this->mockQueryService();
         $useCase = new GetWorldHeritageByIdsUseCase($queryService);
 
