@@ -4,6 +4,7 @@ namespace App\Packages\Features\Controller\Tests;
 
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 use App\Packages\Features\Controller\WorldHeritageController;
 use Mockery;
@@ -144,10 +145,22 @@ class WorldHeritageController_getByIdTest extends TestCase
         return $useCase;
     }
 
+    private function mockRequest(): Request
+    {
+        $request = Mockery::mock(Request::class);
+
+        $request
+            ->shouldReceive('route')
+            ->with('id')
+            ->andReturn(self::arrayData()['id']);
+
+        return $request;
+    }
+
     public function test_controller_work_valid(): void
     {
         $result = $this->controller->getWorldHeritageById(
-            self::arrayData()['id'],
+            $this->mockRequest(),
             $this->mockUseCase()
         );
 

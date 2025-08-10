@@ -4,14 +4,13 @@ namespace App\Packages\Features\Controller\Tests;
 
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Mockery;
 use Tests\TestCase;
 use App\Packages\Features\Controller\WorldHeritageController;
-use App\Common\Pagination\PaginationViewModel;
 use App\Common\Pagination\PaginationDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
-use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
 
 class WorldHeritageController_getByIdsTest extends TestCase
 {
@@ -223,34 +222,45 @@ class WorldHeritageController_getByIdsTest extends TestCase
 
     public function test_controller_return_type(): void
     {
-        $ids = array_column(self::arrayData(), 'id');
-
         $result = $this->controller->getWorldHeritagesByIds(
-            $this->mockUseCase(),
-            $ids,
-            $this->currentPage,
-            $this->perPage
+            $this->mockRequest(),
+            $this->mockUseCase()
         );
 
         $this->assertInstanceOf(JsonResponse::class, $result);
     }
 
+    private function mockRequest(): Request
+    {
+        $mock = Mockery::mock(Request::class);
+
+        $mock->shouldReceive('get')
+            ->with('ids', [])
+            ->andReturn(implode(',', array_column(self::arrayData(), 'id')));
+
+        $mock->shouldReceive('get')
+            ->with('current_page', 1)
+            ->andReturn($this->currentPage);
+
+        $mock->shouldReceive('get')
+            ->with('per_page', 30)
+            ->andReturn($this->perPage);
+
+        return $mock;
+    }
+
     public function test_controller_return_value(): void
     {
-        $ids = array_column(self::arrayData(), 'id');
-
         $result = $this->controller->getWorldHeritagesByIds(
-            $this->mockUseCase(),
-            $ids,
-            $this->currentPage,
-            $this->perPage
+            $this->mockRequest(),
+            $this->mockUseCase()
         );
 
         $response = $result->getOriginalContent();
 
-        $this->assertSame(count($response['data']), count(self::arrayData()));
+        $this->assertSame(count($response['data']['data']), count(self::arrayData()));
 
-        foreach ($response['data'] as $key => $value) {
+        foreach ($response['data']['data'] as $key => $value) {
             $this->assertSame($value['id'], self::arrayData()[$key]['id']);
             $this->assertSame($value['unesco_id'], self::arrayData()[$key]['unesco_id']);
             $this->assertSame($value['official_name'], self::arrayData()[$key]['official_name']);
