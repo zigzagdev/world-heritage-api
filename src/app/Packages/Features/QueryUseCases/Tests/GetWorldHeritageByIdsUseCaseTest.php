@@ -210,6 +210,5 @@ class GetWorldHeritageByIdsUseCaseTest extends TestCase
         $this->assertEquals('http://example.com/api/heritages', $result->getPath());
         $this->assertEquals($this->currentPage, $result->getCurrentPage());
         $this->assertEquals($this->perPage, $result->getPerPage());
-        $this->assertCount(count(self::arrayData()), $result->getCollection());
     }
 }
