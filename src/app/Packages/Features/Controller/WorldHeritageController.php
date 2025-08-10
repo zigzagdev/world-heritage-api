@@ -5,17 +5,24 @@ namespace App\Packages\Features\Controller;
 use App\Common\Pagination\PaginationViewModel;
 use App\Http\Controllers\Controller;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
+use InvalidArgumentException;
 
 class WorldHeritageController extends Controller
 {
     public function getWorldHeritageById(
-        int $id,
+        Request $request,
         GetWorldHeritageByIdUseCase $useCase
     ): JsonResponse
     {
+        $id = $request->route('id');
+        if (empty($id)) {
+            throw new InvalidArgumentException('Id parameter is required.');
+        }
+
         $dto = $useCase->handle($id);
 
         $viewModel = new WorldHeritageViewModel($dto);
@@ -27,13 +34,20 @@ class WorldHeritageController extends Controller
     }
 
     public function getWorldHeritagesByIds(
+        Request $request,
         GetWorldHeritageByIdsUseCase $useCase,
-        array $ids,
-        int $currentPage = 1,
-        int $perPage = 10,
     ): JsonResponse
     {
-        $dto = $useCase->handle($ids, $currentPage, $perPage);
+        $ids = $request->get('ids', []);
+
+        $heritageIds = array_map(
+            fn ($user_id) => intval($user_id),
+            explode(',', $ids)
+        );
+        $currentPage = $request->get('current_page', 1);
+        $perPage = $request->get('per_page', 30);
+
+        $dto = $useCase->handle($heritageIds, $currentPage, $perPage);
 
         $viewModel = new PaginationViewModel($dto);
 

@@ -65,7 +65,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
         $dtoCollection = $this->buildDtoFromCollection($heritages['data']);
 
         return new PaginationDto(
-            collection: $dtoCollection->toArray(),
+            collection: $dtoCollection,
             pagination: collect($heritages)->except('data')->toArray()
         );
     }

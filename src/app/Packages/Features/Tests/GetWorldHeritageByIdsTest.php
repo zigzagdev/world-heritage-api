@@ -1,24 +1,14 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\Tests;
 
-use App\Packages\Domains\WorldHeritageQueryService;
 use Tests\TestCase;
-use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
-use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
-use App\Common\Pagination\PaginationDto;
-use Mockery;
 
-class GetWorldHeritageByIdsUseCaseTest extends TestCase
+class GetWorldHeritageByIdsTest extends TestCase
 {
-    private int $currentPage;
-    private int $perPage;
-
     protected function setUp(): void
     {
         parent::setUp();
-        $this->currentPage = 1;
-        $this->perPage = 10;
     }
 
     protected function tearDown(): void
@@ -116,99 +106,35 @@ class GetWorldHeritageByIdsUseCaseTest extends TestCase
         ];
     }
 
-    private function mockQueryService(): WorldHeritageQueryServiceInterface
-    {
-        $queryService = Mockery::mock(WorldHeritageQueryServiceInterface::class);
-
-        $queryService
-            ->shouldReceive('getHeritagesByIds')
-            ->with(
-                Mockery::type('array'),
-                $this->currentPage,
-                $this->perPage
-            )
-            ->andReturn($this->mockPagination());
-
-        return $queryService;
-    }
-
-    private function mockPagination(): PaginationDto
-    {
-        $pagination = Mockery::mock(PaginationDto::class);
-
-        $pagination
-            ->shouldReceive('getPath')
-            ->andReturn('http://example.com/api/heritages');
-
-        $pagination
-            ->shouldReceive('getCurrentPage')
-            ->andReturn($this->currentPage);
-
-        $pagination
-            ->shouldReceive('getPerPage')
-            ->andReturn($this->perPage);
-
-        $pagination
-            ->shouldReceive('getTotalItems')
-            ->andReturn(count(self::arrayData()));
-
-        $pagination
-            ->shouldReceive('getTotalPages')
-            ->andReturn(1);
-
-        $pagination
-            ->shouldReceive('getFrom')
-            ->andReturn(1);
-
-        $pagination
-            ->shouldReceive('getTo')
-            ->andReturn(count(self::arrayData()));
-
-        $pagination
-            ->shouldReceive('getItems')
-            ->andReturn(self::arrayData());
-
-        $pagination
-            ->shouldReceive('getCollection')
-            ->andReturn(self::arrayData());
-
-        $pagination
-            ->shouldReceive('toArray')
-            ->andReturn([
-                'path'         => 'http://example.com/api/heritages',
-                'current_page' => $this->currentPage,
-                'per_page'     => $this->perPage,
-                'total'        => count(self::arrayData()),
-                'last_page'    => 1,
-                'from'         => 1,
-                'to'           => count(self::arrayData()),
-                'data'         => self::arrayData(),
-            ]);
-
-        return $pagination;
-    }
-
-    public function test_use_case_check_type(): void
+    public function test_feature_api_ok(): void
     {
         $ids = array_column(self::arrayData(), 'id');
-        $queryService = $this->mockQueryService();
-        $useCase = new GetWorldHeritageByIdsUseCase($queryService);
 
-        $result = $useCase->handle($ids, $this->currentPage, $this->perPage);
-
-        $this->assertInstanceOf(PaginationDto::class, $result);
-    }
-
-    public function test_use_case_check_value(): void
-    {
-        $ids = array_column(self::arrayData(), 'id');
-        $queryService = $this->mockQueryService();
-        $useCase = new GetWorldHeritageByIdsUseCase($queryService);
-
-        $result = $useCase->handle($ids, $this->currentPage, $this->perPage);
-
-        $this->assertEquals('http://example.com/api/heritages', $result->getPath());
-        $this->assertEquals($this->currentPage, $result->getCurrentPage());
-        $this->assertEquals($this->perPage, $result->getPerPage());
+        $result = $this->getJson(
+            '/api/v1/heritages?ids=' . implode(',', $ids)
+        );
+        $result->assertStatus(200);
+        $arrayData = $result->getOriginalContent()['data']['data'];
+        foreach ($arrayData as $key => $value) {
+            $this->assertEquals(self::arrayData()[$key]['id'], $value['id']);
+            $this->assertEquals(self::arrayData()[$key]['unesco_id'], $value['unescoId']);
+            $this->assertEquals(self::arrayData()[$key]['official_name'], $value['officialName']);
+            $this->assertEquals(self::arrayData()[$key]['name'], $value['name']);
+            $this->assertEquals(self::arrayData()[$key]['name_jp'], $value['nameJp']);
+            $this->assertEquals(self::arrayData()[$key]['country'], $value['country']);
+            $this->assertEquals(self::arrayData()[$key]['region'], $value['region']);
+            $this->assertEquals(self::arrayData()[$key]['state_party'], $value['stateParty']);
+            $this->assertEquals(self::arrayData()[$key]['category'], $value['category']);
+            $this->assertEquals(self::arrayData()[$key]['criteria'], $value['criteria']);
+            $this->assertEquals(self::arrayData()[$key]['year_inscribed'], $value['yearInscribed']);
+            $this->assertEquals(self::arrayData()[$key]['area_hectares'], $value['areaHectares']);
+            $this->assertEquals(self::arrayData()[$key]['buffer_zone_hectares'], $value['bufferZoneHectares']);
+            $this->assertEquals(self::arrayData()[$key]['is_endangered'], $value['isEndangered']);
+            $this->assertEquals(self::arrayData()[$key]['latitude'], $value['latitude']);
+            $this->assertEquals(self::arrayData()[$key]['longitude'], $value['longitude']);
+            $this->assertEquals(self::arrayData()[$key]['short_description'], $value['shortDescription']);
+            $this->assertEquals(self::arrayData()[$key]['image_url'], $value['imageUrl']);
+            $this->assertEquals(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
+        }
     }
 }
