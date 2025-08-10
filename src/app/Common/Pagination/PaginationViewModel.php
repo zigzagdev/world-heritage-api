@@ -13,10 +13,7 @@ class PaginationViewModel
 
     public function toArray(): array
     {
-        $items = array_map(
-            fn (WorldHeritageDto $dto) => (new WorldHeritageViewModel($dto))->toArray(),
-            $this->pagination->getCollection()
-        );
+        $items = $this->pagination->toArray();
 
         return [
             'data'           => $items,

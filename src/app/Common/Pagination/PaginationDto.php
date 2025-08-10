@@ -2,20 +2,22 @@
 
 namespace App\Common\Pagination;
 
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+
 class PaginationDto
 {
-    private array $collection;
+    private WorldHeritageDtoCollection $collection;
     private array $pagination;
 
     public function __construct(
-        array $collection,
+        WorldHeritageDtoCollection $collection,
         array $pagination
     ) {
         $this->collection = $collection;
         $this->pagination = $pagination;
     }
 
-    public function getCollection(): array
+    public function getCollection(): WorldHeritageDtoCollection
     {
         return $this->collection;
     }
@@ -83,22 +85,21 @@ class PaginationDto
     public function toArray(): array
     {
         return [
-            'data' => array_map(
-                fn($item) => $item->toArray(),
-                $this->collection
-            ),
-            'current_page' => $this->getCurrentPage(),
-            'from' => $this->getFrom(),
-            'to' => $this->getTo(),
-            'per_page' => $this->getPerPage(),
-            'path' => $this->getPath(),
-            'last_page' => $this->getLastPage(),
-            'total' => $this->getTotal(),
-            'first_page_url' => $this->getFirstPageUrl(),
-            'last_page_url' => $this->getLastPageUrl(),
-            'next_page_url' => $this->getNextPageUrl(),
-            'prev_page_url' => $this->getPrevPageUrl(),
-            'links' => $this->getLinks()
+            'data' => $this->collection->toArray(),
+            'pagination' => [
+                'current_page' => $this->getCurrentPage(),
+                'from' => $this->getFrom(),
+                'to' => $this->getTo(),
+                'per_page' => $this->getPerPage(),
+                'path' => $this->getPath(),
+                'last_page' => $this->getLastPage(),
+                'total' => $this->getTotal(),
+                'first_page_url' => $this->getFirstPageUrl(),
+                'last_page_url' => $this->getLastPageUrl(),
+                'next_page_url' => $this->getNextPageUrl(),
+                'prev_page_url' => $this->getPrevPageUrl(),
+                'links' => $this->getLinks(),
+            ],
         ];
     }
 }
