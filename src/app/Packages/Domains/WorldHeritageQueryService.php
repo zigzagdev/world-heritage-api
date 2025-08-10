@@ -2,7 +2,10 @@
 
 namespace App\Packages\Domains;
 
+use App\Common\Pagination\PaginationDto;
 use App\Models\WorldHeritage;
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+use App\Packages\Features\QueryUseCases\Factory\WorldHeritageDtoCollectionFactory;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use RuntimeException;
 
@@ -42,5 +45,33 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             imageUrl: $heritage->image_url,
             unescoSiteUrl: $heritage->unesco_site_url
         );
+    }
+
+    public function getHeritagesByIds(
+        array $ids,
+        int $currentPage,
+        int $perPage
+    ): PaginationDto {
+        $heritages = $this->model
+            ->whereIn('id', $ids)
+            ->paginate(
+                $perPage,
+                ['*'],
+                'page',
+                $currentPage
+            )
+            ->toArray();
+
+        $dtoCollection = $this->buildDtoFromCollection($heritages['data']);
+
+        return new PaginationDto(
+            collection: $dtoCollection,
+            pagination: collect($heritages)->except('data')->toArray()
+        );
+    }
+
+    private function buildDtoFromCollection(array $data): WorldHeritageDtoCollection
+    {
+        return WorldHeritageDtoCollectionFactory::build($data);
     }
 }
