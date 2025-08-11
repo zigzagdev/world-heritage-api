@@ -19,7 +19,7 @@ class  WorldHeritageListQuery
         private readonly ?string $name_jp,
         private readonly ?string $state_party,
         private readonly ?array $criteria,
-        private readonly ?float$area_hectares,
+        private readonly ?float $area_hectares,
         private readonly ?float $buffer_zone_hectares,
         private readonly ?string $short_description,
         private readonly ?string $image_url,
