@@ -33,5 +33,11 @@ class WorldHeritage extends Model
 
     protected $casts = [
         'criteria' => 'array',
+        'is_endangered'  => 'boolean',
+        'year_inscribed' => 'integer',
+        'area_hectares'  => 'float',
+        'buffer_zone_hectares' => 'float',
+        'latitude'  => 'float',
+        'longitude' => 'float',
     ];
 }
