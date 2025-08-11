@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class JapaneseWorldHeritageSeeder extends Seeder
 {
@@ -11,8 +12,7 @@ class JapaneseWorldHeritageSeeder extends Seeder
     {
         $rows = collect(self::arrayData())
             ->map(function ($r) {
-                unset($r['id']);
-                $r['criteria'] = json_encode($r['criteria'], JSON_UNESCAPED_UNICODE);
+                $r['criteria']      = json_encode($r['criteria'], JSON_UNESCAPED_UNICODE);
                 $r['is_endangered'] = (int) $r['is_endangered'];
                 $r['created_at']    = $r['created_at'] ?? now();
                 $r['updated_at']    = now();
@@ -20,16 +20,23 @@ class JapaneseWorldHeritageSeeder extends Seeder
             })
             ->all();
 
-        DB::table('world_heritage_sites')->upsert(
-            $rows,
-            ['unesco_id'],
-            [
-                'official_name','name','name_jp','country','region','state_party',
-                'category','criteria','year_inscribed','area_hectares','buffer_zone_hectares',
-                'is_endangered','latitude','longitude','short_description','image_url',
-                'unesco_site_url','updated_at'
-            ]
-        );
+        if (app()->environment('testing')) {
+            Schema::disableForeignKeyConstraints();
+            DB::table('world_heritage_sites')->truncate();
+            DB::table('world_heritage_sites')->insert($rows);
+            Schema::enableForeignKeyConstraints();
+        } else {
+            DB::table('world_heritage_sites')->upsert(
+                $rows,
+                ['unesco_id'],
+                [
+                    'id','official_name','name','name_jp','country','region','state_party',
+                    'category','criteria','year_inscribed','area_hectares','buffer_zone_hectares',
+                    'is_endangered','latitude','longitude','short_description','image_url',
+                    'unesco_site_url','updated_at'
+                ]
+            );
+        }
     }
 
     private static function arrayData(): array

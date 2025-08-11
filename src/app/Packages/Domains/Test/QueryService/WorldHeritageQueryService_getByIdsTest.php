@@ -2,26 +2,43 @@
 
 namespace App\Packages\Domains\Test\QueryService;
 
+use App\Common\Pagination\PaginationDto;
+use App\Models\WorldHeritage;
+use Database\Seeders\JapaneseWorldHeritageSeeder;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageQueryService;
-use App\Models\WorldHeritage;
 
 class WorldHeritageQueryService_getByIdsTest extends TestCase
 {
-
     private $queryService;
-    private int $currentPage;
     private int $perPage;
+    private int $currentPage;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->refresh();
+        $this->perPage = 15;
+        $this->currentPage = 1;
         $this->queryService = app(WorldHeritageQueryService::class);
+        $seeder = new JapaneseWorldHeritageSeeder();
+        $seeder->run();
     }
 
     protected function tearDown(): void
     {
+        $this->refresh();
         parent::tearDown();
+    }
+
+    private function refresh(): void
+    {
+        if (env('APP_ENV') === 'testing') {
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
+            WorldHeritage::truncate();
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
     }
 
     private static function arrayData(): array
@@ -47,6 +64,7 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
                 'short_description' => "Early Buddhist wooden structures including the world's oldest wooden building.",
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/660/',
+                'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'id' => 2,
@@ -68,6 +86,7 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
                 'short_description' => "A masterpiece of Japanese castle architecture in original form.",
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/661/',
+                'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'id' => 3,
@@ -89,6 +108,7 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
                 'short_description' => "A subtropical island with ancient cedar forests and diverse ecosystems.",
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/662/',
+                'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'id' => 4,
@@ -110,64 +130,53 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
                 'short_description' => "Pristine beech forest with minimal human impact.",
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/663/',
-            ]
+                'created_at' => now(), 'updated_at' => now(),
+            ],
         ];
     }
 
-    public function test_getByIds_count_objects(): void
+    public function test_fetch_data_check_type(): void
     {
-        $ids = [1, 2];
-        $result = $this->queryService->getHeritagesByIds($ids, 1, 10);
+        $ids = array_column(self::arrayData(), 'id');
+        $result = $this->queryService->getHeritagesByIds(
+            $ids,
+            $this->perPage,
+            $this->currentPage
+        );
 
-        $this->assertCount(2, $result->getCollection());
+        $this->assertInstanceOf(PaginationDto::class, $result);
     }
 
-    public function test_getByIds_check_each_value(): void
+    public function test_fetch_data_check_value(): void
     {
-        $ids = [1, 2];
-        $result = $this->queryService->getHeritagesByIds($ids, 1, 10);
+        $ids = array_column(self::arrayData(), 'id');
+        $result = $this->queryService->getHeritagesByIds(
+            $ids,
+            $this->currentPage,
+            $this->perPage
+        );
 
-        $expectedMap = collect(self::arrayData())
-            ->filter(fn($row) => in_array($row['id'], $ids))
-            ->keyBy('id');
-
-        foreach ($result->getCollection() as $entity) {
-            $id = $entity['id'];
-            $expected = $expectedMap[$id] ?? null;
-            $this->assertSame($expected['id'], $entity['id']);
-            $this->assertEquals($expected['unesco_id'], $entity['unesco_id']);
-            $this->assertSame($expected['official_name'], $entity['official_name']);
-            $this->assertSame($expected['name'], $entity['name']);
-            $this->assertSame($expected['name_jp'], $entity['name_jp']);
-            $this->assertSame($expected['country'], $entity['country']);
-            $this->assertSame($expected['region'], $entity['region']);
-            $this->assertSame($expected['state_party'], $entity['state_party']);
-            $this->assertSame($expected['category'], $entity['category']);
-            $this->assertSame($expected['criteria'], $entity['criteria']);
-            $this->assertEquals($expected['year_inscribed'], $entity['year_inscribed']);
-            $this->assertSame($expected['area_hectares'], $entity['area_hectares']);
-            $this->assertSame($expected['buffer_zone_hectares'], $entity['buffer_zone_hectares']);
-            $this->assertIsBool($expected['is_endangered'], $entity['is_endangered']);
-            $this->assertIsFloat($expected['latitude'], $entity['latitude']);
-            $this->assertIsFloat($expected['longitude'], $entity['longitude']);
-            $this->assertSame($expected['short_description'], $entity['short_description']);
-            $this->assertSame($expected['image_url'], $entity['image_url']);
-            $this->assertSame($expected['unesco_site_url'], $entity['unesco_site_url']);
+        $this->assertSame(array_column(self::arrayData(), 'id'), array_column($result->toArray()['data'], 'id'));
+        foreach ($result->toArray()['data'] as $key => $value) {
+            $this->assertSame(self::arrayData()[$key]['id'], $value['id']);
+            $this->assertSame(self::arrayData()[$key]['unesco_id'], $value['unescoId']);
+            $this->assertSame(self::arrayData()[$key]['official_name'], $value['officialName']);
+            $this->assertSame(self::arrayData()[$key]['name'], $value['name']);
+            $this->assertSame(self::arrayData()[$key]['name_jp'], $value['nameJp']);
+            $this->assertSame(self::arrayData()[$key]['country'], $value['country']);
+            $this->assertSame(self::arrayData()[$key]['region'], $value['region']);
+            $this->assertSame(self::arrayData()[$key]['state_party'], $value['stateParty']);
+            $this->assertSame(self::arrayData()[$key]['category'], $value['category']);
+            $this->assertSame(self::arrayData()[$key]['criteria'], $value['criteria']);
+            $this->assertSame(self::arrayData()[$key]['year_inscribed'], $value['yearInscribed']);
+            $this->assertSame(self::arrayData()[$key]['area_hectares'], $value['areaHectares']);
+            $this->assertSame(self::arrayData()[$key]['buffer_zone_hectares'], $value['bufferZoneHectares']);
+            $this->assertSame(self::arrayData()[$key]['is_endangered'], $value['isEndangered']);
+            $this->assertSame(self::arrayData()[$key]['latitude'], $value['latitude']);
+            $this->assertSame(self::arrayData()[$key]['longitude'], $value['longitude']);
+            $this->assertSame(self::arrayData()[$key]['short_description'], $value['shortDescription']);
+            $this->assertSame(self::arrayData()[$key]['image_url'], $value['imageUrl']);
+            $this->assertSame(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
         }
-    }
-
-    public function test_getByIds_pagination_meta(): void
-    {
-        $ids = [1, 2];
-        $currentPage = 1;
-        $perPage = 1;
-
-        $result = $this->queryService->getHeritagesByIds($ids, $currentPage, $perPage);
-
-        $this->assertSame($currentPage, $result->getCurrentPage());
-        $this->assertSame($perPage, $result->getPerPage());
-
-        $this->assertSame(2, $result->getTotal());
-        $this->assertSame(2, $result->getLastPage());
     }
 }

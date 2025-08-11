@@ -2,9 +2,12 @@
 
 namespace App\Packages\Domains\Test\QueryService;
 
+use App\Models\WorldHeritage;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageQueryService;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use Database\Seeders\JapaneseWorldHeritageSeeder;
 
 class WorldHeritageQueryService_getByIdTest extends TestCase
 {
@@ -12,12 +15,24 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->refresh();
         $this->repository = app(WorldHeritageQueryService::class);
+        $this->seed('JapaneseWorldHeritageSeeder');
     }
 
     protected function tearDown(): void
     {
+        $this->refresh();
         parent::tearDown();
+    }
+
+    private function refresh(): void
+    {
+        if (env('APP_ENV') === 'testing') {
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
+            WorldHeritage::truncate();
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
     }
 
     private function arrayData(): array
