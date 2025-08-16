@@ -4,6 +4,7 @@ namespace App\Packages\Features\Controller;
 
 use App\Common\Pagination\PaginationViewModel;
 use App\Http\Controllers\Controller;
+use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -55,5 +56,20 @@ class WorldHeritageController extends Controller
             $viewModel->toArray(),
             200
         );
+    }
+
+    public function registerOneWorldHeritage(
+        Request $request,
+        CreateWorldHeritageUseCase $useCase
+    ): JsonResponse
+    {
+        $listQueryObject = $useCase->handle($request->all());
+
+        $viewModel = new WorldHeritageViewModel($listQueryObject);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $viewModel->toArray(),
+        ], 201);
     }
 }

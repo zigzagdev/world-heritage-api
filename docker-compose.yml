@@ -37,7 +37,7 @@ services:
     ports:
       - "2307:3306"
     environment:
-      MYSQL_DATABASE: world-heritage-test
+      MYSQL_DATABASE: world_heritage_test
       MYSQL_ROOT_PASSWORD: world-heritage
       MYSQL_USER: world-heritage
       MYSQL_PASSWORD: world-heritage

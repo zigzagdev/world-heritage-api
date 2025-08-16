@@ -1,43 +1,41 @@
 <?php
 
-namespace App\Packages\Domains\Test\QueryService;
+namespace Database\Seeders;
 
-use App\Common\Pagination\PaginationDto;
-use App\Models\WorldHeritage;
-use Database\Seeders\JapaneseWorldHeritageSeeder;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
-use App\Packages\Domains\WorldHeritageQueryService;
+use Illuminate\Support\Facades\Schema;
 
-class WorldHeritageQueryService_getByIdsTest extends TestCase
+class JapaneseWorldHeritageSeeder extends Seeder
 {
-    private $queryService;
-    private int $perPage;
-    private int $currentPage;
-
-    protected function setUp(): void
+    public function run(): void
     {
-        parent::setUp();
-        $this->refresh();
-        $this->perPage = 15;
-        $this->currentPage = 1;
-        $this->queryService = app(WorldHeritageQueryService::class);
-        $seeder = new JapaneseWorldHeritageSeeder();
-        $seeder->run();
-    }
+        $rows = collect(self::arrayData())
+            ->map(function ($r) {
+                $r['criteria']      = json_encode($r['criteria'], JSON_UNESCAPED_UNICODE);
+                $r['is_endangered'] = (int) $r['is_endangered'];
+                $r['created_at']    = $r['created_at'] ?? now();
+                $r['updated_at']    = now();
+                return $r;
+            })
+            ->all();
 
-    protected function tearDown(): void
-    {
-        $this->refresh();
-        parent::tearDown();
-    }
-
-    private function refresh(): void
-    {
-        if (env('APP_ENV') === 'testing') {
-            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
-            WorldHeritage::truncate();
-            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (app()->environment('testing')) {
+            Schema::disableForeignKeyConstraints();
+            DB::table('world_heritage_sites')->truncate();
+            DB::table('world_heritage_sites')->insert($rows);
+            Schema::enableForeignKeyConstraints();
+        } else {
+            DB::table('world_heritage_sites')->upsert(
+                $rows,
+                ['unesco_id'],
+                [
+                    'id','official_name','name','name_jp','country','region','state_party',
+                    'category','criteria','year_inscribed','area_hectares','buffer_zone_hectares',
+                    'is_endangered','latitude','longitude','short_description','image_url',
+                    'unesco_site_url','updated_at'
+                ]
+            );
         }
     }
 
@@ -133,50 +131,5 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
                 'created_at' => now(), 'updated_at' => now(),
             ],
         ];
-    }
-
-    public function test_fetch_data_check_type(): void
-    {
-        $ids = array_column(self::arrayData(), 'id');
-        $result = $this->queryService->getHeritagesByIds(
-            $ids,
-            $this->perPage,
-            $this->currentPage
-        );
-
-        $this->assertInstanceOf(PaginationDto::class, $result);
-    }
-
-    public function test_fetch_data_check_value(): void
-    {
-        $ids = array_column(self::arrayData(), 'id');
-        $result = $this->queryService->getHeritagesByIds(
-            $ids,
-            $this->currentPage,
-            $this->perPage
-        );
-
-        $this->assertSame(array_column(self::arrayData(), 'id'), array_column($result->toArray()['data'], 'id'));
-        foreach ($result->toArray()['data'] as $key => $value) {
-            $this->assertSame(self::arrayData()[$key]['id'], $value['id']);
-            $this->assertSame(self::arrayData()[$key]['unesco_id'], $value['unescoId']);
-            $this->assertSame(self::arrayData()[$key]['official_name'], $value['officialName']);
-            $this->assertSame(self::arrayData()[$key]['name'], $value['name']);
-            $this->assertSame(self::arrayData()[$key]['name_jp'], $value['nameJp']);
-            $this->assertSame(self::arrayData()[$key]['country'], $value['country']);
-            $this->assertSame(self::arrayData()[$key]['region'], $value['region']);
-            $this->assertSame(self::arrayData()[$key]['state_party'], $value['stateParty']);
-            $this->assertSame(self::arrayData()[$key]['category'], $value['category']);
-            $this->assertSame(self::arrayData()[$key]['criteria'], $value['criteria']);
-            $this->assertSame(self::arrayData()[$key]['year_inscribed'], $value['yearInscribed']);
-            $this->assertSame(self::arrayData()[$key]['area_hectares'], $value['areaHectares']);
-            $this->assertSame(self::arrayData()[$key]['buffer_zone_hectares'], $value['bufferZoneHectares']);
-            $this->assertSame(self::arrayData()[$key]['is_endangered'], $value['isEndangered']);
-            $this->assertSame(self::arrayData()[$key]['latitude'], $value['latitude']);
-            $this->assertSame(self::arrayData()[$key]['longitude'], $value['longitude']);
-            $this->assertSame(self::arrayData()[$key]['short_description'], $value['shortDescription']);
-            $this->assertSame(self::arrayData()[$key]['image_url'], $value['imageUrl']);
-            $this->assertSame(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
-        }
     }
 }

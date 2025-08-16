@@ -1,27 +1,17 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\Tests;
 
-use App\Packages\Domains\WorldHeritageEntity;
-use App\Packages\Domains\WorldHeritageQueryService;
-use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
-use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
-use Mockery;
-use Tests\TestCase;
-use Database\Seeders\JapaneseWorldHeritageSeeder;
 use App\Models\WorldHeritage;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
-final class GetWorldHeritageByIdUseCaseTest extends TestCase
+class CreateOneWorldHeritageTest extends TestCase
 {
-    private $queryService;
     protected function setUp(): void
     {
         parent::setUp();
         $this->refresh();
-        $this->queryService = app(WorldHeritageQueryService::class);
-        $seeder = new JapaneseWorldHeritageSeeder();
-        $seeder->run();
     }
 
     protected function tearDown(): void
@@ -42,7 +32,6 @@ final class GetWorldHeritageByIdUseCaseTest extends TestCase
     private static function arrayData(): array
     {
         return [
-            'id' => 1,
             'unesco_id' => '660',
             'official_name' => 'Buddhist Monuments in the Horyu-ji Area',
             'name' => 'Buddhist Monuments in the Horyu-ji Area',
@@ -64,12 +53,34 @@ final class GetWorldHeritageByIdUseCaseTest extends TestCase
         ];
     }
 
-    public function test_use_case(): void
+    public function test_feature_check(): void
     {
-        $useCase = new GetWorldHeritageByIdUseCase($this->queryService);
+        $result = $this->postJson('/api/v1/heritage', self::arrayData());
 
-        $result = $useCase->handle(self::arrayData()['id']);
-
-        $this->assertInstanceOf(WorldHeritageDto::class, $result);
+        $result->assertStatus(201);
+        $result->assertJsonStructure([
+            'status',
+            'data' => [
+                'id',
+                'unesco_id',
+                'official_name',
+                'name',
+                'name_jp',
+                'country',
+                'region',
+                'state_party',
+                'category',
+                'criteria',
+                'year_inscribed',
+                'area_hectares',
+                'buffer_zone_hectares',
+                'is_endangered',
+                'latitude',
+                'longitude',
+                'short_description',
+                'image_url',
+                'unesco_site_url',
+            ],
+        ]);
     }
 }
