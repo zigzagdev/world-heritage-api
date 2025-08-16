@@ -10,7 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Exception;
 
 class WorldHeritageController extends Controller
 {
@@ -63,13 +65,24 @@ class WorldHeritageController extends Controller
         CreateWorldHeritageUseCase $useCase
     ): JsonResponse
     {
-        $listQueryObject = $useCase->handle($request->all());
+        DB::beginTransaction();
+        try {
+            $listQueryObject = $useCase->handle($request->all());
 
-        $viewModel = new WorldHeritageViewModel($listQueryObject);
+            $viewModel = new WorldHeritageViewModel($listQueryObject);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $viewModel->toArray(),
-        ], 201);
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $viewModel->toArray(),
+            ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
