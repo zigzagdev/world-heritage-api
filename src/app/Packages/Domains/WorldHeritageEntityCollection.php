@@ -22,7 +22,7 @@ class WorldHeritageEntityCollection
         return $this->heritages;
     }
 
-    public function getCurrent(int $index): int
+    public function getCurrentIndex(int $index): int
     {
         return $this->heritages[$index];
     }
