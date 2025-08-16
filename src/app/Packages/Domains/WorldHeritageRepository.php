@@ -63,4 +63,17 @@ use Exception;
             unescoSiteUrl: $heritage->unesco_site_url
         );
     }
+
+    public function insertHeritages(
+        WorldHeritageEntityCollection $collection
+    ): WorldHeritageEntityCollection {
+        $newCollection = new WorldHeritageEntityCollection();
+
+        foreach ($collection->getAllHeritages() as $entity) {
+           $saved = $this->insertHeritage($entity);
+           $newCollection->add($saved);
+        }
+
+        return $newCollection;
+    }
 }
