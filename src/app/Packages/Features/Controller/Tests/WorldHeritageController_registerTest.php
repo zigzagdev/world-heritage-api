@@ -2,26 +2,38 @@
 
 namespace App\Packages\Features\Controller\Tests;
 
+use App\Models\WorldHeritage;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
 use App\Packages\Features\Controller\WorldHeritageController;
-use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
 
 class WorldHeritageController_registerTest extends TestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
+        $this->refresh();
         $this->controller = new WorldHeritageController();
     }
 
     protected function tearDown(): void
     {
+        $this->refresh();
         parent::tearDown();
+    }
+
+    private function refresh(): void
+    {
+        if (env('APP_ENV') === 'testing') {
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
+            WorldHeritage::truncate();
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
     }
 
     private function requestData(): array

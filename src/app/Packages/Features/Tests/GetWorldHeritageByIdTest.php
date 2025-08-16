@@ -3,7 +3,9 @@
 namespace App\Packages\Features\Tests;
 
 use Tests\TestCase;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Database\Seeders\JapaneseWorldHeritageSeeder;
+use Illuminate\Support\Facades\DB;
+use App\Models\WorldHeritage;
 
 class GetWorldHeritageByIdTest extends TestCase
 {
@@ -12,11 +14,24 @@ class GetWorldHeritageByIdTest extends TestCase
     {
         parent::setUp();
         $this->id = 1;
+        $this->refresh();
+        $seeder = new JapaneseWorldHeritageSeeder();
+        $seeder->run();
     }
 
     protected function tearDown(): void
     {
+        $this->refresh();
         parent::tearDown();
+    }
+
+    private function refresh(): void
+    {
+        if (env('APP_ENV') === 'testing') {
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
+            WorldHeritage::truncate();
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
     }
 
     public function test_feature_test_ok(): void
