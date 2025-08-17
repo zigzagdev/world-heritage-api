@@ -4,7 +4,10 @@ namespace App\Packages\Features\Controller;
 
 use App\Common\Pagination\PaginationViewModel;
 use App\Http\Controllers\Controller;
+use App\Packages\Features\QueryUseCases\Factory\WorldHeritageListQueryCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -77,6 +80,32 @@ class WorldHeritageController extends Controller
                 'status' => 'success',
                 'data' => $viewModel->toArray(),
             ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function registerManyWorldHeritages(
+        Request $request,
+        CreateWorldManyHeritagesUseCase $useCase
+    ): JsonResponse {
+        DB::beginTransaction();
+        try {
+            $listQueryObject = $useCase->handle($request->all());
+
+            $viewModel = WorldHeritageViewModelCollectionFactory::build($listQueryObject);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $viewModel->toArray(),
+            ], 201);
+
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
