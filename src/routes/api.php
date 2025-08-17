@@ -7,4 +7,5 @@ Route::prefix('v1')->group(function () {
     Route::get('/heritages/{id}', [WorldHeritageController::class, 'getWorldHeritageById']);
     Route::get('heritages/', [WorldHeritageController::class, 'getWorldHeritagesByIds']);
     Route::post('heritage', [WorldHeritageController::class, 'registerOneWorldHeritage']);
+    Route::post('heritages', [WorldHeritageController::class, 'registerManyWorldHeritages']);
 });
