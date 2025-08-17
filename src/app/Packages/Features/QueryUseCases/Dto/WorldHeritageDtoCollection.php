@@ -37,4 +37,9 @@ class WorldHeritageDtoCollection
             ];
         }, $this->heritages);
     }
+
+    public function getHeritages(): array
+    {
+        return $this->heritages;
+    }
 }
