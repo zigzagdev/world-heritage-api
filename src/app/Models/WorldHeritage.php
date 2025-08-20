@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Country;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class WorldHeritage extends Model
 {
@@ -10,7 +12,6 @@ class WorldHeritage extends Model
     protected $connection = 'mysql';
 
     protected $fillable = [
-        'id',
         'unesco_id',
         'official_name',
         'name',
@@ -40,4 +41,17 @@ class WorldHeritage extends Model
         'latitude'  => 'float',
         'longitude' => 'float',
     ];
+
+    public function countries(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Country::class,
+            'site_state_parties',
+            'world_heritage_site_id',
+            'state_party_code',
+            'id',
+            'state_party_code'
+        )->withPivot(['is_primary','inscription_year'])
+            ->withTimestamps();
+    }
 }
