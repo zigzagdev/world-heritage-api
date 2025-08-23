@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name_jp')->nullable();
             $table->string('country');
             $table->string('region');
-            $table->string('state_party', 5)->nullable();
+            $table->string('state_party', 255)->nullable();
             $table->enum('category', ['cultural', 'natural', 'mixed']);
             $table->json('criteria')->nullable();
             $table->year('year_inscribed');

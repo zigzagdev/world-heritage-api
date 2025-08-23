@@ -23,7 +23,9 @@ class WorldHeritageEntity
         public ?float $bufferZoneHectares = null,
         public ?string $shortDescription = null,
         public ?string $imageUrl = null,
-        public ?string $unescoSiteUrl = null
+        public ?string $unescoSiteUrl = null,
+        private array $statePartyCodes = [],
+        private array $statePartyMeta = []
     ) {}
 
     public function getId(): ?int
@@ -96,12 +98,12 @@ class WorldHeritageEntity
         return $this->isEndangered;
     }
 
-    public function getLatitude(): float
+    public function getLatitude(): ?float
     {
         return $this->latitude;
     }
 
-    public function getLongitude(): float
+    public function getLongitude(): ?float
     {
         return $this->longitude;
     }
@@ -119,5 +121,42 @@ class WorldHeritageEntity
     public function getUnescoSiteUrl(): ?string
     {
         return $this->unescoSiteUrl;
+    }
+
+    public function getStatePartyCodes(): array
+    {
+        return $this->statePartyCodes;
+    }
+
+    public function getStatePartyMeta(): array
+    {
+        return $this->statePartyMeta;
+    }
+
+    public function isTransnational(): bool
+    {
+        return count($this->statePartyCodes) > 1;
+    }
+
+    public function getPrimaryStatePartyCode(): ?string
+    {
+        foreach ($this->statePartyMeta as $code => $meta) {
+            if (!empty($meta['is_primary'])) return $code;
+        }
+        return $this->statePartyCodes[0] ?? null;
+    }
+
+    public function getStatePartyCodesOrFallback(): array
+    {
+        if ($this->statePartyCodes)
+            return $this->statePartyCodes;
+
+        if (!$this->stateParty)
+            return [];
+
+        $parts = preg_split('/[;,\s]+/', strtoupper($this->stateParty));
+        $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{2}$/', $country));
+
+        return array_values(array_unique($codes));
     }
 }

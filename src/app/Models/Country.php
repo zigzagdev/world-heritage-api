@@ -21,6 +21,7 @@ class Country extends Model
     protected $primaryKey = 'state_party_code';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false;
 
     public function worldHeritageSites(): BelongsToMany
     {

@@ -7,6 +7,7 @@ use App\Packages\Domains\WorldHeritageRepository;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\WorldHeritage;
+use Database\Seeders\CountrySeeder;
 
 class WorldHeritageRepository_insertTest extends TestCase
 {
@@ -15,7 +16,8 @@ class WorldHeritageRepository_insertTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
-
+        $seeder = new CountrySeeder();
+        $seeder->run();
         $this->repository = app(WorldHeritageRepository::class);
     }
 
@@ -34,7 +36,7 @@ class WorldHeritageRepository_insertTest extends TestCase
         }
     }
 
-    private static function arrayData(): array
+    private static function arraySingleData(): array
     {
         return [
             'unesco_id' => '668',
@@ -43,9 +45,9 @@ class WorldHeritageRepository_insertTest extends TestCase
             'name_jp' => '古都奈良の文化財',
             'country' => 'Japan',
             'region' => 'Asia',
-            'state_party' => 'JP',
             'category' => 'cultural',
             'criteria' => ['ii', 'iii', 'v'],
+            'state_party' => null,
             'year_inscribed' => 1998,
             'area_hectares' => 442.0,
             'buffer_zone_hectares' => 320.0,
@@ -55,31 +57,87 @@ class WorldHeritageRepository_insertTest extends TestCase
             'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
+            'state_parties' => ['JP'],
+            'state_parties_meta' => [
+                'JP' => [
+                    'is_primary' => true,
+                    'inscription_year' => 1998,
+                ],
+            ],
         ];
     }
 
-    public function test_insert_check_type(): void
+    private static function arrayMultiData(): array
+    {
+        return [
+            'unesco_id' => 1133,
+            'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
+            'name' => "Ancient and Primeval Beech Forests",
+            'name_jp' => null,
+            'country' => 'Slovakia',
+            'region' => 'Europe',
+            'category' => 'natural',
+            'criteria' => ['ix'],
+            'state_party' => null,
+            'year_inscribed' => 2007,
+            'area_hectares' => 99947.81,
+            'buffer_zone_hectares' => 296275.8,
+            'is_endangered' => false,
+            'latitude' => 0.0,
+            'longitude' => 0.0,
+            'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
+            'image_url' => '',
+            'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
+            'state_parties' => [
+                'AL','AT','BE','BA','BG','HR','CZ','FR','DE','IT','MK','PL','RO','SK','SI','ES','CH','UA'
+            ],
+            'state_parties_meta' => [
+                'AL' => ['is_primary' => false, 'inscription_year' => 2007],
+                'AT' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BE' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BA' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BG' => ['is_primary' => false, 'inscription_year' => 2007],
+                'HR' => ['is_primary' => false, 'inscription_year' => 2007],
+                'CZ' => ['is_primary' => false, 'inscription_year' => 2007],
+                'FR' => ['is_primary' => false, 'inscription_year' => 2007],
+                'DE' => ['is_primary' => false, 'inscription_year' => 2007],
+                'IT' => ['is_primary' => false, 'inscription_year' => 2007],
+                'MK' => ['is_primary' => false, 'inscription_year' => 2007],
+                'PL' => ['is_primary' => false, 'inscription_year' => 2007],
+                'RO' => ['is_primary' => false, 'inscription_year' => 2007],
+                'SK' => ['is_primary' => true,  'inscription_year' => 2007],
+                'SI' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ES' => ['is_primary' => false, 'inscription_year' => 2007],
+                'CH' => ['is_primary' => false, 'inscription_year' => 2007],
+                'UA' => ['is_primary' => false, 'inscription_year' => 2007],
+            ],
+        ];
+    }
+
+    public function test_insert_check_single_type(): void
     {
         $entity = new WorldHeritageEntity(
-            null,
-            self::arrayData()['unesco_id'],
-            self::arrayData()['official_name'],
-            self::arrayData()['name'],
-            self::arrayData()['country'],
-            self::arrayData()['region'],
-            self::arrayData()['category'],
-            self::arrayData()['year_inscribed'],
-            self::arrayData()['is_endangered'],
-            self::arrayData()['latitude'],
-            self::arrayData()['longitude'],
-            self::arrayData()['name_jp'],
-            self::arrayData()['state_party'],
-            self::arrayData()['criteria'],
-            self::arrayData()['area_hectares'],
-            self::arrayData()['buffer_zone_hectares'],
-            self::arrayData()['short_description'],
-            self::arrayData()['image_url'],
-            self::arrayData()['unesco_site_url']
+            self::arraySingleData()['id'] ?? null,
+            self::arraySingleData()['unesco_id'],
+            self::arraySingleData()['official_name'],
+            self::arraySingleData()['name'],
+            self::arraySingleData()['country'],
+            self::arraySingleData()['region'],
+            self::arraySingleData()['category'],
+            self::arraySingleData()['year_inscribed'],
+            self::arraySingleData()['latitude'],
+            self::arraySingleData()['longitude'],
+            self::arraySingleData()['is_endangered'],
+            self::arraySingleData()['name_jp'],
+            self::arraySingleData()['state_party'],
+            self::arraySingleData()['criteria'],
+            self::arraySingleData()['area_hectares'],
+            self::arraySingleData()['buffer_zone_hectares'],
+            self::arraySingleData()['short_description'],
+            self::arraySingleData()['image_url'],
+            self::arraySingleData()['unesco_site_url'],
+            self::arraySingleData()['state_parties'],
+            self::arraySingleData()['state_parties_meta']
         );
 
         $result = $this->repository->insertHeritage($entity);
@@ -87,49 +145,136 @@ class WorldHeritageRepository_insertTest extends TestCase
         $this->assertInstanceOf(WorldHeritageEntity::class, $result);
     }
 
-    public function test_insert_check_value(): void
+    public function test_insert_check_single_value(): void
     {
         $entity = new WorldHeritageEntity(
-            null,
-            self::arrayData()['unesco_id'],
-            self::arrayData()['official_name'],
-            self::arrayData()['name'],
-            self::arrayData()['country'],
-            self::arrayData()['region'],
-            self::arrayData()['category'],
-            self::arrayData()['year_inscribed'],
-            self::arrayData()['latitude'],
-            self::arrayData()['longitude'],
-            self::arrayData()['is_endangered'],
-            self::arrayData()['name_jp'],
-            self::arrayData()['state_party'],
-            self::arrayData()['criteria'],
-            self::arrayData()['area_hectares'],
-            self::arrayData()['buffer_zone_hectares'],
-            self::arrayData()['short_description'],
-            self::arrayData()['image_url'],
-            self::arrayData()['unesco_site_url']
+            self::arraySingleData()['id'] ?? null,
+            self::arraySingleData()['unesco_id'],
+            self::arraySingleData()['official_name'],
+            self::arraySingleData()['name'],
+            self::arraySingleData()['country'],
+            self::arraySingleData()['region'],
+            self::arraySingleData()['category'],
+            self::arraySingleData()['year_inscribed'],
+            self::arraySingleData()['latitude'],
+            self::arraySingleData()['longitude'],
+            self::arraySingleData()['is_endangered'],
+            self::arraySingleData()['name_jp'],
+            self::arraySingleData()['state_party'],
+            self::arraySingleData()['criteria'],
+            self::arraySingleData()['area_hectares'],
+            self::arraySingleData()['buffer_zone_hectares'],
+            self::arraySingleData()['short_description'],
+            self::arraySingleData()['image_url'],
+            self::arraySingleData()['unesco_site_url'],
+            self::arraySingleData()['state_parties'],
+            self::arraySingleData()['state_parties_meta']
         );
 
         $result = $this->repository->insertHeritage($entity);
 
-        $this->assertEquals(self::arrayData()['unesco_id'], $result->getUnescoId());
-        $this->assertEquals(self::arrayData()['official_name'], $result->getOfficialName());
-        $this->assertEquals(self::arrayData()['name'], $result->getName());
-        $this->assertEquals(self::arrayData()['name_jp'], $result->getNameJp());
-        $this->assertEquals(self::arrayData()['country'], $result->getCountry());
-        $this->assertEquals(self::arrayData()['region'], $result->getRegion());
-        $this->assertEquals(self::arrayData()['state_party'], $result->getStateParty());
-        $this->assertEquals(self::arrayData()['category'], $result->getCategory());
-        $this->assertEquals(self::arrayData()['criteria'], $result->getCriteria());
-        $this->assertEquals(self::arrayData()['year_inscribed'], $result->getYearInscribed());
-        $this->assertEquals(self::arrayData()['area_hectares'], $result->getAreaHectares());
-        $this->assertEquals(self::arrayData()['buffer_zone_hectares'], $result->getBufferZoneHectares());
-        $this->assertEquals(self::arrayData()['is_endangered'], $result->isEndangered());
-        $this->assertEquals(self::arrayData()['latitude'], $result->getLatitude());
-        $this->assertEquals(self::arrayData()['longitude'], $result->getLongitude());
-        $this->assertEquals(self::arrayData()['short_description'], $result->getShortDescription());
-        $this->assertEquals(self::arrayData()['image_url'], $result->getImageUrl());
-        $this->assertEquals(self::arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
+        $this->assertEquals(self::arraySingleData()['unesco_id'], $result->getUnescoId());
+        $this->assertEquals(self::arraySingleData()['official_name'], $result->getOfficialName());
+        $this->assertEquals(self::arraySingleData()['name'], $result->getName());
+        $this->assertEquals(self::arraySingleData()['country'], $result->getCountry());
+        $this->assertEquals(self::arraySingleData()['region'], $result->getRegion());
+        $this->assertEquals(self::arraySingleData()['category'], $result->getCategory());
+        $this->assertEquals(self::arraySingleData()['year_inscribed'], $result->getYearInscribed());
+        $this->assertEquals(self::arraySingleData()['latitude'], $result->getLatitude());
+        $this->assertEquals(self::arraySingleData()['longitude'], $result->getLongitude());
+        $this->assertEquals(self::arraySingleData()['is_endangered'], $result->isEndangered());
+        $this->assertEquals(self::arraySingleData()['name_jp'], $result->getNameJp());
+        $this->assertEquals(self::arraySingleData()['criteria'], $result->getCriteria());
+        $this->assertEquals(self::arraySingleData()['area_hectares'], $result->getAreaHectares());
+        $this->assertEquals(self::arraySingleData()['buffer_zone_hectares'], $result->getBufferZoneHectares());
+        $this->assertEquals(self::arraySingleData()['short_description'], $result->getShortDescription());
+        $this->assertEquals(self::arraySingleData()['image_url'], $result->getImageUrl());
+        $this->assertEquals(self::arraySingleData()['unesco_site_url'], $result->getUnescoSiteUrl());
+        $this->assertEquals(self::arraySingleData()['state_parties'], $result->getStatePartyCodes());
+        $this->assertEquals(self::arraySingleData()['state_parties_meta'], $result->getStatePartyMeta());
+    }
+
+    public function test_insert_check_multi_type(): void
+    {
+        $entity = new WorldHeritageEntity(
+            self::arrayMultiData()['id'] ?? null,
+            self::arrayMultiData()['unesco_id'],
+            self::arrayMultiData()['official_name'],
+            self::arrayMultiData()['name'],
+            self::arrayMultiData()['country'],
+            self::arrayMultiData()['region'],
+            self::arrayMultiData()['category'],
+            self::arrayMultiData()['year_inscribed'],
+            self::arrayMultiData()['is_endangered'],
+            self::arrayMultiData()['latitude'],
+            self::arrayMultiData()['longitude'],
+            self::arrayMultiData()['name_jp'],
+            self::arrayMultiData()['state_party'],
+            self::arrayMultiData()['criteria'],
+            self::arrayMultiData()['area_hectares'],
+            self::arrayMultiData()['buffer_zone_hectares'],
+            self::arrayMultiData()['short_description'],
+            self::arrayMultiData()['image_url'],
+            self::arrayMultiData()['unesco_site_url'],
+            self::arrayMultiData()['state_parties'],
+            self::arrayMultiData()['state_parties_meta']
+        );
+
+        $result = $this->repository->insertHeritage($entity);
+
+        $this->assertInstanceOf(WorldHeritageEntity::class, $result);
+    }
+
+    public function test_insert_check_multi_value(): void
+    {
+        $entity = new WorldHeritageEntity(
+            self::arrayMultiData()['id'] ?? null,
+            self::arrayMultiData()['unesco_id'],
+            self::arrayMultiData()['official_name'],
+            self::arrayMultiData()['name'],
+            self::arrayMultiData()['country'],
+            self::arrayMultiData()['region'],
+            self::arrayMultiData()['category'],
+            self::arrayMultiData()['year_inscribed'],
+            self::arrayMultiData()['is_endangered'],
+            self::arrayMultiData()['latitude'],
+            self::arrayMultiData()['longitude'],
+            self::arrayMultiData()['name_jp'],
+            self::arrayMultiData()['state_party'],
+            self::arrayMultiData()['criteria'],
+            self::arrayMultiData()['area_hectares'],
+            self::arrayMultiData()['buffer_zone_hectares'],
+            self::arrayMultiData()['short_description'],
+            self::arrayMultiData()['image_url'],
+            self::arrayMultiData()['unesco_site_url'],
+            self::arrayMultiData()['state_parties'],
+            self::arrayMultiData()['state_parties_meta']
+        );
+
+        $result = $this->repository->insertHeritage($entity);
+
+        $this->assertEquals(self::arrayMultiData()['unesco_id'], $result->getUnescoId());
+        $this->assertEquals(self::arrayMultiData()['official_name'], $result->getOfficialName());
+        $this->assertEquals(self::arrayMultiData()['name'], $result->getName());
+        $this->assertEquals(self::arrayMultiData()['country'], $result->getCountry());
+        $this->assertEquals(self::arrayMultiData()['region'], $result->getRegion());
+        $this->assertEquals(self::arrayMultiData()['category'], $result->getCategory());
+        $this->assertEquals(self::arrayMultiData()['year_inscribed'], $result->getYearInscribed());
+        $this->assertEquals(self::arrayMultiData()['is_endangered'], $result->isEndangered());
+        $this->assertEquals(self::arrayMultiData()['latitude'], $result->getLatitude());
+        $this->assertEquals(self::arrayMultiData()['longitude'], $result->getLongitude());
+        $this->assertEquals(self::arrayMultiData()['name_jp'], $result->getNameJp());
+        $this->assertEquals(self::arrayMultiData()['criteria'], $result->getCriteria());
+        $this->assertEquals(self::arrayMultiData()['area_hectares'], $result->getAreaHectares());
+        $this->assertEquals(self::arrayMultiData()['buffer_zone_hectares'], $result->getBufferZoneHectares());
+        $this->assertEquals(self::arrayMultiData()['short_description'], $result->getShortDescription());
+        $this->assertEquals(self::arrayMultiData()['image_url'], $result->getImageUrl());
+        $this->assertEquals(self::arrayMultiData()['unesco_site_url'], $result->getUnescoSiteUrl());
+        $this->assertEqualsCanonicalizing(self::arrayMultiData()['state_parties'], $result->getStatePartyCodes());
+        $this->assertEquals(self::arrayMultiData()['state_parties_meta'], $result->getStatePartyMeta());
+        $this->assertEqualsCanonicalizing(
+            self::arrayMultiData()['state_parties_meta']['SK'],
+            $entity->getStatePartyMeta()['SK']
+        );
     }
 }

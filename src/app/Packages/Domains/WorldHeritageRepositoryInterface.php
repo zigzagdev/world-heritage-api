@@ -11,4 +11,8 @@ interface WorldHeritageRepositoryInterface
     public function insertHeritages(
         WorldHeritageEntityCollection $collection
     ): WorldHeritageEntityCollection;
+
+//    public function updateOneHeritage(
+//        WorldHeritageEntity $entity
+//    ): WorldHeritageEntity;
 }
