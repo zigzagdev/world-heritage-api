@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('site_state_parties', function (Blueprint $table) {
-            $table->char('state_party_code', 2);
+            $table->char('state_party_code', 255);
 
             $table->foreignId('world_heritage_site_id')
                 ->constrained('world_heritage_sites')
