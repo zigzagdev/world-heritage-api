@@ -26,7 +26,6 @@ use Exception;
         'longitude' => $entity->getLongitude(),
         'is_endangered' => $entity->isEndangered(),
         'name_jp' => $entity->getNameJp(),
-        'state_party' => $entity->getStateParty(),
         'criteria' => $entity->getCriteria(),
         'area_hectares' => $entity->getAreaHectares(),
         'buffer_zone_hectares' => $entity->getBufferZoneHectares(),
@@ -37,8 +36,34 @@ use Exception;
 
         $heritage = $this->model->create($insertValue);
 
-        if (!$heritage) {
-            throw new Exception('Failed to insert heritage');
+        $codes = $entity->getStatePartyCodes() ?: $entity->getStatePartyCodesOrFallback();
+        $codes = array_values(array_unique(array_map('strtoupper', $codes)));
+
+        $meta = $entity->getStatePartyMeta();
+        if (!empty($meta)) {
+            $payload = [];
+            foreach ($codes as $code) {
+                $m = $meta[$code] ?? [];
+                $payload[$code] = [
+                    'is_primary'       => (bool)($m['is_primary'] ?? false),
+                    'inscription_year' => $m['inscription_year'] ?? null,
+                ];
+            }
+            $heritage->countries()->sync($payload);
+        } else {
+            $heritage->countries()->sync($codes);
+        }
+
+        $heritage->state_party = $code ? implode(', ', $codes) : null;
+        $heritage->save();
+
+        $partyMeta = [];
+
+        foreach ($heritage->countries as $country) {
+            $partyMeta[$country->state_party_code] = [
+                'is_primary'       => (bool) data_get($country, 'pivot.is_primary', false),
+                'inscription_year' => data_get($country, 'pivot.inscription_year'),
+            ];
         }
 
         return new WorldHeritageEntity(
@@ -60,7 +85,9 @@ use Exception;
             bufferZoneHectares: $heritage->buffer_zone_hectares,
             shortDescription: $heritage->short_description,
             imageUrl: $heritage->image_url,
-            unescoSiteUrl: $heritage->unesco_site_url
+            unescoSiteUrl: $heritage->unesco_site_url,
+            statePartyCodes: $heritage->countries->pluck('state_party_code')->all(),
+            statePartyMeta: $partyMeta
         );
     }
 
@@ -76,4 +103,71 @@ use Exception;
 
         return $newCollection;
     }
-}
+
+//    public function updateOneHeritage(
+//        WorldHeritageEntity $entity
+//    ): WorldHeritageEntity
+//    {
+//        $targetEntity = $this->model->find($entity->getUnescoId());
+//
+//        if (!$targetEntity) {
+//            throw new Exception('Heritage was not found');
+//        }
+//
+//        $updateValue = [
+//            'id' => $entity->getId(),
+//            'unesco_id' => $entity->getUnescoId(),
+//            'official_name' => $entity->getOfficialName(),
+//            'name' => $entity->getName(),
+//            'country' => $entity->getCountry(),
+//            'region' => $entity->getRegion(),
+//            'category' => $entity->getCategory(),
+//            'year_inscribed' => $entity->getYearInscribed(),
+//            'latitude' => $entity->getLatitude(),
+//            'longitude' => $entity->getLongitude(),
+//            'is_endangered' => $entity->isEndangered(),
+//            'name_jp' => $entity->getNameJp(),
+//            'state_party' => $entity->getStateParty(),
+//            'criteria' => $entity->getCriteria(),
+//            'area_hectares' => $entity->getAreaHectares(),
+//            'buffer_zone_hectares' => $entity->getBufferZoneHectares(),
+//            'short_description' => $entity->getShortDescription(),
+//            'image_url' => $entity->getImageUrl(),
+//            'unesco_site_url' => $entity->getUnescoSiteUrl()
+//        ];
+//
+//        $codes = method_exists($entity, 'getStatePartyCodes')
+//            ? (array) $entity->getStatePartyCodes()
+//            : $this->parseStatePartyString((string) $entity->getStateParty());
+//
+//        $updatedHeritage = $this->model->updateOrFail(
+//          $updateValue
+//        );
+//
+//        if (!$updatedHeritage) {
+//            throw new Exception('Failed to update heritage');
+//        }
+//
+//        return new WorldHeritageEntity(
+//            id: $updateValue['id'],
+//            unescoId: $updateValue['unesco_id'],
+//            officialName: $updateValue['official_name'],
+//            name: $updateValue['name'],
+//            country: $updateValue['country'],
+//            region: $updateValue['region'],
+//            category: $updateValue['category'],
+//            yearInscribed: $updateValue['year_inscribed'],
+//            latitude: $updateValue['latitude'],
+//            longitude: $updateValue['longitude'],
+//            isEndangered: $updateValue['is_endangered'],
+//            nameJp: $updateValue['name_jp'],
+//            stateParty: $updateValue['state_party'],
+//            criteria: $updateValue['criteria'],
+//            areaHectares: $updateValue['area_hectares'],
+//            bufferZoneHectares: $updateValue['buffer_zone_hectares'],
+//            shortDescription: $updateValue['short_description'],
+//            imageUrl: $updateValue['image_url'],
+//            unescoSiteUrl: $updateValue['unesco_site_url']
+//        );
+//    }
+ }
