@@ -2,6 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests;
 
+use Database\Seeders\CountrySeeder;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
@@ -10,8 +11,6 @@ use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageListQueryFactory;
-use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 
 class CreateWorldHeritageUseCaseTest extends TestCase
 {
@@ -19,6 +18,8 @@ class CreateWorldHeritageUseCaseTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
+        $seeder = new CountrySeeder();
+        $seeder->run();
     }
 
     protected function tearDown(): void
@@ -39,15 +40,16 @@ class CreateWorldHeritageUseCaseTest extends TestCase
     private function arrayData(): array
     {
         return [
+            'id' => 1,
             'unesco_id' => '668',
             'official_name' => 'Historic Monuments of Ancient Nara',
             'name' => 'Historic Monuments of Ancient Nara',
             'name_jp' => '古都奈良の文化財',
             'country' => 'Japan',
             'region' => 'Asia',
-            'state_party' => 'JP',
             'category' => 'cultural',
             'criteria' => ['ii', 'iii', 'v'],
+            'state_party' => null,
             'year_inscribed' => 1998,
             'area_hectares' => 442.0,
             'buffer_zone_hectares' => 320.0,
@@ -57,90 +59,14 @@ class CreateWorldHeritageUseCaseTest extends TestCase
             'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
+            'state_parties' => ['JP'],
+            'state_parties_meta' => [
+                'JP' => [
+                    'is_primary' => true,
+                    'inscription_year' => 1998,
+                ],
+            ],
         ];
-    }
-
-    private function mockEntity(): WorldHeritageEntity
-    {
-        $mock = Mockery::mock(WorldHeritageEntity::class);
-
-        $mock
-            ->shouldReceive('getId')
-            ->andReturn($this->arrayData()['id'] ?? null);
-
-        $mock
-            ->shouldReceive('getUnescoId')
-            ->andReturn($this->arrayData()['unesco_id']);
-
-        $mock
-            ->shouldReceive('getOfficialName')
-            ->andReturn($this->arrayData()['official_name']);
-
-        $mock
-            ->shouldReceive('getName')
-            ->andReturn($this->arrayData()['name']);
-
-        $mock
-            ->shouldReceive('getCountry')
-            ->andReturn($this->arrayData()['country']);
-
-        $mock
-            ->shouldReceive('getRegion')
-            ->andReturn($this->arrayData()['region']);
-
-        $mock
-            ->shouldReceive('getStateParty')
-            ->andReturn($this->arrayData()['state_party']);
-
-        $mock
-            ->shouldReceive('getCategory')
-            ->andReturn($this->arrayData()['category']);
-
-        $mock
-            ->shouldReceive('getCriteria')
-            ->andReturn($this->arrayData()['criteria']);
-
-        $mock
-            ->shouldReceive('getYearInscribed')
-            ->andReturn($this->arrayData()['year_inscribed']);
-
-        $mock
-            ->shouldReceive('getAreaHectares')
-            ->andReturn($this->arrayData()['area_hectares']);
-
-        $mock
-            ->shouldReceive('getBufferZoneHectares')
-            ->andReturn($this->arrayData()['buffer_zone_hectares']);
-
-        $mock
-            ->shouldReceive('getLatitude')
-            ->andReturn($this->arrayData()['latitude']);
-
-        $mock
-            ->shouldReceive('getLongitude')
-            ->andReturn($this->arrayData()['longitude']);
-
-        $mock
-            ->shouldReceive('isEndangered')
-            ->andReturn($this->arrayData()['is_endangered']);
-
-        $mock
-            ->shouldReceive('getNameJp')
-            ->andReturn($this->arrayData()['name_jp']);
-
-        $mock
-            ->shouldReceive('getShortDescription')
-            ->andReturn($this->arrayData()['short_description']);
-
-        $mock
-            ->shouldReceive('getImageUrl')
-            ->andReturn($this->arrayData()['image_url']);
-
-        $mock
-            ->shouldReceive('getUnescoSiteUrl')
-            ->andReturn($this->arrayData()['unesco_site_url']);
-
-        return $mock;
     }
 
     private function mockRepository(): WorldHeritageRepositoryInterface
@@ -170,97 +96,11 @@ class CreateWorldHeritageUseCaseTest extends TestCase
                     bufferZoneHectares: $this->arrayData()['buffer_zone_hectares'],
                     shortDescription: $this->arrayData()['short_description'],
                     imageUrl: $this->arrayData()['image_url'],
-                    unescoSiteUrl: $this->arrayData()['unesco_site_url']
+                    unescoSiteUrl: $this->arrayData()['unesco_site_url'],
+                    statePartyCodes: $this->arrayData()['state_parties'],
+                    statePartyMeta: $this->arrayData()['state_parties_meta'] ?? []
                 )
             );
-
-        return $mock;
-    }
-
-    private function mockListQuery(): WorldHeritageListQuery
-    {
-        $factory = Mockery::mock(
-            'alias:' . WorldHeritageListQueryFactory::class
-        );
-
-        $mock = Mockery::mock(WorldHeritageListQuery::class);
-
-        $factory
-            ->shouldReceive('build')
-            ->with(Mockery::type($this->arrayData()))
-            ->andReturn($mock);
-
-        $mock
-            ->shouldReceive('getUnescoId')
-            ->andReturn($this->arrayData()['unesco_id']);
-
-        $mock
-            ->shouldReceive('getOfficialName')
-            ->andReturn($this->arrayData()['official_name']);
-
-        $mock
-            ->shouldReceive('getName')
-            ->andReturn($this->arrayData()['name']);
-
-        $mock
-            ->shouldReceive('getCountry')
-            ->andReturn($this->arrayData()['country']);
-
-        $mock
-            ->shouldReceive('getRegion')
-            ->andReturn($this->arrayData()['region']);
-
-        $mock
-            ->shouldReceive('getStateParty')
-            ->andReturn($this->arrayData()['state_party']);
-
-        $mock
-            ->shouldReceive('getCategory')
-            ->andReturn($this->arrayData()['category']);
-
-        $mock
-            ->shouldReceive('getCriteria')
-            ->andReturn($this->arrayData()['criteria']);
-
-        $mock
-            ->shouldReceive('getYearInscribed')
-            ->andReturn($this->arrayData()['year_inscribed']);
-
-        $mock
-            ->shouldReceive('getAreaHectares')
-            ->andReturn($this->arrayData()['area_hectares']);
-
-        $mock
-            ->shouldReceive('getBufferZoneHectares')
-            ->andReturn($this->arrayData()['buffer_zone_hectares']);
-
-        $mock
-            ->shouldReceive('getLatitude')
-            ->andReturn($this->arrayData()['latitude']);
-
-        $mock
-            ->shouldReceive('getLongitude')
-            ->andReturn($this->arrayData()['longitude']);
-
-        $mock
-            ->shouldReceive('isEndangered')
-            ->andReturn($this->arrayData()['is_endangered']);
-
-        $mock
-            ->shouldReceive('getNameJp')
-            ->andReturn($this->arrayData()['name_jp']);
-
-        $mock
-            ->shouldReceive('getShortDescription')
-            ->andReturn($this->arrayData()['short_description']);
-
-        $mock
-            ->shouldReceive('getImageUrl')
-            ->andReturn($this->arrayData()['image_url']);
-
-        $mock
-            ->shouldReceive('getUnescoSiteUrl')
-            ->andReturn($this->arrayData()['unesco_site_url']);
 
         return $mock;
     }
@@ -303,5 +143,7 @@ class CreateWorldHeritageUseCaseTest extends TestCase
         $this->assertEquals($this->arrayData()['short_description'], $result->getShortDescription());
         $this->assertEquals($this->arrayData()['image_url'], $result->getImageUrl());
         $this->assertEquals($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
+        $this->assertEquals($this->arrayData()['state_parties'], $result->getStatePartyCodes());
+        $this->assertEquals($this->arrayData()['state_parties_meta'], $result->getStatePartiesMeta());
     }
 }

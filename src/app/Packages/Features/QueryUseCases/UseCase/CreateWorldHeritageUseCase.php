@@ -63,7 +63,9 @@ class CreateWorldHeritageUseCase
             bufferZoneHectares: $result->getBufferZoneHectares(),
             shortDescription: $result->getShortDescription(),
             imageUrl: $result->getImageUrl(),
-            unescoSiteUrl: $result->getUnescoSiteUrl()
+            unescoSiteUrl: $result->getUnescoSiteUrl(),
+            statePartyCodes: $result->getStatePartyCodes(),
+            statePartiesMeta: $result->getStatePartyMeta(),
         );
     }
 }
