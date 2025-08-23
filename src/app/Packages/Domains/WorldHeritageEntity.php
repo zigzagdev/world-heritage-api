@@ -125,7 +125,7 @@ class WorldHeritageEntity
 
     public function getStatePartyCodes(): array
     {
-        return $this->statePartyCodes;
+        return $this->statePartyCodes ?: $this->getStatePartyCodesOrFallback();
     }
 
     public function getStatePartyMeta(): array
