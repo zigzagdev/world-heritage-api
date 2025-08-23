@@ -23,7 +23,9 @@ class WorldHeritageDto
         private readonly ?float $bufferZoneHectares = null,
         private readonly ?string $shortDescription = null,
         private readonly ?string $imageUrl = null,
-        private readonly ?string $unescoSiteUrl = null
+        private readonly ?string $unescoSiteUrl = null,
+        private readonly array $statePartyCodes = [],
+        private readonly array $statePartiesMeta = [],
     ){}
 
     public function getId(): int
@@ -121,6 +123,40 @@ class WorldHeritageDto
         return $this->unescoSiteUrl;
     }
 
+    public function getStatePartyCodes(): array
+    {
+        return $this->statePartyCodes ?: $this->getStatePartyCodesOrFallback();
+    }
+
+    public function getStatePartiesMeta(): array
+    {
+        return $this->statePartiesMeta;
+    }
+
+    public function getPrimaryStatePartyCode(): ?string
+    {
+        return $this->primaryStatePartyCode;
+    }
+
+    public function isTransnational(): bool
+    {
+        return $this->isTransnational;
+    }
+
+    public function getStatePartyCodesOrFallback(): array
+    {
+        if ($this->statePartyCodes)
+            return $this->statePartyCodes;
+
+        if (!$this->stateParty)
+            return [];
+
+        $parts = preg_split('/[;,\s]+/', strtoupper($this->stateParty));
+        $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{2}$/', $country));
+
+        return array_values(array_unique($codes));
+    }
+
     public function toArray(): array
     {
         return [
@@ -142,7 +178,11 @@ class WorldHeritageDto
             'buffer_zone_hectares' => $this->getBufferZoneHectares(),
             'short_description' => $this->getShortDescription(),
             'image_url' => $this->getImageUrl(),
-            'unesco_site_url' => $this->getUnescoSiteUrl()
+            'unesco_site_url' => $this->getUnescoSiteUrl(),
+            'state_parties' => $this->getStatePartyCodes(),
+            'state_parties_meta' => $this->getStatePartiesMeta(),
+            'primary_state_party_code' => $this->getPrimaryStatePartyCode(),
+            'is_transnational' => $this->isTransnational()
         ];
     }
 }
