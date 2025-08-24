@@ -1,0 +1,22 @@
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/app/**/*.php"
+          - "src/app/Packages/**/*.php"
+          - "src/routes/**/*.php"
+          - "src/config/**/*.php"
+
+feature:
+  - head-branch: ['^feat', 'feature']
+
+bug:
+  - head-branch: ['^fix', 'bugfix', 'hotfix']
+
+refactor:
+  - head-branch: ['^refactor']
+
+perf:
+  - head-branch: ['^perf']
+
+release:
+  - base-branch: ['^release', '^main$']
