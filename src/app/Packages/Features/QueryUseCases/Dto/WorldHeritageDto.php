@@ -133,16 +133,6 @@ class WorldHeritageDto
         return $this->statePartiesMeta;
     }
 
-    public function getPrimaryStatePartyCode(): ?string
-    {
-        return $this->primaryStatePartyCode;
-    }
-
-    public function isTransnational(): bool
-    {
-        return $this->isTransnational;
-    }
-
     public function getStatePartyCodesOrFallback(): array
     {
         if ($this->statePartyCodes)
@@ -181,8 +171,6 @@ class WorldHeritageDto
             'unesco_site_url' => $this->getUnescoSiteUrl(),
             'state_parties' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),
-            'primary_state_party_code' => $this->getPrimaryStatePartyCode(),
-            'is_transnational' => $this->isTransnational()
         ];
     }
 }

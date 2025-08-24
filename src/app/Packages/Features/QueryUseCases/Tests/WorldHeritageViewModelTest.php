@@ -23,24 +23,47 @@ class WorldHeritageViewModelTest extends TestCase
     {
         return [
             'id' => 1,
-            'unesco_id' => '668',
-            'official_name' => 'Historic Monuments of Ancient Nara',
-            'name' => 'Historic Monuments of Ancient Nara',
-            'name_jp' => '古都奈良の文化財',
-            'country' => 'Japan',
-            'region' => 'Asia',
-            'state_party' => 'JP',
-            'category' => 'cultural',
-            'criteria' => ['ii', 'iii', 'v'],
-            'year_inscribed' => 1998,
-            'area_hectares' => 442.0,
-            'buffer_zone_hectares' => 320.0,
+            'unesco_id' => '1133',
+            'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
+            'name' => "Ancient and Primeval Beech Forests",
+            'name_jp' => null,
+            'country' => 'Slovakia',
+            'region' => 'Europe',
+            'category' => 'natural',
+            'criteria' => ['ix'],
+            'state_party' => null,
+            'year_inscribed' => 2007,
+            'area_hectares' => 99947.81,
+            'buffer_zone_hectares' => 296275.8,
             'is_endangered' => false,
-            'latitude' => 34.6851,
-            'longitude' => 135.8048,
-            'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
+            'latitude' => 0.0,
+            'longitude' => 0.0,
+            'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
             'image_url' => '',
-            'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
+            'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
+            'state_parties' => [
+                'AL','AT','BE','BA','BG','HR','CZ','FR','DE','IT','MK','PL','RO','SK','SI','ES','CH','UA'
+            ],
+            'state_parties_meta' => [
+                'AL' => ['is_primary' => false, 'inscription_year' => 2007],
+                'AT' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BE' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BA' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BG' => ['is_primary' => false, 'inscription_year' => 2007],
+                'HR' => ['is_primary' => false, 'inscription_year' => 2007],
+                'CZ' => ['is_primary' => false, 'inscription_year' => 2007],
+                'FR' => ['is_primary' => false, 'inscription_year' => 2007],
+                'DE' => ['is_primary' => false, 'inscription_year' => 2007],
+                'IT' => ['is_primary' => false, 'inscription_year' => 2007],
+                'MK' => ['is_primary' => false, 'inscription_year' => 2007],
+                'PL' => ['is_primary' => false, 'inscription_year' => 2007],
+                'RO' => ['is_primary' => false, 'inscription_year' => 2007],
+                'SK' => ['is_primary' => true,  'inscription_year' => 2007],
+                'SI' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ES' => ['is_primary' => false, 'inscription_year' => 2007],
+                'CH' => ['is_primary' => false, 'inscription_year' => 2007],
+                'UA' => ['is_primary' => false, 'inscription_year' => 2007],
+            ],
         ];
     }
 
@@ -124,6 +147,14 @@ class WorldHeritageViewModelTest extends TestCase
             ->shouldReceive('getUnescoSiteUrl')
             ->andReturn(self::arrayData()['unesco_site_url']);
 
+        $dto
+            ->shouldReceive('getStatePartyCodes')
+            ->andReturn(self::arrayData()['state_parties']);
+
+        $dto
+            ->shouldReceive('getStatePartiesMeta')
+            ->andReturn(self::arrayData()['state_parties_meta'] ?? []);
+
         return $dto;
     }
 
@@ -144,6 +175,12 @@ class WorldHeritageViewModelTest extends TestCase
 
         foreach (self::arrayData() as $key => $value) {
             if ($key === 'is_endangered') {
+                continue;
+            } elseif ( $key === 'state_parties') {
+                $this->assertSame($value, $viewModel->getStatePartyCodes());
+                continue;
+            } elseif ($key === 'state_parties_meta') {
+                $this->assertSame($value, $viewModel->getStatePartiesMeta());
                 continue;
             }
             $camelKey = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
