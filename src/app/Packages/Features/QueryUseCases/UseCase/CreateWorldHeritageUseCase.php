@@ -37,7 +37,9 @@ class CreateWorldHeritageUseCase
             $requestQuery->getBufferZoneHectares() ?? null,
             $requestQuery->getShortDescription() ?? null,
             $requestQuery->getImageUrl() ?? null,
-            $requestQuery->getUnescoSiteUrl() ?? null
+            $requestQuery->getUnescoSiteUrl() ?? null,
+            $requestQuery->getStatePartyCodes() ?? [],
+            $requestQuery->getStatePartiesMeta() ?? []
         );
 
         $result = $this->repository->insertHeritage(

@@ -3,17 +3,20 @@
 namespace App\Packages\Domains;
 
 use App\Models\WorldHeritage;
+use App\Models\Country;
 use Exception;
 
  readonly class WorldHeritageRepository implements WorldHeritageRepositoryInterface
 {
     public function __construct(
-        private readonly WorldHeritage $model
+        private readonly WorldHeritage $worldHeritage,
+        private readonly Country $country
     ) {}
 
     public function insertHeritage(
         WorldHeritageEntity $entity
     ): WorldHeritageEntity {
+
         $insertValue = [
         'unesco_id' => $entity->getUnescoId(),
         'official_name' => $entity->getOfficialName(),
@@ -34,31 +37,51 @@ use Exception;
         'unesco_site_url' => $entity->getUnescoSiteUrl()
         ];
 
-        $heritage = $this->model->create($insertValue);
+        $heritage = $this->worldHeritage->create($insertValue);
 
-        $codes = $entity->getStatePartyCodes() ?: $entity->getStatePartyCodesOrFallback();
-        $codes = array_values(array_unique(array_map('strtoupper', $codes)));
-
-        $meta = $entity->getStatePartyMeta();
-        if (!empty($meta)) {
-            $payload = [];
-            foreach ($codes as $code) {
-                $m = $meta[$code] ?? [];
-                $payload[$code] = [
-                    'is_primary'       => (bool)($m['is_primary'] ?? false),
-                    'inscription_year' => $m['inscription_year'] ?? null,
-                ];
-            }
-            $heritage->countries()->sync($payload);
-        } else {
-            $heritage->countries()->sync($codes);
+        $meta  = $entity->getStatePartyMeta() ?? [];
+        $codes = $entity->getStatePartyCodes();
+        if (empty($codes) && !empty($meta)) {
+            $codes = array_keys($meta);
+        }
+        if (empty($codes)) {
+            $codes = $entity->getStatePartyCodesOrFallback();
         }
 
-        $heritage->state_party = $code ? implode(', ', $codes) : null;
+        $codes = array_values(array_unique(array_map('strtoupper', $codes)));
+        $codeIds = $this->country
+            ->whereIn('state_party_code', $codes)
+            ->pluck('state_party_code', 'state_party_code')
+            ->all();
+
+        if (!empty($codeIds)) {
+            if (!empty($meta)) {
+                $payload = [];
+                foreach ($codes as $code) {
+                    if (!isset($codeIds[$code])) {
+                        continue;
+                    }
+                    $m = $meta[$code] ?? [];
+                    $payload[$codeIds[$code]] = [
+                        'is_primary'       => (bool)($m['is_primary'] ?? false),
+                        'inscription_year' => $m['inscription_year'] ?? null,
+                    ];
+                }
+                $heritage->countries()->sync($payload);
+            } else {
+                $heritage->countries()->sync(array_values($codeIds));
+            }
+        } else {
+            $heritage->countries()->sync([]);
+        }
+
+        $heritage->state_party = !empty($codes) ? implode(',', $codes) : null;
         $heritage->save();
+        $heritage->load(['countries' => function ($q) {
+            $q->withPivot(['is_primary', 'inscription_year']);
+        }]);
 
         $partyMeta = [];
-
         foreach ($heritage->countries as $country) {
             $partyMeta[$country->state_party_code] = [
                 'is_primary'       => (bool) data_get($country, 'pivot.is_primary', false),
@@ -86,7 +109,7 @@ use Exception;
             shortDescription: $heritage->short_description,
             imageUrl: $heritage->image_url,
             unescoSiteUrl: $heritage->unesco_site_url,
-            statePartyCodes: $heritage->countries->pluck('state_party_code')->all(),
+            statePartyCodes: $this->parseStateParty($heritage->state_party),
             statePartyMeta: $partyMeta
         );
     }
@@ -170,4 +193,14 @@ use Exception;
 //            unescoSiteUrl: $updateValue['unesco_site_url']
 //        );
 //    }
+
+    private function parseStateParty(?string $stored): array
+    {
+        if ($stored === null || $stored === '') return [];
+
+        $parts = array_map('trim', explode(',', $stored));
+        $parts = array_filter($parts, static fn($v) => $v !== '');
+        $parts = array_map('strtoupper', $parts);
+        return array_values(array_unique($parts));
+    }
  }

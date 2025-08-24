@@ -159,4 +159,48 @@ class WorldHeritageEntity
 
         return array_values(array_unique($codes));
     }
+    private function normalizeCodes(array $codes): array
+    {
+        $codes = array_map('trim', $codes);
+        $codes = array_filter($codes, fn($v) => $v !== '');
+        $codes = array_map('strtoupper', $codes);
+        $codes = array_filter($codes, fn($v) => preg_match('/^[A-Z]{2}$/', $v));
+
+        return array_values(array_unique($codes));
+    }
+
+    public function setStateParty(?string $value): void
+    {
+        $this->stateParty = $value;
+
+        $parts = [];
+        if ($value !== null && $value !== '') {
+            $parts = preg_split('/[;,\s]+/', $value);
+        }
+        $this->statePartyCodes = $this->normalizeCodes($parts);
+    }
+
+    public function setStatePartyCodes(array $codes): void
+    {
+        $this->statePartyCodes = $this->normalizeCodes($codes);
+        $this->stateParty = $this->statePartyCodes ? implode(', ', $this->statePartyCodes) : null;
+    }
+
+    public function setStatePartyMeta(array $meta): void
+    {
+        $normalized = [];
+        foreach ($meta as $code => $m) {
+            $code = strtoupper(trim((string)$code));
+            if (!preg_match('/^[A-Z]{2}$/', $code)) {
+                continue;
+            }
+            $normalized[$code] = [
+                'is_primary'       => (bool)($m['is_primary'] ?? false),
+                'inscription_year' => isset($m['inscription_year'])
+                    ? (is_numeric($m['inscription_year']) ? (int)$m['inscription_year'] : null)
+                    : null,
+            ];
+        }
+        $this->statePartyMeta = $normalized;
+    }
 }
