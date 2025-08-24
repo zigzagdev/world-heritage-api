@@ -48,9 +48,9 @@ class WorldHeritageEntityCollectionTest extends TestCase
                 'name_jp' => '古都奈良の文化財',
                 'country' => 'Japan',
                 'region' => 'Asia',
-                'state_party' => 'JP',                 // DB用（string）
-                'state_parties' => ['JP'],             // 配列
-                'state_parties_meta' => [              // メタ
+                'state_party' => 'JP',
+                'state_parties' => ['JP'],
+                'state_parties_meta' => [
                     'JP' => ['is_primary' => true, 'inscription_year' => 1998],
                 ],
                 'category' => 'cultural',
