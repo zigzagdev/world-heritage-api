@@ -133,16 +133,6 @@ class WorldHeritageDto
         return $this->statePartiesMeta;
     }
 
-    public function getPrimaryStatePartyCode(): ?string
-    {
-        return $this->primaryStatePartyCode;
-    }
-
-    public function isTransnational(): bool
-    {
-        return $this->isTransnational;
-    }
-
     public function getStatePartyCodesOrFallback(): array
     {
         if ($this->statePartyCodes)

@@ -189,7 +189,7 @@ class WorldHeritageDtoTest extends TestCase
         $this->assertSame($data['short_description'], $dto->getShortDescription());
         $this->assertSame($data['image_url'], $dto->getImageUrl());
         $this->assertSame($data['unesco_site_url'], $dto->getUnescoSiteUrl());
-        $this->assertSame($data['state_parties'], $dto->getStateParties());
+        $this->assertSame($data['state_parties'], $dto->getStatePartyCodes());
         $this->assertSame($data['state_parties_meta'], $dto->getStatePartiesMeta());
     }
 
@@ -270,7 +270,7 @@ class WorldHeritageDtoTest extends TestCase
         $this->assertSame($data['short_description'], $dto->getShortDescription());
         $this->assertSame($data['image_url'], $dto->getImageUrl());
         $this->assertSame($data['unesco_site_url'], $dto->getUnescoSiteUrl());
-        $this->assertSame($data['state_parties'], $dto->getStateParties());
+        $this->assertSame($data['state_parties'], $dto->getStatePartyCodes());
         $this->assertSame($data['state_parties_meta'], $dto->getStatePartiesMeta());
     }
 }
