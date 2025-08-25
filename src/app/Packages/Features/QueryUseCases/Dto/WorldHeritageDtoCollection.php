@@ -33,7 +33,9 @@ class WorldHeritageDtoCollection
                 'bufferZoneHectares' => $heritage->getBufferZoneHectares(),
                 'shortDescription' => $heritage->getShortDescription(),
                 'imageUrl' => $heritage->getImageUrl(),
-                'unescoSiteUrl' => $heritage->getUnescoSiteUrl()
+                'unescoSiteUrl' => $heritage->getUnescoSiteUrl(),
+                'statePartyCodes' => $heritage->getStatePartyCodes(),
+                'statePartiesMeta' => $heritage->getStatePartiesMeta(),
             ];
         }, $this->heritages);
     }
