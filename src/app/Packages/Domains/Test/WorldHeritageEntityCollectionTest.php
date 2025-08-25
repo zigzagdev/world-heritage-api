@@ -121,13 +121,12 @@ class WorldHeritageEntityCollectionTest extends TestCase
     private static function arrayMultiData(): array
     {
         return [
-            // 既存: ブナ林（ヨーロッパ各地）
             [
                 'unesco_id' => 1133,
                 'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
                 'name' => "Ancient and Primeval Beech Forests",
                 'name_jp' => null,
-                'country' => 'Slovakia', // 便宜上代表国（実際は汎欧州の連続資産）
+                'country' => 'Slovakia',
                 'region' => 'Europe',
                 'category' => 'natural',
                 'criteria' => ['ix'],
@@ -165,8 +164,6 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     'UA' => ['is_primary' => false, 'inscription_year' => 2007],
                 ],
             ],
-
-            // 追加: シルクロード（長安–天山回廊）
             [
                 'unesco_id' => 1442,
                 'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
@@ -195,8 +192,6 @@ class WorldHeritageEntityCollectionTest extends TestCase
             ],
         ];
     }
-
-
 
     public function test_collection_check_type(): void
     {

@@ -169,7 +169,7 @@ class WorldHeritageDto
             'short_description' => $this->getShortDescription(),
             'image_url' => $this->getImageUrl(),
             'unesco_site_url' => $this->getUnescoSiteUrl(),
-            'state_parties' => $this->getStatePartyCodes(),
+            'state_party_codes' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),
         ];
     }

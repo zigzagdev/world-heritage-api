@@ -40,7 +40,6 @@ class CreateWorldHeritageUseCaseTest extends TestCase
     private function arrayData(): array
     {
         return [
-            'id' => 1,
             'unesco_id' => '668',
             'official_name' => 'Historic Monuments of Ancient Nara',
             'name' => 'Historic Monuments of Ancient Nara',
