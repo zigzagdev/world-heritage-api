@@ -44,7 +44,7 @@ class WorldHeritageListQueryFactory
             short_description: $request['short_description'] ?? null,
             image_url: $request['image_url'] ?? null,
             unesco_site_url: $request['unesco_site_url'] ?? null,
-            state_parties_codes: $request['state_party_codes'] ?? [],
+            state_parties_codes: $request['state_parties'] ?? [],
             state_parties_meta: $request['state_parties_meta'] ?? []
         );
     }
