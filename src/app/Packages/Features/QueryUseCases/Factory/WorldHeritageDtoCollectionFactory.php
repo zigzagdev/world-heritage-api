@@ -29,7 +29,9 @@ class WorldHeritageDtoCollectionFactory
                 bufferZoneHectares: $heritage['buffer_zone_hectares'] ?? null,
                 shortDescription: $heritage['short_description'] ?? null,
                 imageUrl: $heritage['image_url'] ?? null,
-                unescoSiteUrl: $heritage['unesco_site_url'] ?? null
+                unescoSiteUrl: $heritage['unesco_site_url'] ?? null,
+                statePartyCodes: $heritage['state_parties'] ?? [],
+                statePartiesMeta: $heritage['state_parties_meta'] ?? []
             );
         }, $data);
 

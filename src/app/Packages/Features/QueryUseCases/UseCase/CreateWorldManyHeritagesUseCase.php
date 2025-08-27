@@ -43,7 +43,9 @@ class CreateWorldManyHeritagesUseCase
                     bufferZoneHectares: $q->getBufferZoneHectares(),
                     shortDescription: $q->getShortDescription(),
                     imageUrl: $q->getImageUrl(),
-                    unescoSiteUrl: $q->getUnescoSiteUrl()
+                    unescoSiteUrl: $q->getUnescoSiteUrl(),
+                    statePartyCodes: $q->getStatePartyCodes() ?? [],
+                    statePartyMeta: $q->getStatePartiesMeta() ?? []
                 );
             }, $listQueries->getAllHeritages()
         );
@@ -75,7 +77,9 @@ class CreateWorldManyHeritagesUseCase
                     bufferZoneHectares: $item->getBufferZoneHectares(),
                     shortDescription: $item->getShortDescription(),
                     imageUrl: $item->getImageUrl(),
-                    unescoSiteUrl: $item->getUnescoSiteUrl()
+                    unescoSiteUrl: $item->getUnescoSiteUrl(),
+                    statePartyCodes: $item->getStatePartyCodes(),
+                    statePartiesMeta: $item->getStatePartyMeta()
                 ),
                 $result->getAllHeritages()
             )
