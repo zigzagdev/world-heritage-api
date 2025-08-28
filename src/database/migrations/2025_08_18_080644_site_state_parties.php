@@ -9,30 +9,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('site_state_parties', function (Blueprint $table) {
-            $table->char('state_party_code', 255);
-
-            $table->foreignId('world_heritage_site_id')
-                ->constrained('world_heritage_sites')
-                ->cascadeOnDelete();
+            $table->char('state_party_code', 3);
+            $table->unsignedInteger('world_heritage_site_unesco_id');
 
             $table->boolean('is_primary')->default(false);
-            $table->smallInteger('inscription_year')->nullable();
+            $table->unsignedSmallInteger('inscription_year')->nullable();
             $table->timestamps();
 
             $table->foreign('state_party_code')
-                ->references('state_party_code')
-                ->on('countries')
+                ->references('state_party_code')->on('countries')
                 ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->foreign('world_heritage_site_unesco_id')
+                ->references('unesco_id')->on('world_heritage_sites')
                 ->cascadeOnDelete();
 
-            $table->primary(['state_party_code', 'world_heritage_site_id']);
-
-            $table->index(['world_heritage_site_id', 'state_party_code']);
+            $table->primary(['state_party_code', 'world_heritage_site_unesco_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('state_party_world_heritage_site');
+        Schema::dropIfExists('site_state_parties');
     }
 };
