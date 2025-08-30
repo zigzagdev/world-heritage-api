@@ -2,7 +2,10 @@
 
 namespace App\Packages\Domains\Test;
 
-use PHPUnit\Framework\TestCase;
+use App\Models\Country;
+use App\Models\WorldHeritage;
+use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageEntity;
 
 class WorldHeritageEntityTest extends TestCase
@@ -10,6 +13,7 @@ class WorldHeritageEntityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->refresh();
     }
 
     protected function tearDown(): void
@@ -17,10 +21,21 @@ class WorldHeritageEntityTest extends TestCase
         parent::tearDown();
     }
 
+    private function refresh(): void
+    {
+        if (env('APP_ENV') === 'testing') {
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
+            WorldHeritage::truncate();
+            Country::truncate();
+            DB::table('site_state_parties')->truncate();
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
+    }
+
     private static function arraySingleData(): array
     {
         return [
-            'unesco_id' => '668',
+            'id' => 668,
             'official_name' => 'Historic Monuments of Ancient Nara',
             'name' => 'Historic Monuments of Ancient Nara',
             'name_jp' => '古都奈良の文化財',
@@ -51,7 +66,7 @@ class WorldHeritageEntityTest extends TestCase
     private static function arrayMultiData(): array
     {
         return [
-            'unesco_id' => 1133,
+            'id' => 1133,
             'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
             'name' => "Ancient and Primeval Beech Forests",
             'name_jp' => null,
@@ -99,8 +114,7 @@ class WorldHeritageEntityTest extends TestCase
     public function test_entity_check_single_type(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arraySingleData()['id'] ?? null,
-            self::arraySingleData()['unesco_id'],
+            self::arraySingleData()['id'],
             self::arraySingleData()['official_name'],
             self::arraySingleData()['name'],
             self::arraySingleData()['country'],
@@ -128,8 +142,7 @@ class WorldHeritageEntityTest extends TestCase
     public function test_entity_check_single_value(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arraySingleData()['id'] ?? null,
-            self::arraySingleData()['unesco_id'],
+            self::arraySingleData()['id'],
             self::arraySingleData()['official_name'],
             self::arraySingleData()['name'],
             self::arraySingleData()['country'],
@@ -151,7 +164,7 @@ class WorldHeritageEntityTest extends TestCase
             self::arraySingleData()['state_parties_meta']
         );
 
-        $this->assertEquals(self::arraySingleData()['unesco_id'], $entity->getUnescoId());
+        $this->assertEquals(self::arraySingleData()['id'], $entity->getId());
         $this->assertEquals(self::arraySingleData()['official_name'], $entity->getOfficialName());
         $this->assertEquals(self::arraySingleData()['name'], $entity->getName());
         $this->assertEquals(self::arraySingleData()['country'], $entity->getCountry());
@@ -176,8 +189,7 @@ class WorldHeritageEntityTest extends TestCase
     public function test_entity_check_multi_type(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arrayMultiData()['id'] ?? null,
-            self::arrayMultiData()['unesco_id'],
+            self::arrayMultiData()['id'],
             self::arrayMultiData()['official_name'],
             self::arrayMultiData()['name'],
             self::arrayMultiData()['country'],
@@ -205,8 +217,7 @@ class WorldHeritageEntityTest extends TestCase
     public function test_entity_check_multi_value(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arrayMultiData()['id'] ?? null,
-            self::arrayMultiData()['unesco_id'],
+            self::arrayMultiData()['id'],
             self::arrayMultiData()['official_name'],
             self::arrayMultiData()['name'],
             self::arrayMultiData()['country'],
@@ -228,7 +239,7 @@ class WorldHeritageEntityTest extends TestCase
             self::arrayMultiData()['state_parties_meta']
         );
 
-        $this->assertEquals(self::arrayMultiData()['unesco_id'], $entity->getUnescoId());
+        $this->assertEquals(self::arrayMultiData()['id'], $entity->getId());
         $this->assertEquals(self::arrayMultiData()['official_name'], $entity->getOfficialName());
         $this->assertEquals(self::arrayMultiData()['name'], $entity->getName());
         $this->assertEquals(self::arrayMultiData()['country'], $entity->getCountry());

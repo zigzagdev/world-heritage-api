@@ -5,7 +5,7 @@ namespace App\Packages\Domains\Test;
 use App\Models\Country;
 use App\Models\WorldHeritage;
 use App\Packages\Domains\WorldHeritageEntityCollection;
-use Database\Seeders\CountrySeeder;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageEntity;
@@ -16,7 +16,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
-        $seeder = new CountrySeeder();
+        $seeder = new DatabaseSeeder();
         $seeder->run();
     }
 
@@ -41,8 +41,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'unesco_id' => '668',
+                'id' => 668,
                 'official_name' => 'Historic Monuments of Ancient Nara',
                 'name' => 'Historic Monuments of Ancient Nara',
                 'name_jp' => '古都奈良の文化財',
@@ -65,56 +64,6 @@ class WorldHeritageEntityCollectionTest extends TestCase
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
             ],
-            [
-                'id' => 2,
-                'unesco_id' => '1234',
-                'official_name' => 'Example Heritage Site',
-                'name' => 'Example Heritage Site',
-                'name_jp' => '例の文化遺産',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'state_parties' => ['JP'],
-                'state_parties_meta' => [
-                    'JP' => ['is_primary' => true, 'inscription_year' => 2000],
-                ],
-                'category' => 'natural',
-                'criteria' => ['vii', 'viii'],
-                'year_inscribed' => 2000,
-                'area_hectares' => 500.0,
-                'buffer_zone_hectares' => 400.0,
-                'is_endangered' => true,
-                'latitude' => 35.6895,
-                'longitude' => 139.6917,
-                'short_description' => 'An example of a natural heritage site.',
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/1234/',
-            ],
-            [
-                'id' => 3,
-                'unesco_id' => '669',
-                'official_name' => 'Shrines and Temples of Nikko',
-                'name' => 'Shrines and Temples of Nikko',
-                'name_jp' => '日光の社寺',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'state_parties' => ['JP'],
-                'state_parties_meta' => [
-                    'JP' => ['is_primary' => true, 'inscription_year' => 1999],
-                ],
-                'category' => 'cultural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1999,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
-                'is_endangered' => false,
-                'latitude' => 36.7578,
-                'longitude' => 139.598,
-                'short_description' => 'Lavishly decorated shrines set among ancient cedar trees.',
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/669/',
-            ],
         ];
     }
 
@@ -122,7 +71,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
     {
         return [
             [
-                'unesco_id' => 1133,
+                'id' => 1133,
                 'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
                 'name' => "Ancient and Primeval Beech Forests",
                 'name_jp' => null,
@@ -165,7 +114,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                 ],
             ],
             [
-                'unesco_id' => 1442,
+                'id' => 1442,
                 'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
                 'name' => "Silk Roads: Chang'an–Tianshan Corridor",
                 'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
@@ -199,7 +148,6 @@ class WorldHeritageEntityCollectionTest extends TestCase
             array_map(function ($data) {
                 return new WorldHeritageEntity(
                     $data['id'],
-                    $data['unesco_id'],
                     $data['official_name'],
                     $data['name'],
                     $data['country'],
@@ -238,7 +186,6 @@ class WorldHeritageEntityCollectionTest extends TestCase
             array_map(function ($data) {
                 return new WorldHeritageEntity(
                     $data['id'],
-                    $data['unesco_id'],
                     $data['official_name'],
                     $data['name'],
                     $data['country'],
@@ -262,7 +209,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
             }, $this->arraySingleData())
         );
 
-        $this->assertCount(3, $collection->getAllHeritages());
+        $this->assertCount(1, $collection->getAllHeritages());
     }
 
     public function test_multi_collection_check_type(): void
@@ -270,8 +217,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
         $collection = new WorldHeritageEntityCollection(
             array_map(function ($data) {
                 return new WorldHeritageEntity(
-                    null, // IDは自動生成されるためnull
-                    $data['unesco_id'],
+                    $data['id'],
                     $data['official_name'],
                     $data['name'],
                     $data['country'],
@@ -303,8 +249,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
         $collection = new WorldHeritageEntityCollection(
             array_map(function ($data) {
                 return new WorldHeritageEntity(
-                    null,
-                    $data['unesco_id'],
+                    $data['id'],
                     $data['official_name'],
                     $data['name'],
                     $data['country'],
