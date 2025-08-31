@@ -22,8 +22,7 @@ class WorldHeritageListQueryCollectionFactoryTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'unesco_id' => '660',
+                'id' => 660,
                 'official_name' => 'Buddhist Monuments in the Horyu-ji Area',
                 'name' => 'Buddhist Monuments in the Horyu-ji Area',
                 'name_jp' => '法隆寺地域の仏教建造物',
@@ -44,8 +43,7 @@ class WorldHeritageListQueryCollectionFactoryTest extends TestCase
                 'created_at' => now(), 'updated_at' => now(),
             ],
             [
-                'id' => 2,
-                'unesco_id' => '661',
+                'id' => 661,
                 'official_name' => 'Himeji-jo',
                 'name' => 'Himeji-jo',
                 'name_jp' => '姫路城',
@@ -66,8 +64,7 @@ class WorldHeritageListQueryCollectionFactoryTest extends TestCase
                 'created_at' => now(), 'updated_at' => now(),
             ],
             [
-                'id' => 3,
-                'unesco_id' => '662',
+                'id' => 662,
                 'official_name' => 'Yakushima',
                 'name' => 'Yakushima',
                 'name_jp' => '屋久島',
@@ -88,8 +85,7 @@ class WorldHeritageListQueryCollectionFactoryTest extends TestCase
                 'created_at' => now(), 'updated_at' => now(),
             ],
             [
-                'id' => 4,
-                'unesco_id' => '663',
+                'id' => 663,
                 'official_name' => 'Shirakami-Sanchi',
                 'name' => 'Shirakami-Sanchi',
                 'name_jp' => '白神山地',
@@ -125,7 +121,6 @@ class WorldHeritageListQueryCollectionFactoryTest extends TestCase
 
         foreach ($result->getAllHeritages() as $key => $value) {
             $this->assertEquals(self::arrayData()[$key]['id'], $value->getId());
-            $this->assertEquals(self::arrayData()[$key]['unesco_id'], $value->getUnescoId());
             $this->assertEquals(self::arrayData()[$key]['official_name'], $value->getOfficialName());
             $this->assertEquals(self::arrayData()[$key]['name'], $value->getName());
             $this->assertEquals(self::arrayData()[$key]['name_jp'], $value->getNameJp());

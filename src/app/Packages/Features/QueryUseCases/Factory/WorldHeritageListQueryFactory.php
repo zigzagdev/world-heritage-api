@@ -9,7 +9,7 @@ use Illuminate\Support\Arr;
 class WorldHeritageListQueryFactory
 {
     private static array $REQUIRED = [
-        'unesco_id',
+        'id',
         'official_name',
         'name',
         'country',
@@ -23,8 +23,7 @@ class WorldHeritageListQueryFactory
         self::validation($request);
 
         return new WorldHeritageListQuery(
-            id: Arr::get($request, 'id', null),
-            unesco_id: $request['unesco_id'],
+            id: $request['id'],
             official_name: (string)($request['official_name'] ?? ''),
             name: (string)($request['name'] ?? ''),
             country: (string)($request['country'] ?? ''),

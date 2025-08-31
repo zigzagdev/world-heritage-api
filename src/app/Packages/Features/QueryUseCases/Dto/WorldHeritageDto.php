@@ -6,7 +6,6 @@ class WorldHeritageDto
 {
     public function __construct(
         private readonly int $id,
-        private readonly string $unescoId,
         private readonly string $officialName,
         private readonly string $name,
         private readonly string $country,
@@ -31,11 +30,6 @@ class WorldHeritageDto
     public function getId(): int
     {
         return $this->id;
-    }
-
-    public function getUnescoId(): string
-    {
-        return $this->unescoId;
     }
 
     public function getOfficialName(): string
@@ -151,7 +145,6 @@ class WorldHeritageDto
     {
         return [
             'id' => $this->getId(),
-            'unesco_id' => $this->getUnescoId(),
             'official_name' => $this->getOfficialName(),
             'name' => $this->getName(),
             'country' => $this->getCountry(),

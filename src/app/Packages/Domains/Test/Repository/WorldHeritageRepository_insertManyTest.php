@@ -77,9 +77,9 @@ class WorldHeritageRepository_insertManyTest extends TestCase
                 'country' => 'Japan',
                 'region' => 'Asia',
                 'state_party' => 'JP',
-                'state_parties' => ['JP'],
+                'state_parties' => ['JPN'],
                 'state_parties_meta' => [
-                    'JP' => ['is_primary' => true, 'inscription_year' => 1999],
+                    'JPN' => ['is_primary' => true, 'inscription_year' => 1999],
                 ],
                 'category' => 'cultural',
                 'criteria' => ['ii', 'iii', 'v'],
