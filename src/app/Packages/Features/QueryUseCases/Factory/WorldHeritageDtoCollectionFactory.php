@@ -12,7 +12,6 @@ class WorldHeritageDtoCollectionFactory
         $heritages = array_map(function ($heritage) {
             return new WorldHeritageDto(
                 id: $heritage['id'],
-                unescoId: $heritage['unesco_id'],
                 officialName: $heritage['official_name'],
                 name: $heritage['name'],
                 country: $heritage['country'],

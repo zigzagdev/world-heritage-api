@@ -4,8 +4,6 @@ namespace App\Packages\Domains;
 
 use App\Models\WorldHeritage;
 use App\Models\Country;
-use Exception;
-
  readonly class WorldHeritageRepository implements WorldHeritageRepositoryInterface
 {
     public function __construct(
@@ -18,7 +16,7 @@ use Exception;
     ): WorldHeritageEntity {
 
         $insertValue = [
-        'unesco_id' => $entity->getUnescoId(),
+        'id' => $entity->getId(),
         'official_name' => $entity->getOfficialName(),
         'name' => $entity->getName(),
         'country' => $entity->getCountry(),
@@ -76,7 +74,7 @@ use Exception;
         }
 
         $heritage->state_party = !empty($codes) ? implode(',', $codes) : null;
-        $heritage->save();
+
         $heritage->load(['countries' => function ($q) {
             $q->withPivot(['is_primary', 'inscription_year']);
         }]);
@@ -91,7 +89,6 @@ use Exception;
 
         return new WorldHeritageEntity(
             id: $heritage->id,
-            unescoId: $heritage->unesco_id,
             officialName: $heritage->official_name,
             name: $heritage->name,
             country: $heritage->country,
@@ -102,14 +99,15 @@ use Exception;
             longitude: $heritage->longitude,
             isEndangered: $heritage->is_endangered,
             nameJp: $heritage->name_jp,
-            stateParty: $heritage->state_party,
             criteria: $heritage->criteria,
             areaHectares: $heritage->area_hectares,
             bufferZoneHectares: $heritage->buffer_zone_hectares,
             shortDescription: $heritage->short_description,
             imageUrl: $heritage->image_url,
             unescoSiteUrl: $heritage->unesco_site_url,
-            statePartyCodes: $this->parseStateParty($heritage->state_party),
+            statePartyCodes: $this->parseStateParty(
+                implode(',', $heritage->countries->pluck('state_party_code')->all())
+            ),
             statePartyMeta: $partyMeta
         );
     }
@@ -194,13 +192,14 @@ use Exception;
 //        );
 //    }
 
-    private function parseStateParty(?string $stored): array
+    private function parseStateParty(?string $party): array
     {
-        if ($stored === null || $stored === '') return [];
+        if ($party === null || $party === '') return [];
 
-        $parts = array_map('trim', explode(',', $stored));
+        $parts = array_map('trim', explode(',', $party));
         $parts = array_filter($parts, static fn($v) => $v !== '');
         $parts = array_map('strtoupper', $parts);
+
         return array_values(array_unique($parts));
     }
  }

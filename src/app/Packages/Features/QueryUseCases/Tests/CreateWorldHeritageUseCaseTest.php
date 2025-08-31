@@ -2,6 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests;
 
+use App\Models\Country;
 use Database\Seeders\CountrySeeder;
 use Illuminate\Support\Facades\DB;
 use Mockery;
@@ -33,6 +34,7 @@ class CreateWorldHeritageUseCaseTest extends TestCase
         if (env('APP_ENV') === 'testing') {
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
             WorldHeritage::truncate();
+            Country::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -40,7 +42,7 @@ class CreateWorldHeritageUseCaseTest extends TestCase
     private function arrayData(): array
     {
         return [
-            'unesco_id' => '668',
+            'id' => 668,
             'official_name' => 'Historic Monuments of Ancient Nara',
             'name' => 'Historic Monuments of Ancient Nara',
             'name_jp' => '古都奈良の文化財',
@@ -58,9 +60,9 @@ class CreateWorldHeritageUseCaseTest extends TestCase
             'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
-            'state_parties' => ['JP'],
+            'state_parties' => ['JPN'],
             'state_parties_meta' => [
-                'JP' => [
+                'JPN' => [
                     'is_primary' => true,
                     'inscription_year' => 1998,
                 ],
@@ -77,8 +79,7 @@ class CreateWorldHeritageUseCaseTest extends TestCase
             ->with(Mockery::type(WorldHeritageEntity::class))
             ->andReturn(
                 new WorldHeritageEntity(
-                    id: 1,
-                    unescoId: $this->arrayData()['unesco_id'],
+                    id: $this->arrayData()['id'],
                     officialName: $this->arrayData()['official_name'],
                     name: $this->arrayData()['name'],
                     country: $this->arrayData()['country'],
@@ -123,8 +124,7 @@ class CreateWorldHeritageUseCaseTest extends TestCase
 
         $result = $useCase->handle($this->arrayData());
 
-        $this->assertEquals(1, $result->getId());
-        $this->assertEquals($this->arrayData()['unesco_id'], $result->getUnescoId());
+        $this->assertEquals($this->arrayData()['id'], $result->getId());
         $this->assertEquals($this->arrayData()['official_name'], $result->getOfficialName());
         $this->assertEquals($this->arrayData()['name'], $result->getName());
         $this->assertEquals($this->arrayData()['country'], $result->getCountry());

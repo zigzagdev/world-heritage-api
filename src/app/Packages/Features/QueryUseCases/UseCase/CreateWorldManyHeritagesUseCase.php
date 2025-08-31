@@ -25,8 +25,7 @@ class CreateWorldManyHeritagesUseCase
         $entityArray = array_map(
             function (WorldHeritageListQuery $q) {
                 return new WorldHeritageEntity(
-                    id: $q->getId() ?? null,
-                    unescoId: (int)$q->getUnescoId(),
+                    id: $q->getId(),
                     officialName: $q->getOfficialName(),
                     name: $q->getName(),
                     country: $q->getCountry(),
@@ -60,7 +59,6 @@ class CreateWorldManyHeritagesUseCase
             ...array_map(
                 fn($item) => new WorldHeritageDto(
                     id: $item->getId(),
-                    unescoId: $item->getUnescoId(),
                     officialName: $item->getOfficialName(),
                     name: $item->getName(),
                     country: $item->getCountry(),

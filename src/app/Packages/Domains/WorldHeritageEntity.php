@@ -5,8 +5,7 @@ namespace App\Packages\Domains;
 class WorldHeritageEntity
 {
     public function __construct(
-        public ?int $id,
-        public string $unescoId,
+        public int $id,
         public string $officialName,
         public string $name,
         public string $country,
@@ -28,14 +27,9 @@ class WorldHeritageEntity
         private array $statePartyMeta = []
     ) {}
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
-    }
-
-    public function getUnescoId(): string
-    {
-        return $this->unescoId;
     }
 
     public function getOfficialName(): string
@@ -155,7 +149,7 @@ class WorldHeritageEntity
             return [];
 
         $parts = preg_split('/[;,\s]+/', strtoupper($this->stateParty));
-        $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{2}$/', $country));
+        $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{3}$/', $country));
 
         return array_values(array_unique($codes));
     }
@@ -164,7 +158,7 @@ class WorldHeritageEntity
         $codes = array_map('trim', $codes);
         $codes = array_filter($codes, fn($v) => $v !== '');
         $codes = array_map('strtoupper', $codes);
-        $codes = array_filter($codes, fn($v) => preg_match('/^[A-Z]{2}$/', $v));
+        $codes = array_filter($codes, fn($v) => preg_match('/^[A-Z]{3}$/', $v));
 
         return array_values(array_unique($codes));
     }
@@ -191,11 +185,11 @@ class WorldHeritageEntity
         $normalized = [];
         foreach ($meta as $code => $m) {
             $code = strtoupper(trim((string)$code));
-            if (!preg_match('/^[A-Z]{2}$/', $code)) {
+            if (!preg_match('/^[A-Z]{3}$/', $code)) {
                 continue;
             }
             $normalized[$code] = [
-                'is_primary'       => (bool)($m['is_primary'] ?? false),
+                'is_primary' => (bool)($m['is_primary'] ?? false),
                 'inscription_year' => isset($m['inscription_year'])
                     ? (is_numeric($m['inscription_year']) ? (int)$m['inscription_year'] : null)
                     : null,

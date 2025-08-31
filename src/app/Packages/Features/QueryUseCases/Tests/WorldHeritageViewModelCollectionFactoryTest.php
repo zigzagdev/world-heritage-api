@@ -26,8 +26,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'unesco_id' => '1133',
+                'id' => 1133,
                 'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
                 'name' => "Ancient and Primeval Beech Forests",
                 'name_jp' => null,
@@ -70,8 +69,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 ],
             ],
             [
-                'id' => 2,
-                'unesco_id' => '1442',
+                'id' => 1442,
                 'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
                 'name' => "Silk Roads: Chang'an–Tianshan Corridor",
                 'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
@@ -109,7 +107,6 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
         $dtos = array_map(
             fn (array $data) => new WorldHeritageDto(
                 id: $data['id'],
-                unescoId: $data['unesco_id'],
                 officialName: $data['official_name'],
                 name: $data['name'],
                 country: $data['country'],
@@ -160,7 +157,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
         );
 
         foreach ($result->toArray() as $key => $value) {
-            $this->assertEquals(self::arrayData()[$key]['unesco_id'], $value['unesco_id']);
+            $this->assertEquals(self::arrayData()[$key]['id'], $value['id']);
             $this->assertEquals(self::arrayData()[$key]['official_name'], $value['official_name']);
             $this->assertEquals(self::arrayData()[$key]['name'], $value['name']);
             $this->assertEquals(self::arrayData()[$key]['country'], $value['country']);

@@ -3,6 +3,7 @@
 namespace App\Packages\Domains\Test\Repository;
 
 use Database\Seeders\CountrySeeder;
+use Database\Seeders\DatabaseSeeder;
 use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageEntityCollection;
@@ -45,8 +46,7 @@ class WorldHeritageRepository_insertManyTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'unesco_id' => '668',
+                'id' => 668,
                 'official_name' => 'Historic Monuments of Ancient Nara',
                 'name' => 'Historic Monuments of Ancient Nara',
                 'name_jp' => '古都奈良の文化財',
@@ -70,42 +70,16 @@ class WorldHeritageRepository_insertManyTest extends TestCase
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
             ],
             [
-                'id' => 2,
-                'unesco_id' => '1234',
-                'official_name' => 'Example Heritage Site',
-                'name' => 'Example Heritage Site',
-                'name_jp' => '例の文化遺産',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'state_parties' => ['JP'],
-                'state_parties_meta' => [
-                    'JP' => ['is_primary' => true, 'inscription_year' => 2000],
-                ],
-                'category' => 'natural',
-                'criteria' => ['vii', 'viii'],
-                'year_inscribed' => 2000,
-                'area_hectares' => 500.0,
-                'buffer_zone_hectares' => 400.0,
-                'is_endangered' => true,
-                'latitude' => 35.6895,
-                'longitude' => 139.6917,
-                'short_description' => 'An example of a natural heritage site.',
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/1234/',
-            ],
-            [
-                'id' => 3,
-                'unesco_id' => '669',
+                'id' => 669,
                 'official_name' => 'Shrines and Temples of Nikko',
                 'name' => 'Shrines and Temples of Nikko',
                 'name_jp' => '日光の社寺',
                 'country' => 'Japan',
                 'region' => 'Asia',
                 'state_party' => 'JP',
-                'state_parties' => ['JP'],
+                'state_parties' => ['JPN'],
                 'state_parties_meta' => [
-                    'JP' => ['is_primary' => true, 'inscription_year' => 1999],
+                    'JPN' => ['is_primary' => true, 'inscription_year' => 1999],
                 ],
                 'category' => 'cultural',
                 'criteria' => ['ii', 'iii', 'v'],
@@ -127,8 +101,7 @@ class WorldHeritageRepository_insertManyTest extends TestCase
         $collection = new WorldHeritageEntityCollection(
             array_map(function ($d) {
                 return new WorldHeritageEntity(
-                    null,
-                    $d['unesco_id'],
+                    $d['id'],
                     $d['official_name'],
                     $d['name'],
                     $d['country'],
@@ -163,8 +136,7 @@ class WorldHeritageRepository_insertManyTest extends TestCase
         $collection = new WorldHeritageEntityCollection(
             array_map(function ($data) {
                 return new WorldHeritageEntity(
-                    null,
-                    $data['unesco_id'],
+                    $data['id'],
                     $data['official_name'],
                     $data['name'],
                     $data['country'],
@@ -192,10 +164,7 @@ class WorldHeritageRepository_insertManyTest extends TestCase
 
         foreach ($result->getAllHeritages() as $entity) {
             foreach (self::arrayData() as $value) {
-                if ((string)$entity->getUnescoId() !== (string)$value['unesco_id']) {
-                    continue;
-                }
-                $this->assertEquals($value['unesco_id'], $entity->getUnescoId());
+                $this->assertEquals($value['id'], $entity->getId());
                 $this->assertEquals($value['official_name'], $entity->getOfficialName());
                 $this->assertEquals($value['name'], $entity->getName());
                 $this->assertEquals($value['country'], $entity->getCountry());

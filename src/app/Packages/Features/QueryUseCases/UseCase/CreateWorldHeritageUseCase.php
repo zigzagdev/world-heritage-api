@@ -19,8 +19,7 @@ class CreateWorldHeritageUseCase
         $requestQuery = WorldHeritageListQueryFactory::build($request);
 
         $requestEntity = new WorldHeritageEntity(
-            $requestQuery->getId() ?? null,
-            $requestQuery->getUnescoId(),
+            $requestQuery->getId(),
             $requestQuery->getOfficialName(),
             $requestQuery->getName(),
             $requestQuery->getCountry(),
@@ -48,7 +47,6 @@ class CreateWorldHeritageUseCase
 
         return new WorldHeritageDto(
             id: $result->getId(),
-            unescoId: $result->getUnescoId(),
             officialName: $result->getOfficialName(),
             name: $result->getName(),
             country: $result->getCountry(),
