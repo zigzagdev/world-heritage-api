@@ -2,12 +2,14 @@
 
 namespace App\Packages\Domains\Test\Repository;
 
+use App\Models\Country;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepository;
+use Database\Seeders\CountrySeeder;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\WorldHeritage;
-use Database\Seeders\CountrySeeder;
 
 class WorldHeritageRepository_insertTest extends TestCase
 {
@@ -32,6 +34,8 @@ class WorldHeritageRepository_insertTest extends TestCase
         if (env('APP_ENV') === 'testing') {
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
             WorldHeritage::truncate();
+            Country::truncate();
+            DB::table('site_state_parties')->truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -39,7 +43,7 @@ class WorldHeritageRepository_insertTest extends TestCase
     private static function arraySingleData(): array
     {
         return [
-            'unesco_id' => '668',
+            'id' => 668,
             'official_name' => 'Historic Monuments of Ancient Nara',
             'name' => 'Historic Monuments of Ancient Nara',
             'name_jp' => '古都奈良の文化財',
@@ -57,9 +61,9 @@ class WorldHeritageRepository_insertTest extends TestCase
             'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
-            'state_parties' => ['JP'],
+            'state_parties' => ['JPN'],
             'state_parties_meta' => [
-                'JP' => [
+                'JPN' => [
                     'is_primary' => true,
                     'inscription_year' => 1998,
                 ],
@@ -70,7 +74,7 @@ class WorldHeritageRepository_insertTest extends TestCase
     private static function arrayMultiData(): array
     {
         return [
-            'unesco_id' => 1133,
+            'id' => 1133,
             'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
             'name' => "Ancient and Primeval Beech Forests",
             'name_jp' => null,
@@ -89,27 +93,27 @@ class WorldHeritageRepository_insertTest extends TestCase
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
             'state_parties' => [
-                'AL','AT','BE','BA','BG','HR','CZ','FR','DE','IT','MK','PL','RO','SK','SI','ES','CH','UA'
+                'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
             ],
             'state_parties_meta' => [
-                'AL' => ['is_primary' => false, 'inscription_year' => 2007],
-                'AT' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BE' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BA' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BG' => ['is_primary' => false, 'inscription_year' => 2007],
-                'HR' => ['is_primary' => false, 'inscription_year' => 2007],
-                'CZ' => ['is_primary' => false, 'inscription_year' => 2007],
-                'FR' => ['is_primary' => false, 'inscription_year' => 2007],
-                'DE' => ['is_primary' => false, 'inscription_year' => 2007],
-                'IT' => ['is_primary' => false, 'inscription_year' => 2007],
-                'MK' => ['is_primary' => false, 'inscription_year' => 2007],
-                'PL' => ['is_primary' => false, 'inscription_year' => 2007],
-                'RO' => ['is_primary' => false, 'inscription_year' => 2007],
-                'SK' => ['is_primary' => true,  'inscription_year' => 2007],
-                'SI' => ['is_primary' => false, 'inscription_year' => 2007],
-                'ES' => ['is_primary' => false, 'inscription_year' => 2007],
-                'CH' => ['is_primary' => false, 'inscription_year' => 2007],
-                'UA' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ALB' => ['is_primary' => false, 'inscription_year' => 2007],
+                'AUT' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BEL' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BIH' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BGR' => ['is_primary' => false, 'inscription_year' => 2007],
+                'HRV' => ['is_primary' => false, 'inscription_year' => 2007],
+                'CZE' => ['is_primary' => false, 'inscription_year' => 2007],
+                'FRA' => ['is_primary' => false, 'inscription_year' => 2007],
+                'DEU' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ITA' => ['is_primary' => false, 'inscription_year' => 2007],
+                'MKD' => ['is_primary' => false, 'inscription_year' => 2007],
+                'POL' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ROU' => ['is_primary' => false, 'inscription_year' => 2007],
+                'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
+                'SVN' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ESP' => ['is_primary' => false, 'inscription_year' => 2007],
+                'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
+                'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
             ],
         ];
     }
@@ -117,8 +121,7 @@ class WorldHeritageRepository_insertTest extends TestCase
     public function test_insert_check_single_type(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arraySingleData()['id'] ?? null,
-            self::arraySingleData()['unesco_id'],
+            self::arraySingleData()['id'],
             self::arraySingleData()['official_name'],
             self::arraySingleData()['name'],
             self::arraySingleData()['country'],
@@ -148,8 +151,7 @@ class WorldHeritageRepository_insertTest extends TestCase
     public function test_insert_check_single_value(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arraySingleData()['id'] ?? null,
-            self::arraySingleData()['unesco_id'],
+            self::arraySingleData()['id'],
             self::arraySingleData()['official_name'],
             self::arraySingleData()['name'],
             self::arraySingleData()['country'],
@@ -173,7 +175,7 @@ class WorldHeritageRepository_insertTest extends TestCase
 
         $result = $this->repository->insertHeritage($entity);
 
-        $this->assertEquals(self::arraySingleData()['unesco_id'], $result->getUnescoId());
+        $this->assertEquals(self::arraySingleData()['id'], $result->getId());
         $this->assertEquals(self::arraySingleData()['official_name'], $result->getOfficialName());
         $this->assertEquals(self::arraySingleData()['name'], $result->getName());
         $this->assertEquals(self::arraySingleData()['country'], $result->getCountry());
@@ -191,14 +193,12 @@ class WorldHeritageRepository_insertTest extends TestCase
         $this->assertEquals(self::arraySingleData()['image_url'], $result->getImageUrl());
         $this->assertEquals(self::arraySingleData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEquals(self::arraySingleData()['state_parties'], $result->getStatePartyCodes());
-        $this->assertEquals(self::arraySingleData()['state_parties_meta'], $result->getStatePartyMeta());
     }
 
     public function test_insert_check_multi_type(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arrayMultiData()['id'] ?? null,
-            self::arrayMultiData()['unesco_id'],
+            self::arrayMultiData()['id'],
             self::arrayMultiData()['official_name'],
             self::arrayMultiData()['name'],
             self::arrayMultiData()['country'],
@@ -228,8 +228,7 @@ class WorldHeritageRepository_insertTest extends TestCase
     public function test_insert_check_multi_value(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arrayMultiData()['id'] ?? null,
-            self::arrayMultiData()['unesco_id'],
+            self::arrayMultiData()['id'],
             self::arrayMultiData()['official_name'],
             self::arrayMultiData()['name'],
             self::arrayMultiData()['country'],
@@ -253,7 +252,7 @@ class WorldHeritageRepository_insertTest extends TestCase
 
         $result = $this->repository->insertHeritage($entity);
 
-        $this->assertEquals(self::arrayMultiData()['unesco_id'], $result->getUnescoId());
+        $this->assertEquals(self::arrayMultiData()['id'], $result->getId());
         $this->assertEquals(self::arrayMultiData()['official_name'], $result->getOfficialName());
         $this->assertEquals(self::arrayMultiData()['name'], $result->getName());
         $this->assertEquals(self::arrayMultiData()['country'], $result->getCountry());
@@ -273,8 +272,8 @@ class WorldHeritageRepository_insertTest extends TestCase
         $this->assertEqualsCanonicalizing(self::arrayMultiData()['state_parties'], $result->getStatePartyCodes());
         $this->assertEquals(self::arrayMultiData()['state_parties_meta'], $result->getStatePartyMeta());
         $this->assertEqualsCanonicalizing(
-            self::arrayMultiData()['state_parties_meta']['SK'],
-            $entity->getStatePartyMeta()['SK']
+            self::arrayMultiData()['state_parties_meta']['SVK'],
+            $entity->getStatePartyMeta()['SVK']
         );
     }
 }

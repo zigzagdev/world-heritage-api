@@ -2,8 +2,6 @@
 
 namespace App\Packages\Domains;
 
-use App\Packages\Domains\WorldHeritageEntity;
-
 class WorldHeritageEntityCollection
 {
     public function __construct(
