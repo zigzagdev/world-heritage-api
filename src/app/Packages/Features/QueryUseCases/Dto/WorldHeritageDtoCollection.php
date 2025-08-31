@@ -16,7 +16,6 @@ class WorldHeritageDtoCollection
         return array_map(function (WorldHeritageDto $heritage) {
             return [
                 'id' => $heritage->getId(),
-                'unescoId' => $heritage->getUnescoId(),
                 'officialName' => $heritage->getOfficialName(),
                 'name' => $heritage->getName(),
                 'country' => $heritage->getCountry(),
