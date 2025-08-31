@@ -4,12 +4,13 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Country;
+use RuntimeException;
 
 class CountrySeeder extends Seeder
 {
     public function run(): void
     {
-        $countries = [
+        $countriesIso2 = [
             ['AF','Afghanistan'], ['AL','Albania'], ['DZ','Algeria'], ['AD','Andorra'], ['AO','Angola'],
             ['AG','Antigua and Barbuda'], ['AR','Argentina'], ['AM','Armenia'], ['AU','Australia'], ['AT','Austria'],
             ['AZ','Azerbaijan'], ['BS','Bahamas'], ['BH','Bahrain'], ['BD','Bangladesh'], ['BB','Barbados'],
@@ -52,7 +53,30 @@ class CountrySeeder extends Seeder
             ['VA','Holy See'], ['PS','State of Palestine'],
         ];
 
-        $regions = [
+        $iso2to3 = [
+            'AF'=>'AFG','AL'=>'ALB','DZ'=>'DZA','AD'=>'AND','AO'=>'AGO','AG'=>'ATG','AR'=>'ARG','AM'=>'ARM','AU'=>'AUS','AT'=>'AUT',
+            'AZ'=>'AZE','BS'=>'BHS','BH'=>'BHR','BD'=>'BGD','BB'=>'BRB','BY'=>'BLR','BE'=>'BEL','BZ'=>'BLZ','BJ'=>'BEN','BT'=>'BTN',
+            'BO'=>'BOL','BA'=>'BIH','BW'=>'BWA','BR'=>'BRA','BN'=>'BRN','BG'=>'BGR','BF'=>'BFA','BI'=>'BDI','CV'=>'CPV','KH'=>'KHM',
+            'CM'=>'CMR','CA'=>'CAN','CF'=>'CAF','TD'=>'TCD','CL'=>'CHL','CN'=>'CHN','CO'=>'COL','KM'=>'COM','CG'=>'COG','CD'=>'COD',
+            'CR'=>'CRI','CI'=>'CIV','HR'=>'HRV','CU'=>'CUB','CY'=>'CYP','CZ'=>'CZE','DK'=>'DNK','DJ'=>'DJI','DM'=>'DMA','DO'=>'DOM',
+            'EC'=>'ECU','EG'=>'EGY','SV'=>'SLV','GQ'=>'GNQ','ER'=>'ERI','EE'=>'EST','SZ'=>'SWZ','ET'=>'ETH','FJ'=>'FJI','FI'=>'FIN',
+            'FR'=>'FRA','GA'=>'GAB','GM'=>'GMB','GE'=>'GEO','DE'=>'DEU','GH'=>'GHA','GR'=>'GRC','GD'=>'GRD','GT'=>'GTM','GN'=>'GIN',
+            'GW'=>'GNB','GY'=>'GUY','HT'=>'HTI','HN'=>'HND','HU'=>'HUN','IS'=>'ISL','IN'=>'IND','ID'=>'IDN','IR'=>'IRN','IQ'=>'IRQ',
+            'IE'=>'IRL','IL'=>'ISR','IT'=>'ITA','JM'=>'JAM','JP'=>'JPN','JO'=>'JOR','KZ'=>'KAZ','KE'=>'KEN','KI'=>'KIR','KP'=>'PRK',
+            'KR'=>'KOR','KW'=>'KWT','KG'=>'KGZ','LA'=>'LAO','LV'=>'LVA','LB'=>'LBN','LS'=>'LSO','LR'=>'LBR','LY'=>'LBY','LI'=>'LIE',
+            'LT'=>'LTU','LU'=>'LUX','MG'=>'MDG','MW'=>'MWI','MY'=>'MYS','MV'=>'MDV','ML'=>'MLI','MT'=>'MLT','MH'=>'MHL','MR'=>'MRT',
+            'MU'=>'MUS','MX'=>'MEX','FM'=>'FSM','MD'=>'MDA','MC'=>'MCO','MN'=>'MNG','ME'=>'MNE','MA'=>'MAR','MZ'=>'MOZ','MM'=>'MMR',
+            'NA'=>'NAM','NR'=>'NRU','NP'=>'NPL','NL'=>'NLD','NZ'=>'NZL','NI'=>'NIC','NE'=>'NER','NG'=>'NGA','MK'=>'MKD','NO'=>'NOR',
+            'OM'=>'OMN','PK'=>'PAK','PW'=>'PLW','PA'=>'PAN','PG'=>'PNG','PY'=>'PRY','PE'=>'PER','PH'=>'PHL','PL'=>'POL','PT'=>'PRT',
+            'QA'=>'QAT','RO'=>'ROU','RU'=>'RUS','RW'=>'RWA','KN'=>'KNA','LC'=>'LCA','VC'=>'VCT','WS'=>'WSM','SM'=>'SMR','ST'=>'STP',
+            'SA'=>'SAU','SN'=>'SEN','RS'=>'SRB','SC'=>'SYC','SL'=>'SLE','SG'=>'SGP','SK'=>'SVK','SI'=>'SVN','SB'=>'SLB','SO'=>'SOM',
+            'ZA'=>'ZAF','SS'=>'SSD','ES'=>'ESP','LK'=>'LKA','SD'=>'SDN','SR'=>'SUR','SE'=>'SWE','CH'=>'CHE','SY'=>'SYR','TJ'=>'TJK',
+            'TH'=>'THA','TL'=>'TLS','TG'=>'TGO','TO'=>'TON','TT'=>'TTO','TN'=>'TUN','TR'=>'TUR','TM'=>'TKM','TV'=>'TUV','UG'=>'UGA',
+            'UA'=>'UKR','AE'=>'ARE','GB'=>'GBR','TZ'=>'TZA','US'=>'USA','UY'=>'URY','UZ'=>'UZB','VU'=>'VUT','VE'=>'VEN','VN'=>'VNM',
+            'YE'=>'YEM','ZM'=>'ZMB','ZW'=>'ZWE','VA'=>'VAT','PS'=>'PSE',
+        ];
+
+        $regionsIso2 = [
             'Africa' => [
                 'DZ','AO','BJ','BF','BI','CV','CM','CF','TD','KM','CG','CD','CI','DJ','EG','GQ','ER','SZ','ET','GA','GM','GH','GN','GW',
                 'KE','LS','LR','LY','MG','MW','ML','MR','MU','MA','MZ','NA','NE','NG','RW','ST','SN','SC','SL','SO','ZA','SS','SD','TZ','TG','TN','UG','ZM','ZW',
@@ -71,7 +95,7 @@ class CountrySeeder extends Seeder
             ],
         ];
 
-        $nameJp = [
+        $nameJpIso2 = [
             'JP'=>'日本','CN'=>'中国','KR'=>'大韓民国','KP'=>'朝鮮民主主義人民共和国','TW'=> '台湾',
             'SG'=>'シンガポール','MY'=>'マレーシア','TH'=>'タイ','VN'=>'ベトナム','PH'=>'フィリピン','ID'=>'インドネシア',
             'LA'=>'ラオス','KH'=>'カンボジア','MM'=>'ミャンマー','LK'=>'スリランカ','IN'=>'インド','BD'=>'バングラデシュ',
@@ -89,22 +113,31 @@ class CountrySeeder extends Seeder
             'AU'=>'オーストラリア','NZ'=>'ニュージーランド','PG'=>'パプアニューギニア','FJ'=>'フィジー','WS'=>'サモア','SB'=>'ソロモン諸島','TO'=>'トンガ','TV'=>'ツバル','VU'=>'バヌアツ','FM'=>'ミクロネシア連邦','MH'=>'マーシャル諸島','PW'=>'パラオ','KI'=>'キリバス','NR'=>'ナウル',
         ];
 
-        $regionByCode = [];
-        foreach ($regions as $regionName => $codes) {
-            foreach ($codes as $code) {
-                $regionByCode[$code] = $regionName;
+        $countriesIso3 = array_map(function ($c) use ($iso2to3, $nameJpIso2) {
+            [$code2, $nameEn] = $c;
+            $code3 = $iso2to3[$code2] ?? null;
+            if (!$code3) {
+                throw new RuntimeException("ISO2 code {$code2} has no ISO3 mapping.");
+            }
+            return [
+                'state_party_code' => $code3,
+                'name_en'          => $nameEn,
+                'name_jp'          => $nameJpIso2[$code2] ?? null,
+            ];
+        }, $countriesIso2);
+
+        $regionByIso3 = [];
+        foreach ($regionsIso2 as $regionName => $codes2) {
+            foreach ($codes2 as $code2) {
+                $code3 = $iso2to3[$code2] ?? null;
+                if ($code3) $regionByIso3[$code3] = $regionName;
             }
         }
 
-        $rows = array_map(function ($c) use ($regionByCode, $nameJp) {
-            $code = $c[0];
-            return [
-                'state_party_code' => $code,
-                'name_en'          => $c[1],
-                'name_jp'          => $nameJp[$code] ?? null,
-                'region'           => $regionByCode[$code] ?? null,
-            ];
-        }, $countries);
+        $rows = array_map(function ($row) use ($regionByIso3) {
+            $row['region'] = $regionByIso3[$row['state_party_code']] ?? null;
+            return $row;
+        }, $countriesIso3);
 
         Country::query()->upsert(
             $rows,
