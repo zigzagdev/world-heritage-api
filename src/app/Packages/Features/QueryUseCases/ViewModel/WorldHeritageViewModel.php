@@ -15,11 +15,6 @@ class WorldHeritageViewModel
         return $this->dto->getId();
     }
 
-    public function getUnescoId(): string
-    {
-        return $this->dto->getUnescoId();
-    }
-
     public function getOfficialName(): string
     {
         return $this->dto->getOfficialName();
@@ -119,7 +114,6 @@ class WorldHeritageViewModel
     {
         return [
             'id' => $this->getId(),
-            'unesco_id' => $this->getUnescoId(),
             'official_name' => $this->getOfficialName(),
             'name' => $this->getName(),
             'country' => $this->getCountry(),
