@@ -10,9 +10,11 @@ class WorldHeritage extends Model
 {
     protected $table = 'world_heritage_sites';
     protected $connection = 'mysql';
+    public $incrementing = false;
+    protected $primaryKey = 'id';
 
     protected $fillable = [
-        'unesco_id',
+        'id',
         'official_name',
         'name',
         'name_jp',
