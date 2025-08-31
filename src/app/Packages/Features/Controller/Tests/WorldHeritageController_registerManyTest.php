@@ -57,7 +57,6 @@ class WorldHeritageController_registerManyTest extends TestCase
         $collection = array_map(
             fn (array $data) => new WorldHeritageDto(
                 $data['id'],
-                $data['unesco_id'],
                 $data['official_name'],
                 $data['name'],
                 $data['country'],
@@ -106,8 +105,7 @@ class WorldHeritageController_registerManyTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'unesco_id' => '1133',
+                'id' => 1133,
                 'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
                 'name' => "Ancient and Primeval Beech Forests",
                 'name_jp' => null,
@@ -126,32 +124,31 @@ class WorldHeritageController_registerManyTest extends TestCase
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
                 'state_parties' => [
-                    'AL','AT','BE','BA','BG','HR','CZ','FR','DE','IT','MK','PL','RO','SK','SI','ES','CH','UA'
+                    'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
                 ],
                 'state_parties_meta' => [
-                    'AL' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'AT' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'BE' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'BA' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'BG' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'HR' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'CZ' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'FR' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'DE' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'IT' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'MK' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'PL' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'RO' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'SK' => ['is_primary' => true,  'inscription_year' => 2007],
-                    'SI' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'ES' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'CH' => ['is_primary' => false, 'inscription_year' => 2007],
-                    'UA' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ALB' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'AUT' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BEL' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BIH' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BGR' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'HRV' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'CZE' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'FRA' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'DEU' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ITA' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'MKD' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'POL' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ROU' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
+                    'SVN' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ESP' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
                 ],
             ],
             [
-                'id' => 2,
-                'unesco_id' => '1442',
+                'id' => 1442,
                 'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
                 'name' => "Silk Roads: Chang'an–Tianshan Corridor",
                 'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
@@ -169,11 +166,11 @@ class WorldHeritageController_registerManyTest extends TestCase
                 'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
-                'state_parties' => ['CN','KZ','KG'],
+                'state_parties' => ['CHN','KAZ','KGZ'],
                 'state_parties_meta' => [
-                    'CN' => ['is_primary' => true,  'inscription_year' => 2014],
-                    'KZ' => ['is_primary' => false, 'inscription_year' => 2014],
-                    'KG' => ['is_primary' => false, 'inscription_year' => 2014],
+                    'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+                    'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                    'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
                 ],
             ],
         ];
@@ -211,7 +208,6 @@ class WorldHeritageController_registerManyTest extends TestCase
 
         foreach ($data['data'] as $key => $value) {
             $this->assertEquals(self::arrayData()[$key]['id'], $value['id']);
-            $this->assertEquals(self::arrayData()[$key]['unesco_id'], $value['unesco_id']);
             $this->assertEquals(self::arrayData()[$key]['official_name'], $value['official_name']);
             $this->assertEquals(self::arrayData()[$key]['name'], $value['name']);
             $this->assertEquals(self::arrayData()[$key]['country'], $value['country']);

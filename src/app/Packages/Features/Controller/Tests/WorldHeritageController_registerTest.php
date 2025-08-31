@@ -45,8 +45,7 @@ class WorldHeritageController_registerTest extends TestCase
     private function requestData(): array
     {
         return [
-            'id' => 1,
-            'unesco_id' => '1133',
+            'id' => 1133,
             'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
             'name' => "Ancient and Primeval Beech Forests",
             'name_jp' => null,
@@ -64,7 +63,7 @@ class WorldHeritageController_registerTest extends TestCase
             'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
-            'state_party_codes' => [
+            'state_parties' => [
                 'AL','AT','BE','BA','BG','HR','CZ','FR','DE','IT','MK','PL','RO','SK','SI','ES','CH','UA'
             ],
             'state_parties_meta' => [
@@ -109,10 +108,6 @@ class WorldHeritageController_registerTest extends TestCase
         $mock
             ->shouldReceive('getId')
             ->andReturn($this->requestData()['id']);
-
-        $mock
-            ->shouldReceive('getUnescoId')
-            ->andReturn($this->requestData()['unesco_id']);
 
         $mock
             ->shouldReceive('getOfficialName')
@@ -184,7 +179,7 @@ class WorldHeritageController_registerTest extends TestCase
 
         $mock
             ->shouldReceive('getStatePartyCodes')
-            ->andReturn($this->requestData()['state_party_codes']);
+            ->andReturn($this->requestData()['state_parties']);
 
         $mock
             ->shouldReceive('getStatePartiesMeta')
@@ -223,7 +218,6 @@ class WorldHeritageController_registerTest extends TestCase
 
         $this->assertEquals(201, $result->getStatusCode());
         $this->assertEquals($this->requestData()['id'], $result->getOriginalContent()['data']['id']);
-        $this->assertEquals($this->requestData()['unesco_id'], $result->getOriginalContent()['data']['unesco_id']);
         $this->assertEquals($this->requestData()['official_name'], $result->getOriginalContent()['data']['official_name']);
         $this->assertEquals($this->requestData()['name'], $result->getOriginalContent()['data']['name']);
         $this->assertEquals($this->requestData()['name_jp'], $result->getOriginalContent()['data']['name_jp']);
@@ -240,7 +234,7 @@ class WorldHeritageController_registerTest extends TestCase
         $this->assertEquals($this->requestData()['short_description'], $result->getOriginalContent()['data']['short_description']);
         $this->assertEquals($this->requestData()['image_url'], $result->getOriginalContent()['data']['image_url']);
         $this->assertEquals($this->requestData()['unesco_site_url'], $result->getOriginalContent()['data']['unesco_site_url']);
-        $this->assertEquals($this->requestData()['state_party_codes'], $result->getOriginalContent()['data']['state_party_codes']);
+        $this->assertEquals($this->requestData()['state_parties'], $result->getOriginalContent()['data']['state_party_codes']);
         $this->assertEquals($this->requestData()['state_parties_meta'], $result->getOriginalContent()['data']['state_parties_meta']);
     }
 }

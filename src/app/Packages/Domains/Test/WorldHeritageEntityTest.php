@@ -85,31 +85,30 @@ class WorldHeritageEntityTest extends TestCase
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
             'state_parties' => [
-                'AL','AT','BE','BA','BG','HR','CZ','FR','DE','IT','MK','PL','RO','SK','SI','ES','CH','UA'
+                'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
             ],
             'state_parties_meta' => [
-                'AL' => ['is_primary' => false, 'inscription_year' => 2007],
-                'AT' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BE' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BA' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BG' => ['is_primary' => false, 'inscription_year' => 2007],
-                'HR' => ['is_primary' => false, 'inscription_year' => 2007],
-                'CZ' => ['is_primary' => false, 'inscription_year' => 2007],
-                'FR' => ['is_primary' => false, 'inscription_year' => 2007],
-                'DE' => ['is_primary' => false, 'inscription_year' => 2007],
-                'IT' => ['is_primary' => false, 'inscription_year' => 2007],
-                'MK' => ['is_primary' => false, 'inscription_year' => 2007],
-                'PL' => ['is_primary' => false, 'inscription_year' => 2007],
-                'RO' => ['is_primary' => false, 'inscription_year' => 2007],
-                'SK' => ['is_primary' => true,  'inscription_year' => 2007],
-                'SI' => ['is_primary' => false, 'inscription_year' => 2007],
-                'ES' => ['is_primary' => false, 'inscription_year' => 2007],
-                'CH' => ['is_primary' => false, 'inscription_year' => 2007],
-                'UA' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ALB' => ['is_primary' => false, 'inscription_year' => 2007],
+                'AUT' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BEL' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BIH' => ['is_primary' => false, 'inscription_year' => 2007],
+                'BGR' => ['is_primary' => false, 'inscription_year' => 2007],
+                'HRV' => ['is_primary' => false, 'inscription_year' => 2007],
+                'CZE' => ['is_primary' => false, 'inscription_year' => 2007],
+                'FRA' => ['is_primary' => false, 'inscription_year' => 2007],
+                'DEU' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ITA' => ['is_primary' => false, 'inscription_year' => 2007],
+                'MKD' => ['is_primary' => false, 'inscription_year' => 2007],
+                'POL' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ROU' => ['is_primary' => false, 'inscription_year' => 2007],
+                'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
+                'SVN' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ESP' => ['is_primary' => false, 'inscription_year' => 2007],
+                'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
+                'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
             ],
         ];
     }
-
 
     public function test_entity_check_single_type(): void
     {
@@ -259,8 +258,8 @@ class WorldHeritageEntityTest extends TestCase
         $this->assertEquals(self::arrayMultiData()['state_parties'], $entity->getStatePartyCodes());
         $this->assertEquals(self::arrayMultiData()['state_parties_meta'], $entity->getStatePartyMeta());
         $this->assertEquals(
-            self::arrayMultiData()['state_parties_meta']['SK'],
-            $entity->getStatePartyMeta()['SK']
+            self::arrayMultiData()['state_parties_meta']['SVK'],
+            $entity->getStatePartyMeta()['SVK']
         );
     }
 }
