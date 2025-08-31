@@ -6,7 +6,6 @@ class  WorldHeritageListQuery
 {
     public function __construct(
         private readonly ?int $id,
-        private readonly int $unesco_id,
         private readonly string $official_name,
         private readonly string $name,
         private readonly string $country,
@@ -31,11 +30,6 @@ class  WorldHeritageListQuery
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getUnescoId(): int
-    {
-        return $this->unesco_id;
     }
 
     public function getOfficialName(): string
@@ -151,7 +145,6 @@ class  WorldHeritageListQuery
     {
         return [
             'id' => $this->getId(),
-            'unesco_id' => $this->getUnescoId(),
             'official_name' => $this->getOfficialName(),
             'name' => $this->getName(),
             'country' => $this->getCountry(),
