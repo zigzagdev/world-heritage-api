@@ -2,15 +2,15 @@
 
 namespace App\Packages\Features\QueryUseCases\QueryServiceInterface;
 
-use App\Packages\Domains\WorldHeritageEntity;
 use App\Common\Pagination\PaginationDto;
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 
 
 interface WorldHeritageQueryServiceInterface
 {
     public function getHeritageById(
         int $id
-    ): WorldHeritageEntity;
+    ): WorldHeritageDto;
 
     public function getHeritagesByIds(
         array $ids,

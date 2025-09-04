@@ -3,8 +3,9 @@
 namespace App\Packages\Domains\Test\QueryService;
 
 use App\Common\Pagination\PaginationDto;
+use App\Models\Country;
 use App\Models\WorldHeritage;
-use Database\Seeders\JapaneseWorldHeritageSeeder;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageQueryService;
@@ -22,7 +23,7 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
         $this->perPage = 15;
         $this->currentPage = 1;
         $this->queryService = app(WorldHeritageQueryService::class);
-        $seeder = new JapaneseWorldHeritageSeeder();
+        $seeder = new DatabaseSeeder();
         $seeder->run();
     }
 
@@ -37,6 +38,8 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
         if (env('APP_ENV') === 'testing') {
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
             WorldHeritage::truncate();
+            Country::truncate();
+            DB::table('site_state_parties')->truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -45,92 +48,73 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'unesco_id' => '660',
-                'official_name' => 'Buddhist Monuments in the Horyu-ji Area',
-                'name' => 'Buddhist Monuments in the Horyu-ji Area',
-                'name_jp' => '法隆寺地域の仏教建造物',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'cultural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'id' => 1133,
+                'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
+                'name' => "Ancient and Primeval Beech Forests",
+                'name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
+                'country' => 'Slovakia',
+                'region' => 'Europe',
+                'category' => 'Natural',
+                'criteria' => ['ix'],
+                'state_party' => null,
+                'year_inscribed' => 2007,
+                'area_hectares' => 99947.81,
+                'buffer_zone_hectares' => 296275.8,
                 'is_endangered' => false,
-                'latitude' => 34.6147,
-                'longitude' => 135.7355,
-                'short_description' => "Early Buddhist wooden structures including the world's oldest wooden building.",
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
                 'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/660/',
-                'created_at' => now(), 'updated_at' => now(),
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
+                'state_parties_codes' => [
+                    'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
+                ],
+                'state_parties_meta' => [
+                    'ALB' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'AUT' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BEL' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BIH' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BGR' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'HRV' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'CZE' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'FRA' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'DEU' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ITA' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'MKD' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'POL' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ROU' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
+                    'SVN' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ESP' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
+                ]
             ],
             [
-                'id' => 2,
-                'unesco_id' => '661',
-                'official_name' => 'Himeji-jo',
-                'name' => 'Himeji-jo',
-                'name_jp' => '姫路城',
-                'country' => 'Japan',
+                'id' => 1442,
+                'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
+                'name' => "Silk·Roads:·Chang'an–Tianshan·Corridor",
+                'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
+                'country' => 'China',
                 'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'cultural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'category' => 'Cultural',
+                'criteria' => ['ii','iii','vi'],
+                'state_party' => null,
+                'year_inscribed' => 2014,
+                'area_hectares' => 0.0,
+                'buffer_zone_hectares' => 0.0,
                 'is_endangered' => false,
-                'latitude' => 34.8394,
-                'longitude' => 134.6939,
-                'short_description' => "A masterpiece of Japanese castle architecture in original form.",
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => '中国・カザフスタン・キルギスにまたがるオアシス都市や遺跡群で構成され、東西交流の歴史を物証する文化遺産群。',
                 'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/661/',
-                'created_at' => now(), 'updated_at' => now(),
-            ],
-            [
-                'id' => 3,
-                'unesco_id' => '662',
-                'official_name' => 'Yakushima',
-                'name' => 'Yakushima',
-                'name_jp' => '屋久島',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'natural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
-                'is_endangered' => false,
-                'latitude' => 30.3581,
-                'longitude' => 130.546,
-                'short_description' => "A subtropical island with ancient cedar forests and diverse ecosystems.",
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/662/',
-                'created_at' => now(), 'updated_at' => now(),
-            ],
-            [
-                'id' => 4,
-                'unesco_id' => '663',
-                'official_name' => 'Shirakami-Sanchi',
-                'name' => 'Shirakami-Sanchi',
-                'name_jp' => '白神山地',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'natural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
-                'is_endangered' => false,
-                'latitude' => 40.5167,
-                'longitude' => 140.05,
-                'short_description' => "Pristine beech forest with minimal human impact.",
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/663/',
-                'created_at' => now(), 'updated_at' => now(),
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1442',
+                'state_parties' => ['CHN','KAZ','KGZ'],
+                'state_parties_meta' => [
+                    'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+                    'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                    'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                ],
             ],
         ];
     }
@@ -140,8 +124,8 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
         $ids = array_column(self::arrayData(), 'id');
         $result = $this->queryService->getHeritagesByIds(
             $ids,
-            $this->perPage,
-            $this->currentPage
+            $this->currentPage,
+            $this->perPage
         );
 
         $this->assertInstanceOf(PaginationDto::class, $result);
@@ -156,10 +140,8 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
             $this->perPage
         );
 
-        $this->assertSame(array_column(self::arrayData(), 'id'), array_column($result->toArray()['data'], 'id'));
         foreach ($result->toArray()['data'] as $key => $value) {
             $this->assertSame(self::arrayData()[$key]['id'], $value['id']);
-            $this->assertSame(self::arrayData()[$key]['unesco_id'], $value['unescoId']);
             $this->assertSame(self::arrayData()[$key]['official_name'], $value['officialName']);
             $this->assertSame(self::arrayData()[$key]['name'], $value['name']);
             $this->assertSame(self::arrayData()[$key]['name_jp'], $value['nameJp']);
@@ -177,6 +159,66 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
             $this->assertSame(self::arrayData()[$key]['short_description'], $value['shortDescription']);
             $this->assertSame(self::arrayData()[$key]['image_url'], $value['imageUrl']);
             $this->assertSame(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
+            $this->assertArrayHasKey('statePartyCodes', $value);
+            $this->assertArrayHasKey('statePartiesMeta', $value);
         }
+
+        $expectedFirstCodes = [
+            'ALB','AUT','BEL','BGR','BIH','CHE','CZE','DEU','ESP','FRA',
+            'HRV','ITA','MKD','POL','ROU','SVK','SVN','UKR',
+        ];
+        $expectedFirst = [
+            'ALB' => ['is_primary' => false, 'inscription_year' => 2017],
+            'AUT' => ['is_primary' => false, 'inscription_year' => 2017],
+            'BEL' => ['is_primary' => false, 'inscription_year' => 2017],
+            'BGR' => ['is_primary' => false, 'inscription_year' => 2017],
+            'BIH' => ['is_primary' => false, 'inscription_year' => 2021],
+            'CHE' => ['is_primary' => false, 'inscription_year' => 2021],
+            'CZE' => ['is_primary' => false, 'inscription_year' => 2021],
+            'DEU' => ['is_primary' => false, 'inscription_year' => 2011],
+            'ESP' => ['is_primary' => false, 'inscription_year' => 2017],
+            'FRA' => ['is_primary' => false, 'inscription_year' => 2021],
+            'HRV' => ['is_primary' => false, 'inscription_year' => 2017],
+            'ITA' => ['is_primary' => false, 'inscription_year' => 2017],
+            'MKD' => ['is_primary' => false, 'inscription_year' => 2021],
+            'POL' => ['is_primary' => false, 'inscription_year' => 2021],
+            'ROU' => ['is_primary' => false, 'inscription_year' => 2017],
+            'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
+            'SVN' => ['is_primary' => false, 'inscription_year' => 2017],
+            'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
+        ];
+        $orderedExpectedFirst = [];
+        foreach ($expectedFirstCodes as $code) {
+            $orderedExpectedFirst[$code] = $expectedFirst[$code];
+        }
+
+        $this->assertSame(
+            $expectedFirstCodes,
+            $result->toArray()['data'][0]['statePartyCodes']
+        );
+        $this->assertSame(
+            $orderedExpectedFirst,
+            $result->toArray()['data'][0]['statePartiesMeta']
+        );
+
+        $expectedSecondCodes = ['CHN','KAZ','KGZ'];
+        $expectedSecond = [
+            'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+            'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
+            'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
+        ];
+        $orderedExpectedSecond = [];
+        foreach ($expectedSecondCodes as $code) {
+            $orderedExpectedSecond[$code] = $expectedSecond[$code];
+        }
+
+        $this->assertSame(
+            $expectedSecondCodes,
+            $result->toArray()['data'][1]['statePartyCodes']
+        );
+        $this->assertSame(
+            $orderedExpectedSecond,
+            $result->toArray()['data'][1]['statePartiesMeta']
+        );
     }
 }

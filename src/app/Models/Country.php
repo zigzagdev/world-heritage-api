@@ -23,6 +23,11 @@ class Country extends Model
     protected $keyType = 'string';
     public $timestamps = false;
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function worldHeritageSites(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -32,7 +37,6 @@ class Country extends Model
             'world_heritage_site_id',
             'state_party_code',
             'id'
-        )->withPivot(['is_primary','inscription_year'])
-            ->withTimestamps();
+        )->withPivot(['is_primary','inscription_year']);
     }
 }
