@@ -12,8 +12,8 @@ class WorldHeritageDto
         private readonly string $region,
         private readonly string $category,
         private readonly int $yearInscribed,
-        private readonly float $latitude,
-        private readonly float $longitude,
+        private readonly ?float $latitude,
+        private readonly ?float $longitude,
         private readonly bool $isEndangered = false,
         private readonly ?string $nameJp = null,
         private readonly ?string $stateParty = null,
@@ -62,12 +62,12 @@ class WorldHeritageDto
         return $this->yearInscribed;
     }
 
-    public function getLatitude(): float
+    public function getLatitude(): ?float
     {
         return $this->latitude;
     }
 
-    public function getLongitude(): float
+    public function getLongitude(): ?float
     {
         return $this->longitude;
     }
