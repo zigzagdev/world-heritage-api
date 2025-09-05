@@ -2,7 +2,6 @@
 
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
-use App\Models\WorldHeritage;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 
