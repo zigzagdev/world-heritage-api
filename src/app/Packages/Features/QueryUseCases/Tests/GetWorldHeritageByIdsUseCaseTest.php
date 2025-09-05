@@ -30,88 +30,73 @@ class GetWorldHeritageByIdsUseCaseTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'unesco_id' => '660',
-                'official_name' => 'Buddhist Monuments in the Horyu-ji Area',
-                'name' => 'Buddhist Monuments in the Horyu-ji Area',
-                'name_jp' => '法隆寺地域の仏教建造物',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'cultural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
-                'is_endangered' => false,
-                'latitude' => 34.6147,
-                'longitude' => 135.7355,
-                'short_description' => "Early Buddhist wooden structures including the world's oldest wooden building.",
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/660/',
-            ],
-            [
-                'id' => 2,
-                'unesco_id' => '661',
-                'official_name' => 'Himeji-jo',
-                'name' => 'Himeji-jo',
-                'name_jp' => '姫路城',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'cultural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
-                'is_endangered' => false,
-                'latitude' => 34.8394,
-                'longitude' => 134.6939,
-                'short_description' => "A masterpiece of Japanese castle architecture in original form.",
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/661/',
-            ],
-            [
-                'id' => 3,
-                'unesco_id' => '662',
-                'official_name' => 'Yakushima',
-                'name' => 'Yakushima',
-                'name_jp' => '屋久島',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
+                'id' => 1133,
+                'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
+                'name' => "Ancient and Primeval Beech Forests",
+                'name_jp' => null,
+                'country' => 'Slovakia',
+                'region' => 'Europe',
                 'category' => 'natural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'criteria' => ['ix'],
+                'state_party' => null,
+                'year_inscribed' => 2007,
+                'area_hectares' => 99947.81,
+                'buffer_zone_hectares' => 296275.8,
                 'is_endangered' => false,
-                'latitude' => 30.3581,
-                'longitude' => 130.546,
-                'short_description' => "A subtropical island with ancient cedar forests and diverse ecosystems.",
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
                 'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/662/',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
+                'state_parties' => [
+                    'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
+                ],
+                'state_parties_meta' => [
+                    'ALB' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'AUT' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BEL' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BIH' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'BGR' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'HRV' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'CZE' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'FRA' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'DEU' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ITA' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'MKD' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'POL' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ROU' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
+                    'SVN' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'ESP' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
+                    'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
+                ]
             ],
             [
-                'id' => 4,
-                'unesco_id' => '663',
-                'official_name' => 'Shirakami-Sanchi',
-                'name' => 'Shirakami-Sanchi',
-                'name_jp' => '白神山地',
-                'country' => 'Japan',
+                'id' => 1442,
+                'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
+                'name' => "Silk Roads: Chang'an–Tianshan Corridor",
+                'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
+                'country' => 'China, Kazakhstan, Kyrgyzstan',
                 'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'natural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'category' => 'cultural',
+                'criteria' => ['ii','iii','vi'],
+                'state_party' => null,
+                'year_inscribed' => 2014,
+                'area_hectares' => 0.0,
+                'buffer_zone_hectares' => 0.0,
                 'is_endangered' => false,
-                'latitude' => 40.5167,
-                'longitude' => 140.05,
-                'short_description' => "Pristine beech forest with minimal human impact.",
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
                 'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/663/',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
+                'state_parties' => ['CHN','KAZ','KGZ'],
+                'state_parties_meta' => [
+                    'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+                    'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                    'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                ],
             ]
         ];
     }
@@ -207,8 +192,32 @@ class GetWorldHeritageByIdsUseCaseTest extends TestCase
 
         $result = $useCase->handle($ids, $this->currentPage, $this->perPage);
 
-        $this->assertEquals('http://example.com/api/heritages', $result->getPath());
-        $this->assertEquals($this->currentPage, $result->getCurrentPage());
-        $this->assertEquals($this->perPage, $result->getPerPage());
+        $this->assertCount(2, $result->toArray()['data']);
+        foreach ($result->toArray() as $key => $value) {
+            if ($key === 'data') {
+                foreach ($value as $k => $v) {
+                    $this->assertSame(self::arrayData()[$k]['id'], $v['id']);
+                    $this->assertSame(self::arrayData()[$k]['official_name'], $v['official_name']);
+                    $this->assertSame(self::arrayData()[$k]['name'], $v['name']);
+                    $this->assertSame(self::arrayData()[$k]['name_jp'], $v['name_jp']);
+                    $this->assertSame(self::arrayData()[$k]['country'], $v['country']);
+                    $this->assertSame(self::arrayData()[$k]['region'], $v['region']);
+                    $this->assertSame(self::arrayData()[$k]['state_party'], $v['state_party']);
+                    $this->assertSame(self::arrayData()[$k]['category'], $v['category']);
+                    $this->assertSame(self::arrayData()[$k]['criteria'], $v['criteria']);
+                    $this->assertSame(self::arrayData()[$k]['year_inscribed'], $v['year_inscribed']);
+                    $this->assertSame(self::arrayData()[$k]['area_hectares'], $v['area_hectares']);
+                    $this->assertSame(self::arrayData()[$k]['buffer_zone_hectares'], $v['buffer_zone_hectares']);
+                    $this->assertSame(self::arrayData()[$k]['is_endangered'], $v['is_endangered']);
+                    $this->assertSame(self::arrayData()[$k]['latitude'], $v['latitude']);
+                    $this->assertSame(self::arrayData()[$k]['longitude'], $v['longitude']);
+                    $this->assertSame(self::arrayData()[$k]['short_description'], $v['short_description']);
+                    $this->assertSame(self::arrayData()[$k]['image_url'], $v['image_url']);
+                    $this->assertSame(self::arrayData()[$k]['unesco_site_url'], $v['unesco_site_url']);
+                }
+            } else {
+                $this->assertSame($result->toArray()[$key], $value);
+            }
+        }
     }
 }
