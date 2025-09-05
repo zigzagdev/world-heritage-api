@@ -2,6 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
+use App\Models\WorldHeritage;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 
@@ -15,14 +16,13 @@ class GetWorldHeritageByIdUseCase
         int $id
     ): WorldHeritageDto
     {
+
         $result = $this->worldHeritageQueryService->getHeritageById($id);
 
         return new WorldHeritageDto(
             id: $result->getId(),
-            unescoId: $result->getUnescoId(),
             officialName: $result->getOfficialName(),
             name: $result->getName(),
-            nameJp: $result->getNameJp(),
             country: $result->getCountry(),
             region: $result->getRegion(),
             category: $result->getCategory(),
@@ -30,6 +30,7 @@ class GetWorldHeritageByIdUseCase
             latitude: $result->getLatitude(),
             longitude: $result->getLongitude(),
             isEndangered: $result->isEndangered(),
+            nameJp: $result->getNameJp(),
             stateParty: $result->getStateParty(),
             criteria: $result->getCriteria(),
             areaHectares: $result->getAreaHectares(),
