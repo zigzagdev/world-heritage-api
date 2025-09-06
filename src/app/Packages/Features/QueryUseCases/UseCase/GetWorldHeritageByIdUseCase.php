@@ -15,14 +15,13 @@ class GetWorldHeritageByIdUseCase
         int $id
     ): WorldHeritageDto
     {
+
         $result = $this->worldHeritageQueryService->getHeritageById($id);
 
         return new WorldHeritageDto(
             id: $result->getId(),
-            unescoId: $result->getUnescoId(),
             officialName: $result->getOfficialName(),
             name: $result->getName(),
-            nameJp: $result->getNameJp(),
             country: $result->getCountry(),
             region: $result->getRegion(),
             category: $result->getCategory(),
@@ -30,13 +29,16 @@ class GetWorldHeritageByIdUseCase
             latitude: $result->getLatitude(),
             longitude: $result->getLongitude(),
             isEndangered: $result->isEndangered(),
+            nameJp: $result->getNameJp(),
             stateParty: $result->getStateParty(),
             criteria: $result->getCriteria(),
             areaHectares: $result->getAreaHectares(),
             bufferZoneHectares: $result->getBufferZoneHectares(),
             shortDescription: $result->getShortDescription(),
             imageUrl: $result->getImageUrl(),
-            unescoSiteUrl: $result->getUnescoSiteUrl()
+            unescoSiteUrl: $result->getUnescoSiteUrl(),
+            statePartyCodes: $result->getStatePartyCodes(),
+            statePartiesMeta: $result->getStatePartiesMeta()
         );
     }
 }

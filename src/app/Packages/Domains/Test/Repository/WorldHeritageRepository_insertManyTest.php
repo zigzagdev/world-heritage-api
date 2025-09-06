@@ -42,60 +42,81 @@ class WorldHeritageRepository_insertManyTest extends TestCase
         }
     }
 
-    private function arrayData(): array
+
+    private static function arrayData(): array
     {
         return [
             [
-                'id' => 668,
-                'official_name' => 'Historic Monuments of Ancient Nara',
-                'name' => 'Historic Monuments of Ancient Nara',
-                'name_jp' => '古都奈良の文化財',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'state_parties' => ['JP'],
-                'state_parties_meta' => [
-                    'JP' => ['is_primary' => true, 'inscription_year' => 1998],
-                ],
-                'category' => 'cultural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1998,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'id' => 1133,
+                'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
+                'name' => "Ancient and Primeval Beech Forests",
+                'name_jp' => null,
+                'country' => 'Slovakia',
+                'region' => 'Europe',
+                'category' => 'natural',
+                'criteria' => ['ix'],
+                'state_party' => null,
+                'year_inscribed' => 2007,
+                'area_hectares' => 99947.81,
+                'buffer_zone_hectares' => 296275.8,
                 'is_endangered' => false,
-                'latitude' => 34.6851,
-                'longitude' => 135.8048,
-                'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
                 'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
+                'state_parties' => [
+                    'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
+                ],
+                'state_parties_meta' => [
+                    'ALB' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'AUT' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'BEL' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'BIH' => ['is_primary' => false, 'inscription_year' => 2021],
+                    'BGR' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'HRV' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'CZE' => ['is_primary' => false, 'inscription_year' => 2021],
+                    'FRA' => ['is_primary' => false, 'inscription_year' => 2021],
+                    'DEU' => ['is_primary' => false, 'inscription_year' => 2011],
+                    'ITA' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'MKD' => ['is_primary' => false, 'inscription_year' => 2021],
+                    'POL' => ['is_primary' => false, 'inscription_year' => 2021],
+                    'ROU' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
+                    'SVN' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'ESP' => ['is_primary' => false, 'inscription_year' => 2017],
+                    'CHE' => ['is_primary' => false, 'inscription_year' => 2021],
+                    'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
+                ]
             ],
             [
-                'id' => 669,
-                'official_name' => 'Shrines and Temples of Nikko',
-                'name' => 'Shrines and Temples of Nikko',
-                'name_jp' => '日光の社寺',
-                'country' => 'Japan',
+                'id' => 1442,
+                'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
+                'name' => "Silk Roads: Chang'an–Tianshan Corridor",
+                'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
+                'country' => 'China, Kazakhstan, Kyrgyzstan',
                 'region' => 'Asia',
-                'state_party' => 'JP',
-                'state_parties' => ['JPN'],
-                'state_parties_meta' => [
-                    'JPN' => ['is_primary' => true, 'inscription_year' => 1999],
-                ],
                 'category' => 'cultural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1999,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'criteria' => ['ii','iii','vi'],
+                'state_party' => null,
+                'year_inscribed' => 2014,
+                'area_hectares' => 0.0,
+                'buffer_zone_hectares' => 0.0,
                 'is_endangered' => false,
-                'latitude' => 36.7578,
-                'longitude' => 139.598,
-                'short_description' => 'Lavishly decorated shrines set among ancient cedar trees.',
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
                 'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/669/',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
+                'state_parties' => ['CHN','KAZ','KGZ'],
+                'state_parties_meta' => [
+                    'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+                    'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                    'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                ],
             ],
         ];
     }
-
     public function test_check_return_type(): void
     {
         $collection = new WorldHeritageEntityCollection(
@@ -162,30 +183,84 @@ class WorldHeritageRepository_insertManyTest extends TestCase
 
         $result = $this->repository->insertHeritages($collection);
 
-        foreach ($result->getAllHeritages() as $entity) {
-            foreach (self::arrayData() as $value) {
-                $this->assertEquals($value['id'], $entity->getId());
-                $this->assertEquals($value['official_name'], $entity->getOfficialName());
-                $this->assertEquals($value['name'], $entity->getName());
-                $this->assertEquals($value['country'], $entity->getCountry());
-                $this->assertEquals($value['region'], $entity->getRegion());
-                $this->assertEquals($value['category'], $entity->getCategory());
-                $this->assertEquals($value['year_inscribed'], $entity->getYearInscribed());
-                $this->assertEquals($value['latitude'], $entity->getLatitude());
-                $this->assertEquals($value['longitude'], $entity->getLongitude());
-                $this->assertEquals($value['is_endangered'], $entity->isEndangered());
-                $this->assertEquals($value['name_jp'], $entity->getNameJp());
-                $this->assertEquals($value['state_party'], $entity->getStateParty());
-                $this->assertEquals($value['criteria'], $entity->getCriteria());
-                $this->assertEquals($value['area_hectares'], $entity->getAreaHectares());
-                $this->assertEquals($value['buffer_zone_hectares'], $entity->getBufferZoneHectares());
-                $this->assertEquals($value['short_description'], $entity->getShortDescription());
-                $this->assertEquals($value['image_url'], $entity->getImageUrl());
-                $this->assertEquals($value['unesco_site_url'], $entity->getUnescoSiteUrl());
-                $this->assertEquals($value['state_parties'], $entity->getStatePartyCodes());
-                $this->assertEquals($value['state_parties_meta'], $entity->getStatePartyMeta());
-                break;
-            }
+
+        $expectedFirstCodes = [
+            'ALB','AUT','BEL','BGR','BIH','CHE','CZE','DEU','ESP','FRA',
+            'HRV','ITA','MKD','POL','ROU','SVK','SVN','UKR',
+        ];
+        $expectedFirst = [
+            'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+            'ALB' => ['is_primary'=>false,'inscription_year'=>2017],
+            'AUT' => ['is_primary'=>false,'inscription_year'=>2017],
+            'BEL' => ['is_primary'=>false,'inscription_year'=>2017],
+            'BIH' => ['is_primary'=>false,'inscription_year'=>2021],
+            'BGR' => ['is_primary'=>false,'inscription_year'=>2017],
+            'HRV' => ['is_primary'=>false,'inscription_year'=>2017],
+            'CZE' => ['is_primary'=>false,'inscription_year'=>2021],
+            'FRA' => ['is_primary'=>false,'inscription_year'=>2021],
+            'DEU' => ['is_primary'=>false,'inscription_year'=>2011],
+            'ITA' => ['is_primary'=>false,'inscription_year'=>2017],
+            'MKD' => ['is_primary'=>false,'inscription_year'=>2021],
+            'POL' => ['is_primary'=>false,'inscription_year'=>2021],
+            'ROU' => ['is_primary'=>false,'inscription_year'=>2017],
+            'SVK' => ['is_primary'=>true,'inscription_year'=>2007],
+            'SVN' => ['is_primary'=>false,'inscription_year'=>2017],
+            'ESP' => ['is_primary'=>false,'inscription_year'=>2017],
+            'CHE' => ['is_primary'=>false,'inscription_year'=>2021],
+            'UKR' => ['is_primary'=>false,'inscription_year'=>2007],
+        ];
+        $orderedExpectedFirst = [];
+        foreach ($expectedFirstCodes as $code) {
+            $orderedExpectedFirst[$code] = $expectedFirst[$code];
+        }
+
+        $this->assertSame(
+            $expectedFirstCodes,
+            $result->getAllHeritages()[0]->getStatePartyCodes()
+        );
+        $this->assertSame(
+            $orderedExpectedFirst,
+            $result->getAllHeritages()[0]->getStatePartyMeta()
+        );
+
+        $expectedSecondCodes = ['CHN','KAZ','KGZ'];
+        $expectedSecond = [
+            'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+            'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
+            'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
+        ];
+        $orderedExpectedSecond = [];
+        foreach ($expectedSecondCodes as $code) {
+            $orderedExpectedSecond[$code] = $expectedSecond[$code];
+        }
+
+        $this->assertSame(
+            $expectedSecondCodes,
+            $result->getAllHeritages()[1]->getStatePartyCodes()
+        );
+        $this->assertSame(
+            $orderedExpectedSecond,
+            $result->getAllHeritages()[1]->getStatePartyMeta()
+        );
+
+        foreach ($result->getAllHeritages() as $key => $value) {
+            $this->assertEquals(self::arrayData()[$key]['id'], $value->getid());
+            $this->assertEquals(self::arrayData()[$key]['official_name'], $value->getOfficialName());
+            $this->assertEquals(self::arrayData()[$key]['name'], $value->getName());
+            $this->assertEquals(self::arrayData()[$key]['name_jp'], $value->getNameJp());
+            $this->assertEquals(self::arrayData()[$key]['country'], $value->getCountry());
+            $this->assertEquals(self::arrayData()[$key]['region'], $value->getRegion());
+            $this->assertEquals(self::arrayData()[$key]['category'], $value->getCategory());
+            $this->assertEquals(self::arrayData()[$key]['criteria'], $value->getCriteria());
+            $this->assertEquals(self::arrayData()[$key]['year_inscribed'], $value->getYearInscribed());
+            $this->assertEquals(self::arrayData()[$key]['area_hectares'], $value->getAreaHectares());
+            $this->assertEquals(self::arrayData()[$key]['buffer_zone_hectares'], $value->getBufferZoneHectares());
+            $this->assertEquals(self::arrayData()[$key]['is_endangered'], $value->isEndangered());
+            $this->assertEquals(self::arrayData()[$key]['latitude'], $value->getLatitude());
+            $this->assertEquals(self::arrayData()[$key]['longitude'], $value->getLongitude());
+            $this->assertEquals(self::arrayData()[$key]['short_description'], $value->getShortDescription());
+            $this->assertEquals(self::arrayData()[$key]['image_url'], $value->getImageUrl());
+            $this->assertEquals(self::arrayData()[$key]['unesco_site_url'], $value->getUnescoSiteUrl());
         }
     }
 }

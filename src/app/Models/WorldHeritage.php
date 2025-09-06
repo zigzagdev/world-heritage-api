@@ -44,6 +44,11 @@ class WorldHeritage extends Model
         'longitude' => 'float',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function countries(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -53,7 +58,6 @@ class WorldHeritage extends Model
             'state_party_code',
             'id',
             'state_party_code'
-        )->withPivot(['is_primary','inscription_year'])
-            ->withTimestamps();
+        )->withPivot(['is_primary','inscription_year']);
     }
 }
