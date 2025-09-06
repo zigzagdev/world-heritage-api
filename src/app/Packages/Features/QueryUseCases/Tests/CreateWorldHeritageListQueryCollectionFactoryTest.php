@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Domains\WorldHeritageEntityCollection;
 
-class WorldHeritageListQueryCollectionFactoryTest extends TestCase
+class CreateWorldHeritageListQueryCollectionFactoryTest extends TestCase
 {
     protected function setUp(): void
     {
