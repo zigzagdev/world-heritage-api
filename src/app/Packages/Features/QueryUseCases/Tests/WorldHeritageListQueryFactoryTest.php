@@ -4,8 +4,8 @@ namespace App\Packages\Features\QueryUseCases\Tests;
 
 use Tests\TestCase;
 use DomainException;
-use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageListQueryFactory;
+use App\Packages\Features\QueryUseCases\ListQuery\CreateWorldHeritageListQuery;
+use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryFactory;
 
 class WorldHeritageListQueryFactoryTest extends TestCase
 {
@@ -92,14 +92,14 @@ class WorldHeritageListQueryFactoryTest extends TestCase
 
     public function test_check_list_query_type(): void
     {
-        $result = WorldHeritageListQueryFactory::build(self::arrayData());
+        $result = CreateWorldHeritageListQueryFactory::build(self::arrayData());
 
-        $this->assertInstanceOf(WorldHeritageListQuery::class, $result);
+        $this->assertInstanceOf(CreateWorldHeritageListQuery::class, $result);
     }
 
     public function test_check_list_query_value(): void
     {
-        $result = WorldHeritageListQueryFactory::build(self::arrayData());
+        $result = CreateWorldHeritageListQueryFactory::build(self::arrayData());
 
         $this->assertEquals(self::arrayData()['id'], $result->getId());
         $this->assertEquals(self::arrayData()['official_name'], $result->getOfficialName());
@@ -126,6 +126,6 @@ class WorldHeritageListQueryFactoryTest extends TestCase
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage("id is Required !");
 
-        WorldHeritageListQueryFactory::build(self::wrongArrayData());
+        CreateWorldHeritageListQueryFactory::build(self::wrongArrayData());
     }
 }

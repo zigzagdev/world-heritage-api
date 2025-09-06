@@ -2,12 +2,12 @@
 
 namespace App\Packages\Features\QueryUseCases\ListQuery;
 
-class WorldHeritageListQueryCollection
+class CreateWorldHeritageListQueryCollection
 {
     private array $listQuery;
 
     public function __construct(
-        WorldHeritageListQuery ...$listQuery
+        CreateWorldHeritageListQuery ...$listQuery
     ) {
         $this->listQuery = $listQuery;
     }
@@ -15,7 +15,7 @@ class WorldHeritageListQueryCollection
     public function toArray(): array
     {
         return array_map(
-            fn(WorldHeritageListQuery $query) => $query->toArray(),
+            fn(CreateWorldHeritageListQuery $query) => $query->toArray(),
             $this->listQuery
         );
     }

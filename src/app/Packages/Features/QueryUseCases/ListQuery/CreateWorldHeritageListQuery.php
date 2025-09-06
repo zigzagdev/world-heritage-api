@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\ListQuery;
 
-class  WorldHeritageListQuery
+class  CreateWorldHeritageListQuery
 {
     public function __construct(
         private readonly ?int $id,

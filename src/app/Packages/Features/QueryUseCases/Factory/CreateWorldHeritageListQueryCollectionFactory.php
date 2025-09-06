@@ -4,13 +4,13 @@ namespace App\Packages\Features\QueryUseCases\Factory;
 
 use App\Packages\Domains\WorldHeritageEntityCollection;
 
-class WorldHeritageListQueryCollectionFactory
+class CreateWorldHeritageListQueryCollectionFactory
 {
     public static function build(
         array $request
     ): WorldHeritageEntityCollection {
         $listQuery = array_map(
-            fn(array $item) => WorldHeritageListQueryFactory::build($item),
+            fn(array $item) => CreateWorldHeritageListQueryFactory::build($item),
             $request
         );
 
