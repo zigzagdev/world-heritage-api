@@ -4,7 +4,6 @@ namespace App\Packages\Features\Tests;
 
 use App\Models\Country;
 use App\Models\WorldHeritage;
-use Database\Seeders\CountrySeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -14,8 +13,6 @@ class CreateManyWorldHeritagesTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
-        $seeder = new CountrySeeder();
-        $seeder->run();
     }
 
     protected function tearDown(): void

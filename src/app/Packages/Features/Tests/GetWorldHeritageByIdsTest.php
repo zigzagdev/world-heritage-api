@@ -2,18 +2,37 @@
 
 namespace App\Packages\Features\Tests;
 
+use Database\Seeders\DatabaseSeeder;
 use Tests\TestCase;
+use Illuminate\Support\Facades\DB;
+use App\Models\WorldHeritage;
+use App\Models\Country;
 
 class GetWorldHeritageByIdsTest extends TestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
+        $this->refresh();
+        $seeder = new DatabaseSeeder();
+        $seeder->run();
     }
 
     protected function tearDown(): void
     {
+        $this->refresh();
         parent::tearDown();
+    }
+
+    private function refresh(): void
+    {
+        if (env('APP_ENV') === 'testing') {
+             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
+             WorldHeritage::truncate();
+             Country::truncate();
+             DB::table('site_state_parties')->truncate();
+             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
     }
 
     private static function arrayData(): array
