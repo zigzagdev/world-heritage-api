@@ -6,6 +6,7 @@ use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
+use Illuminate\Http\Request;
 
 class UpdateWorldHeritageUseCase
 {
@@ -14,13 +15,12 @@ class UpdateWorldHeritageUseCase
     ){}
 
     public function handle(
-        int $id,
-        array $request
+        Request $request
     ): WorldHeritageDto {
-        $commandObject = UpdateWorldHeritageListQueryFactory::build($request);
+        $commandObject = UpdateWorldHeritageListQueryFactory::build($request->all());
 
         $updateEntity = new WorldHeritageEntity(
-            id: $id,
+            id: $commandObject->getId(),
             officialName: $commandObject->getOfficialName(),
             name: $commandObject->getName(),
             country: $commandObject->getCountry(),
