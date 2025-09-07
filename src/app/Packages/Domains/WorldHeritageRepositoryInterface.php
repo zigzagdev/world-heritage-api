@@ -15,4 +15,8 @@ interface WorldHeritageRepositoryInterface
     public function updateOneHeritage(
         WorldHeritageEntity $entity
     ): WorldHeritageEntity;
+
+    public function deleteOneHeritage(
+        int $id
+    ): void;
 }
