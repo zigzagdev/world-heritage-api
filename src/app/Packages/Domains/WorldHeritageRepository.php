@@ -233,6 +233,18 @@ use RuntimeException;
             statePartyMeta:     $partyMeta
         );
     }
+    public function deleteOneHeritage(int $id): void
+    {
+        $heritageModel = $this->worldHeritage->find($id);
+        if (!$heritageModel) {
+            throw new RuntimeException('Heritage was not found');
+        }
+        $heritageModel->countries()->detach();
+
+        if (!$heritageModel->delete()) {
+            throw new RuntimeException('Failed to delete heritage');
+        }
+    }
 
     private function parseStateParty(?string $party): array
     {
