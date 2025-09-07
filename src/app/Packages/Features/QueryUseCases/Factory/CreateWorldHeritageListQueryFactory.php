@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Packages\Features\QueryUseCases\Factory;
+
+use App\Packages\Features\QueryUseCases\ListQuery\CreateWorldHeritageListQuery;
+use DomainException;
+use Illuminate\Support\Arr;
+
+class CreateWorldHeritageListQueryFactory
+{
+    private static array $REQUIRED = [
+        'id',
+        'official_name',
+        'name',
+        'country',
+        'category',
+        'region',
+        'year_inscribed'
+    ];
+
+    public static function build(array $request): CreateWorldHeritageListQuery
+    {
+        self::validation($request);
+
+        return new CreateWorldHeritageListQuery(
+            id: $request['id'],
+            official_name: (string)($request['official_name'] ?? ''),
+            name: (string)($request['name'] ?? ''),
+            country: (string)($request['country'] ?? ''),
+            region: (string)($request['region'] ?? ''),
+            category: (string)($request['category'] ?? ''),
+            year_inscribed: (int)($request['year_inscribed'] ?? 0),
+            latitude: isset($request['latitude'])  ? (float)$request['latitude']  : null,
+            longitude: isset($request['longitude']) ? (float)$request['longitude'] : null,
+            is_endangered: (bool)($request['is_endangered'] ?? false),
+            name_jp: $request['name_jp'] ?? null,
+            state_party: $request['state_party'] ?? null,
+            criteria: is_string($request['criteria'] ?? null)
+                ? json_decode($request['criteria'], true)
+                : ($request['criteria'] ?? null),
+            area_hectares: isset($request['area_hectares']) ? (float)$request['area_hectares'] : null,
+            buffer_zone_hectares: isset($request['buffer_zone_hectares']) ? (float)$request['buffer_zone_hectares'] : null,
+            short_description: $request['short_description'] ?? null,
+            image_url: $request['image_url'] ?? null,
+            unesco_site_url: $request['unesco_site_url'] ?? null,
+            state_parties_codes: $request['state_parties'] ?? [],
+            state_parties_meta: $request['state_parties_meta'] ?? []
+        );
+    }
+
+    private static function validation(array $request): void
+    {
+        foreach (self::$REQUIRED as $key) {
+            if (!array_key_exists($key, $request) || $request[$key] === null) {
+                throw new DomainException("{$key} is Required !");
+            }
+        }
+    }
+}

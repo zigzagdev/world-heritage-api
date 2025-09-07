@@ -12,7 +12,7 @@ interface WorldHeritageRepositoryInterface
         WorldHeritageEntityCollection $collection
     ): WorldHeritageEntityCollection;
 
-//    public function updateOneHeritage(
-//        WorldHeritageEntity $entity
-//    ): WorldHeritageEntity;
+    public function updateOneHeritage(
+        WorldHeritageEntity $entity
+    ): WorldHeritageEntity;
 }

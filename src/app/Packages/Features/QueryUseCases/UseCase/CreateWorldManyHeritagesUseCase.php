@@ -5,10 +5,10 @@ namespace App\Packages\Features\QueryUseCases\UseCase;
 use App\Packages\Domains\WorldHeritageEntityCollection;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageListQueryCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Domains\WorldHeritageEntity;
-use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+use App\Packages\Features\QueryUseCases\ListQuery\CreateWorldHeritageListQuery;
 
 class CreateWorldManyHeritagesUseCase
 {
@@ -20,10 +20,10 @@ class CreateWorldManyHeritagesUseCase
         array $request
     ): WorldHeritageDtoCollection
     {
-        $listQueries = WorldHeritageListQueryCollectionFactory::build($request);
+        $listQueries = CreateWorldHeritageListQueryCollectionFactory::build($request);
 
         $entityArray = array_map(
-            function (WorldHeritageListQuery $q) {
+            function (CreateWorldHeritageListQuery $q) {
                 return new WorldHeritageEntity(
                     id: $q->getId(),
                     officialName: $q->getOfficialName(),

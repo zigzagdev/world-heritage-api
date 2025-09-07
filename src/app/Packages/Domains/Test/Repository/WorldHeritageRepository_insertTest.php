@@ -6,7 +6,6 @@ use App\Models\Country;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepository;
 use Database\Seeders\CountrySeeder;
-use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\WorldHeritage;

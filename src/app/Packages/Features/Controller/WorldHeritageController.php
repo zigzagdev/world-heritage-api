@@ -4,11 +4,12 @@ namespace App\Packages\Features\Controller;
 
 use App\Common\Pagination\PaginationViewModel;
 use App\Http\Controllers\Controller;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageListQueryCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Features\QueryUseCases\Factory\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
@@ -108,6 +109,35 @@ class WorldHeritageController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function updateOneWorldHeritage(
+        int $id,
+        Request $request,
+        UpdateWorldHeritageUseCase $useCase
+    ): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $updateTargetObject = $useCase->handle($id, $request);
+
+            $viewModel = new WorldHeritageViewModel($updateTargetObject);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $viewModel->toArray(),
+            ], 200);
+
+        } catch(Exception $e) {
+            DB::rollBack();
+
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),

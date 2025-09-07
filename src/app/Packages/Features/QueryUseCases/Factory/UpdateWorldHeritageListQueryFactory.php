@@ -2,11 +2,10 @@
 
 namespace App\Packages\Features\QueryUseCases\Factory;
 
-use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 use DomainException;
-use Illuminate\Support\Arr;
+use App\Packages\Features\QueryUseCases\ListQuery\UpdateWorldHeritageListQuery;
 
-class WorldHeritageListQueryFactory
+class UpdateWorldHeritageListQueryFactory
 {
     private static array $REQUIRED = [
         'id',
@@ -18,11 +17,11 @@ class WorldHeritageListQueryFactory
         'year_inscribed'
     ];
 
-    public static function build(array $request): WorldHeritageListQuery
+    public static function build(array $request): UpdateWorldHeritageListQuery
     {
         self::validation($request);
 
-        return new WorldHeritageListQuery(
+        return new UpdateWorldHeritageListQuery(
             id: $request['id'],
             official_name: (string)($request['official_name'] ?? ''),
             name: (string)($request['name'] ?? ''),

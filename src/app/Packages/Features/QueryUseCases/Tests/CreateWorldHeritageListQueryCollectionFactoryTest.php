@@ -3,10 +3,10 @@
 namespace App\Packages\Features\QueryUseCases\Tests;
 
 use Tests\TestCase;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageListQueryCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Domains\WorldHeritageEntityCollection;
 
-class WorldHeritageListQueryCollectionFactoryTest extends TestCase
+class CreateWorldHeritageListQueryCollectionFactoryTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -110,14 +110,14 @@ class WorldHeritageListQueryCollectionFactoryTest extends TestCase
 
     public function test_list_query_collection_test_check_type(): void
     {
-        $result = WorldHeritageListQueryCollectionFactory::build(self::arrayData());
+        $result = CreateWorldHeritageListQueryCollectionFactory::build(self::arrayData());
 
         $this->assertInstanceOf(WorldHeritageEntityCollection::class, $result);
     }
 
     public function test_list_query_collection_test_check_value(): void
     {
-        $result = WorldHeritageListQueryCollectionFactory::build(self::arrayData());
+        $result = CreateWorldHeritageListQueryCollectionFactory::build(self::arrayData());
 
         foreach ($result->getAllHeritages() as $key => $value) {
             $this->assertEquals(self::arrayData()[$key]['id'], $value->getId());
