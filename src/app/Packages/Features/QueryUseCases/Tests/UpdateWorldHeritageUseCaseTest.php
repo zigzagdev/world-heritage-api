@@ -316,8 +316,7 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
         );
 
         $result = $useCase->handle(
-            self::arrayData()['id'],
-            $this->mockRequest()->all()
+            $this->mockRequest()
         );
 
         $this->assertInstanceOf(WorldHeritageDto::class, $result);
@@ -329,10 +328,7 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
             $this->mockRepository()
         );
 
-        $result = $useCase->handle(
-            self::arrayData()['id'],
-            $this->mockRequest()->all()
-        );
+        $result = $useCase->handle($this->mockRequest());
 
         $this->assertSame(self::arrayData()['id'], $result->getId());
         $this->assertSame(self::arrayData()['official_name'], $result->getOfficialName());

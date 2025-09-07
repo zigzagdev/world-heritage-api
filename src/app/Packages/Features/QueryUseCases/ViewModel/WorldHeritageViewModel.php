@@ -45,12 +45,12 @@ class WorldHeritageViewModel
         return $this->dto->getYearInscribed();
     }
 
-    public function getLatitude(): float
+    public function getLatitude(): ?float
     {
         return $this->dto->getLatitude();
     }
 
-    public function getLongitude(): float
+    public function getLongitude(): ?float
     {
         return $this->dto->getLongitude();
     }
