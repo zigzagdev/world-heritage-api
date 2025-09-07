@@ -117,13 +117,14 @@ class WorldHeritageController extends Controller
     }
 
     public function updateOneWorldHeritage(
+        int $id,
         Request $request,
         UpdateWorldHeritageUseCase $useCase
     ): JsonResponse
     {
         DB::beginTransaction();
         try {
-            $updateTargetObject = $useCase->handle($request);
+            $updateTargetObject = $useCase->handle($id, $request);
 
             $viewModel = new WorldHeritageViewModel($updateTargetObject);
 

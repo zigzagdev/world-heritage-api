@@ -94,6 +94,7 @@ class WorldHeritageController_updateByIdTest extends TestCase
         $mock
             ->shouldReceive('handle')
             ->with(
+                self::arrayData()['id'],
                 Mockery::type(Request::class),
             )
             ->andReturn(
@@ -127,6 +128,7 @@ class WorldHeritageController_updateByIdTest extends TestCase
     public function test_check_controller_result_type(): void
     {
         $result =  $this->controller->updateOneWorldHeritage(
+            self::arrayData()['id'],
             $this->mockRequest(),
             $this->mockUseCase(),
         );
@@ -140,6 +142,7 @@ class WorldHeritageController_updateByIdTest extends TestCase
         $oldNameJp = $row->name_jp;
 
         $result = $this->controller->updateOneWorldHeritage(
+            self::arrayData()['id'],
             $this->mockRequest(),
             $this->mockUseCase(),
         );
