@@ -15,9 +15,13 @@ class UpdateWorldHeritageUseCase
     ){}
 
     public function handle(
+        int $id,
         Request $request
     ): WorldHeritageDto {
-        $commandObject = UpdateWorldHeritageListQueryFactory::build($request->all());
+        $commandObject = UpdateWorldHeritageListQueryFactory::build(array_merge(
+            ['id' => $id],
+            $request->all()
+        ));
 
         $updateEntity = new WorldHeritageEntity(
             id: $commandObject->getId(),
