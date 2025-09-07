@@ -316,6 +316,7 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
         );
 
         $result = $useCase->handle(
+            self::arrayData()['id'],
             $this->mockRequest()
         );
 
@@ -328,7 +329,10 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
             $this->mockRepository()
         );
 
-        $result = $useCase->handle($this->mockRequest());
+        $result = $useCase->handle(
+            self::arrayData()['id'],
+            $this->mockRequest()
+        );
 
         $this->assertSame(self::arrayData()['id'], $result->getId());
         $this->assertSame(self::arrayData()['official_name'], $result->getOfficialName());
