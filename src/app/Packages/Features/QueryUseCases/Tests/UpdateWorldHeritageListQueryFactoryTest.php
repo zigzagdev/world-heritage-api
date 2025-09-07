@@ -4,10 +4,10 @@ namespace App\Packages\Features\QueryUseCases\Tests;
 
 use Tests\TestCase;
 use DomainException;
-use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageListQueryFactory;
+use App\Packages\Features\QueryUseCases\ListQuery\UpdateWorldHeritageListQuery;
+use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
 
-class WorldHeritageListQueryFactoryTest extends TestCase
+class UpdateWorldHeritageListQueryFactoryTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -19,13 +19,14 @@ class WorldHeritageListQueryFactoryTest extends TestCase
         parent::tearDown();
     }
 
+
     private static function arrayData(): array
     {
         return [
             'id' => 1133,
             'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
             'name' => "Ancient and Primeval Beech Forests",
-            'name_jp' => null,
+            'name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林。",
             'country' => 'Slovakia',
             'region' => 'Europe',
             'category' => 'natural',
@@ -92,14 +93,18 @@ class WorldHeritageListQueryFactoryTest extends TestCase
 
     public function test_check_list_query_type(): void
     {
-        $result = WorldHeritageListQueryFactory::build(self::arrayData());
+        $result = UpdateWorldHeritageListQueryFactory::build(self::arrayData());
 
-        $this->assertInstanceOf(WorldHeritageListQuery::class, $result);
+        $this->assertInstanceOf(UpdateWorldHeritageListQuery::class, $result);
     }
 
     public function test_check_list_query_value(): void
     {
-        $result = WorldHeritageListQueryFactory::build(self::arrayData());
+        $expectPartyCode = [
+            'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
+        ];
+
+        $result = UpdateWorldHeritageListQueryFactory::build(self::arrayData());
 
         $this->assertEquals(self::arrayData()['id'], $result->getId());
         $this->assertEquals(self::arrayData()['official_name'], $result->getOfficialName());
@@ -107,7 +112,6 @@ class WorldHeritageListQueryFactoryTest extends TestCase
         $this->assertEquals(self::arrayData()['name_jp'], $result->getNameJp());
         $this->assertEquals(self::arrayData()['country'], $result->getCountry());
         $this->assertEquals(self::arrayData()['region'], $result->getRegion());
-        $this->assertEquals(self::arrayData()['state_party'], $result->getStateParty());
         $this->assertEquals(self::arrayData()['category'], $result->getCategory());
         $this->assertEquals(self::arrayData()['criteria'], $result->getCriteria());
         $this->assertEquals(self::arrayData()['year_inscribed'], $result->getYearInscribed());
@@ -119,6 +123,8 @@ class WorldHeritageListQueryFactoryTest extends TestCase
         $this->assertEquals(self::arrayData()['short_description'], $result->getShortDescription());
         $this->assertEquals(self::arrayData()['image_url'], $result->getImageUrl());
         $this->assertEquals(self::arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
+        $this->assertEquals(self::arrayData()['state_parties_meta'], $result->getStatePartiesMeta());
+        $this->assertEqualsCanonicalizing($expectPartyCode, $result->getStatePartyCodesOrFallback());
     }
 
     public function test_check_list_required_is_null(): void
@@ -126,6 +132,6 @@ class WorldHeritageListQueryFactoryTest extends TestCase
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage("id is Required !");
 
-        WorldHeritageListQueryFactory::build(self::wrongArrayData());
+        UpdateWorldHeritageListQueryFactory::build(self::wrongArrayData());
     }
 }

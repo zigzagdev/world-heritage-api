@@ -3,7 +3,7 @@
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageListQueryFactory;
+use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryFactory;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Domains\WorldHeritageEntity;
 
@@ -16,7 +16,7 @@ class CreateWorldHeritageUseCase
     public function handle(
         array $request
     ): WorldHeritageDto {
-        $requestQuery = WorldHeritageListQueryFactory::build($request);
+        $requestQuery = CreateWorldHeritageListQueryFactory::build($request);
 
         $requestEntity = new WorldHeritageEntity(
             $requestQuery->getId(),

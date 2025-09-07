@@ -2,10 +2,10 @@
 
 namespace App\Packages\Features\QueryUseCases\ListQuery;
 
-class  WorldHeritageListQuery
+class UpdateWorldHeritageListQuery
 {
     public function __construct(
-        private readonly ?int $id,
+        private readonly int $id,
         private readonly string $official_name,
         private readonly string $name,
         private readonly string $country,
@@ -18,16 +18,16 @@ class  WorldHeritageListQuery
         private readonly ?string $name_jp,
         private readonly ?string $state_party,
         private readonly ?array $criteria,
-        private readonly ?float $area_hectares,
+        private readonly ?float$area_hectares,
         private readonly ?float $buffer_zone_hectares,
         private readonly ?string $short_description,
         private readonly ?string $image_url,
         private readonly ?string $unesco_site_url,
-        private readonly ?array $state_parties_codes = null,
-        private readonly ?array $state_parties_meta = null
+        private readonly ?array $state_parties_codes = [],
+        private readonly ?array $state_parties_meta = []
     ){}
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -50,6 +50,11 @@ class  WorldHeritageListQuery
     public function getRegion(): string
     {
         return $this->region;
+    }
+
+    public function getCategory(): string
+    {
+        return $this->category;
     }
 
     public function getYearInscribed(): int
@@ -82,11 +87,6 @@ class  WorldHeritageListQuery
         return $this->state_party;
     }
 
-    public function getCategory(): string
-    {
-        return $this->category;
-    }
-
     public function getCriteria(): ?array
     {
         return $this->criteria;
@@ -117,11 +117,6 @@ class  WorldHeritageListQuery
         return $this->unesco_site_url;
     }
 
-    public function getStatePartyCodes(): array
-    {
-        return $this->state_parties_codes ?: $this->getStatePartyCodesOrFallback();
-    }
-
     public function getStatePartiesMeta(): array
     {
         return $this->state_parties_meta ?: [];
@@ -144,25 +139,25 @@ class  WorldHeritageListQuery
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
-            'official_name' => $this->getOfficialName(),
-            'name' => $this->getName(),
-            'country' => $this->getCountry(),
-            'region' => $this->getRegion(),
-            'year_inscribed' => $this->getYearInscribed(),
-            'latitude' => $this->getLatitude(),
-            'longitude' => $this->getLongitude(),
-            'is_endangered' => $this->isEndangered(),
-            'name_jp' => $this->getNameJp(),
-            'state_party' => $this->getStateParty(),
-            'criteria' => $this->getCriteria(),
-            'area_hectares' => $this->getAreaHectares(),
-            'buffer_zone_hectares' => $this->getBufferZoneHectares(),
-            'short_description' => $this->getShortDescription(),
-            'image_url' => $this->getImageUrl(),
-            'unesco_site_url' => $this->getUnescoSiteUrl(),
-            'state_parties_codes' => $this->getStatePartyCodes(),
-            'state_parties_meta' => $this->getStatePartiesMeta()
+            'id' => $this->id,
+            'official_name' => $this->official_name,
+            'name' => $this->name,
+            'country' => $this->country,
+            'region' => $this->region,
+            'year_inscribed' => $this->year_inscribed,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'is_endangered' => $this->is_endangered,
+            'name_jp' => $this->name_jp,
+            'state_party' => $this->state_party,
+            'criteria' => $this->criteria,
+            'area_hectares' => $this->area_hectares,
+            'buffer_zone_hectares' => $this->buffer_zone_hectares,
+            'short_description' => $this->short_description,
+            'image_url' => $this->image_url,
+            'unesco_site_url' => $this->unesco_site_url,
+            'state_parties_codes' => $this->state_parties_codes ?: $this->getStatePartyCodesOrFallback(),
+            'state_parties_meta' => $this->state_parties_meta ?: []
         ];
     }
 }
