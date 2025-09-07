@@ -9,4 +9,5 @@ Route::prefix('v1')->group(function () {
     Route::post('heritage', [WorldHeritageController::class, 'registerOneWorldHeritage']);
     Route::post('heritages', [WorldHeritageController::class, 'registerManyWorldHeritages']);
     Route::put('heritages/{id}', [WorldHeritageController::class, 'updateOneWorldHeritage']);
+    Route::delete('heritages/{id}', [WorldHeritageController::class, 'deleteOneHeritage']);
 });

@@ -8,6 +8,7 @@ use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryColl
 use App\Packages\Features\QueryUseCases\Factory\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use Illuminate\Http\Request;
@@ -142,6 +143,33 @@ class WorldHeritageController extends Controller
                 'status' => 'error',
                 'message' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    public function deleteOneHeritage(
+        int $id,
+        DeleteWorldHeritageUseCase $useCase
+    ): JsonResponse {
+        DB::beginTransaction();
+        try {
+
+            $useCase->handle($id);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Heritage was deleted.",
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+
         }
     }
 }
