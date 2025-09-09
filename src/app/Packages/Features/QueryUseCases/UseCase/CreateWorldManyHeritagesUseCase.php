@@ -8,7 +8,7 @@ use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Domains\WorldHeritageEntity;
-use App\Packages\Features\QueryUseCases\ListQuery\CreateWorldHeritageListQuery;
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 
 class CreateWorldManyHeritagesUseCase
 {
@@ -23,7 +23,7 @@ class CreateWorldManyHeritagesUseCase
         $listQueries = CreateWorldHeritageListQueryCollectionFactory::build($request);
 
         $entityArray = array_map(
-            function (CreateWorldHeritageListQuery $q) {
+            function (WorldHeritageListQuery $q) {
                 return new WorldHeritageEntity(
                     id: $q->getId(),
                     officialName: $q->getOfficialName(),

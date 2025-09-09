@@ -2,7 +2,9 @@
 
 namespace App\Packages\Features\QueryUseCases\ListQuery;
 
-class CreateWorldHeritageListQueryCollection
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+
+class UpdateWorldHeritageListQueryCollection
 {
     private array $listQuery;
 

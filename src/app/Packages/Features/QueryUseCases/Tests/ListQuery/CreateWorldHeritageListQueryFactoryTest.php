@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\ListQuery;
 
-use Tests\TestCase;
-use DomainException;
-use App\Packages\Features\QueryUseCases\ListQuery\CreateWorldHeritageListQuery;
 use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryFactory;
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+use DomainException;
+use Tests\TestCase;
 
 class CreateWorldHeritageListQueryFactoryTest extends TestCase
 {
@@ -94,7 +94,7 @@ class CreateWorldHeritageListQueryFactoryTest extends TestCase
     {
         $result = CreateWorldHeritageListQueryFactory::build(self::arrayData());
 
-        $this->assertInstanceOf(CreateWorldHeritageListQuery::class, $result);
+        $this->assertInstanceOf(WorldHeritageListQuery::class, $result);
     }
 
     public function test_check_list_query_value(): void
