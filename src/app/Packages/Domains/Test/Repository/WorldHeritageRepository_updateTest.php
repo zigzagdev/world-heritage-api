@@ -61,12 +61,12 @@ class WorldHeritageRepository_updateTest extends TestCase
             'short_description' => '日本の象徴たる霊峰。信仰・芸術・登拝文化に深い影響を与えた文化的景観。',
             'image_url' => null,
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1418',
-            'state_parties' => ['JPN'],
+            'state_parties' => ['ITA'],
             'state_parties_meta' => [
-                'JPN' => [
+                'ITA' => [
                     'is_primary' => true,
                     'inscription_year' => 2013,
-                ],
+                ]
             ]
         ];
     }
@@ -92,11 +92,15 @@ class WorldHeritageRepository_updateTest extends TestCase
             'short_description' => '日本の象徴たる霊峰。信仰・芸術・登拝文化に深い影響を与えた文化的景観。',
             'image_url' => null,
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1418',
-            'state_parties' => ['FRA'],
+            'state_parties' => ['FRA', 'ITA'],
             'state_parties_meta' => [
                 'FRA' => [
-                    'is_primary' => true,
+                    'is_primary' => false,
                     'inscription_year' => 5000,
+                ],
+                'ITA' => [
+                    'is_primary' => true,
+                    'inscription_year' => 2099,
                 ],
             ],
         ];
@@ -274,10 +278,18 @@ class WorldHeritageRepository_updateTest extends TestCase
             [
                 'world_heritage_site_id' => $result->getId(),
                 'state_party_code' => 'FRA',
-                'is_primary' => true,
+                'is_primary' => false,
                 'inscription_year' => 5000,
-            ]
+            ],
         );
-
+        $this->assertDatabaseMissing(
+            'site_state_parties',
+            [
+                'world_heritage_site_id' => $result->getId(),
+                'state_party_code' => 'JPN',
+                'is_primary' => true,
+                'inscription_year' => 2013,
+            ],
+        );
     }
 }
