@@ -126,113 +126,116 @@ use RuntimeException;
         return $newCollection;
     }
 
-    public function updateOneHeritage(
-        WorldHeritageEntity $entity
-    ): WorldHeritageEntity
-    {
+     public function updateOneHeritage(
+         WorldHeritageEntity $entity
+     ): WorldHeritageEntity
+     {
+         $model = $this->worldHeritage->find($entity->getId());
+         if (!$model) {
+             throw new RuntimeException('Heritage was not found');
+         }
 
-        $model = $this->worldHeritage->find($entity->getId());
-        if (!$model) {
-            throw new RuntimeException('Heritage was not found');
-        }
+         // 本体の更新
+         $update = [
+             'official_name'        => $entity->getOfficialName(),
+             'name'                 => $entity->getName(),
+             'country'              => $entity->getCountry(),
+             'region'               => $entity->getRegion(),
+             'category'             => $entity->getCategory(),
+             'year_inscribed'       => $entity->getYearInscribed(),
+             'latitude'             => $entity->getLatitude(),
+             'longitude'            => $entity->getLongitude(),
+             'is_endangered'        => $entity->isEndangered(),
+             'name_jp'              => $entity->getNameJp(),
+             'criteria'             => $entity->getCriteria(),
+             'area_hectares'        => $entity->getAreaHectares(),
+             'buffer_zone_hectares' => $entity->getBufferZoneHectares(),
+             'short_description'    => $entity->getShortDescription(),
+             'image_url'            => $entity->getImageUrl(),
+             'unesco_site_url'      => $entity->getUnescoSiteUrl(),
+         ];
 
-        $update = [
-            'official_name'        => $entity->getOfficialName(),
-            'name'                 => $entity->getName(),
-            'country'              => $entity->getCountry(),
-            'region'               => $entity->getRegion(),
-            'category'             => $entity->getCategory(),
-            'year_inscribed'       => $entity->getYearInscribed(),
-            'latitude'             => $entity->getLatitude(),
-            'longitude'            => $entity->getLongitude(),
-            'is_endangered'        => $entity->isEndangered(),
-            'name_jp'              => $entity->getNameJp(),
-            'state_party'          => $entity->getStateParty(),
-            'criteria'             => $entity->getCriteria(),
-            'area_hectares'        => $entity->getAreaHectares(),
-            'buffer_zone_hectares' => $entity->getBufferZoneHectares(),
-            'short_description'    => $entity->getShortDescription(),
-            'image_url'            => $entity->getImageUrl(),
-            'unesco_site_url'      => $entity->getUnescoSiteUrl(),
-        ];
+         $model->fill($update);
+         if (!$model->save()) {
+             throw new RuntimeException('Failed to update heritage');
+         }
 
-        $model->fill($update);
-        if (!$model->save()) {
-            throw new RuntimeException('Failed to update heritage');
-        }
+         $meta  = $entity->getStatePartyMeta() ?? [];
 
-        $codes = $entity->getStatePartyCodes();
-        $meta  = $entity->getStatePartyMeta() ?? [];
+         $codes = $entity->getStatePartyCodes();
+         $codes = array_values(array_unique(array_map('strtoupper', $codes)));
 
-        if (empty($codes) && !empty($meta)) {
-            $codes = array_keys($meta);
-        }
-        if (empty($codes)) {
-            $codes = $this->parseStateParty($model->state_party ?? '');
-        }
 
-        $codes   = array_values(array_unique(array_map('strtoupper', $codes ?? [])));
-        $codeMap = $this->country
-            ->whereIn('state_party_code', $codes)
-            ->pluck('state_party_code', 'state_party_code')
-            ->all();
+         $payload = [];
+         foreach ($codes as $code) {
+             $m = $meta[$code] ?? [];
+             $payload[$code] = [
+                 'is_primary' => (bool)($m['is_primary'] ?? false),
+                 'inscription_year' => $m['inscription_year'] ?? null,
+             ];
+         }
+         $model->countries()->sync($payload);
 
-        if (!empty($codeMap)) {
-            if (!empty($meta)) {
-                $payload = [];
-                foreach ($codes as $code) {
-                    if (!isset($codeMap[$code])) continue;
-                    $mm = $meta[$code] ?? [];
-                    $payload[$codeMap[$code]] = [
-                        'is_primary'       => (bool)($mm['is_primary'] ?? false),
-                        'inscription_year' => $mm['inscription_year'] ?? null,
-                    ];
-                }
-                $model->countries()->sync($payload);
-            } else {
-                $model->countries()->sync(array_values($codeMap));
-            }
-        } else {
-            $model->countries()->sync([]);
-        }
+         $primary = null;
+         foreach ($codes as $c) {
+             if (!empty($meta[$c]['is_primary'])) {
+                 $primary = $c;
+                 break;
+             }
+         }
+         $primary ??= ($codes[0] ?? null);
+         $model->state_party = $primary ?: null;
+         $model->save();
 
-        $model->state_party = !empty($codes) ? implode(',', $codes) : null;
-        $model->save();
-        $model->load(['countries' => fn ($q) => $q->withPivot(['is_primary', 'inscription_year'])]);
+         $model->load(['countries' => fn ($q) => $q->withPivot(['is_primary','inscription_year'])]);
 
-        $partyMeta = [];
-        foreach ($model->countries as $c) {
-            $partyMeta[$c->state_party_code] = [
-                'is_primary'       => (bool) data_get($c, 'pivot.is_primary', false),
-                'inscription_year' => data_get($c, 'pivot.inscription_year'),
-            ];
-        }
+         $partyMeta = [];
+         foreach ($model->countries as $c) {
+             $partyMeta[$c->state_party_code] = [
+                 'is_primary'       => (bool)data_get($c, 'pivot.is_primary', false),
+                 'inscription_year' => data_get($c, 'pivot.inscription_year'),
+             ];
+         }
 
-        return new WorldHeritageEntity(
-            id:                 $model->id,
-            officialName:       $model->official_name,
-            name:               $model->name,
-            country:            $model->country,
-            region:             $model->region,
-            category:           $model->category,
-            yearInscribed:      $model->year_inscribed,
-            latitude:           $model->latitude,
-            longitude:          $model->longitude,
-            isEndangered:       $model->is_endangered,
-            nameJp:             $model->name_jp,
-            stateParty:         $model->state_party,
-            criteria:           $model->criteria,
-            areaHectares:       $model->area_hectares,
-            bufferZoneHectares: $model->buffer_zone_hectares,
-            shortDescription:   $model->short_description,
-            imageUrl:           $model->image_url,
-            unescoSiteUrl:      $model->unesco_site_url,
-            statePartyCodes:    $this->parseStateParty(
-                implode(',', $model->countries->pluck('state_party_code')->all())
-            ),
-            statePartyMeta:     $partyMeta
-        );
-    }
+         return new WorldHeritageEntity(
+             id:                 $model->id,
+             officialName:       $model->official_name,
+             name:               $model->name,
+             country:            $model->country,
+             region:             $model->region,
+             category:           $model->category,
+             yearInscribed:      $model->year_inscribed,
+             latitude:           $model->latitude,
+             longitude:          $model->longitude,
+             isEndangered:       $model->is_endangered,
+             nameJp:             $model->name_jp,
+             stateParty:         $model->state_party,
+             criteria:           $model->criteria,
+             areaHectares:       $model->area_hectares,
+             bufferZoneHectares: $model->buffer_zone_hectares,
+             shortDescription:   $model->short_description,
+             imageUrl:           $model->image_url,
+             unescoSiteUrl:      $model->unesco_site_url,
+             statePartyCodes:    $this->parseStateParty(
+                 implode(',', $model->countries->pluck('state_party_code')->all())
+             ),
+             statePartyMeta: $partyMeta
+         );
+     }
+
+     public function updateManyHeritages(
+         WorldHeritageEntityCollection $collection
+     ): WorldHeritageEntityCollection {
+         $newCollection = new WorldHeritageEntityCollection();
+
+         foreach ($collection->getAllHeritages() as $entity) {
+             $saved = $this->updateOneHeritage($entity);
+             $newCollection->add($saved);
+         }
+
+         return $newCollection;
+     }
+
     public function deleteOneHeritage(int $id): void
     {
         $heritageModel = $this->worldHeritage->find($id);
