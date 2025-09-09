@@ -3,7 +3,7 @@
 namespace App\Packages\Features\QueryUseCases\Factory;
 
 use DomainException;
-use App\Packages\Features\QueryUseCases\ListQuery\UpdateWorldHeritageListQuery;
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 
 class UpdateWorldHeritageListQueryFactory
 {
@@ -17,11 +17,11 @@ class UpdateWorldHeritageListQueryFactory
         'year_inscribed'
     ];
 
-    public static function build(array $request): UpdateWorldHeritageListQuery
+    public static function build(array $request): WorldHeritageListQuery
     {
         self::validation($request);
 
-        return new UpdateWorldHeritageListQuery(
+        return new WorldHeritageListQuery(
             id: $request['id'],
             official_name: (string)($request['official_name'] ?? ''),
             name: (string)($request['name'] ?? ''),

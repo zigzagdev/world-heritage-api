@@ -7,7 +7,7 @@ class CreateWorldHeritageListQueryCollection
     private array $listQuery;
 
     public function __construct(
-        CreateWorldHeritageListQuery ...$listQuery
+        WorldHeritageListQuery ...$listQuery
     ) {
         $this->listQuery = $listQuery;
     }
@@ -15,7 +15,7 @@ class CreateWorldHeritageListQueryCollection
     public function toArray(): array
     {
         return array_map(
-            fn(CreateWorldHeritageListQuery $query) => $query->toArray(),
+            fn(WorldHeritageListQuery $query) => $query->toArray(),
             $this->listQuery
         );
     }
