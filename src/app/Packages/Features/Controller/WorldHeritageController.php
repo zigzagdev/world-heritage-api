@@ -5,11 +5,13 @@ namespace App\Packages\Features\Controller;
 use App\Common\Pagination\PaginationViewModel;
 use App\Http\Controllers\Controller;
 use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Features\QueryUseCases\Factory\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -137,6 +139,36 @@ class WorldHeritageController extends Controller
             ], 200);
 
         } catch(Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function updateManyHeritages(
+        Request $request,
+        UpdateWorldHeritagesUseCase $useCase
+    ): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $listQueryObject = UpdateWorldHeritageListQueryCollectionFactory::build($request->all());
+
+            $result = $useCase->handle($listQueryObject);
+
+            $viewModel = WorldHeritageViewModelCollectionFactory::build($result);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $viewModel->toArray(),
+            ], 200);
+
+        } catch (Exception $e) {
             DB::rollBack();
 
             return response()->json([

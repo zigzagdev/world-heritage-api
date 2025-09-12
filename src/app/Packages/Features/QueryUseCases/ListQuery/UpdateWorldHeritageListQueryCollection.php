@@ -2,7 +2,9 @@
 
 namespace App\Packages\Features\QueryUseCases\ListQuery;
 
-class CreateWorldHeritageListQueryCollection
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+
+class UpdateWorldHeritageListQueryCollection
 {
     private array $listQuery;
 
@@ -18,5 +20,10 @@ class CreateWorldHeritageListQueryCollection
             fn(WorldHeritageListQuery $query) => $query->toArray(),
             $this->listQuery
         );
+    }
+
+    public function getItems(): array
+    {
+        return $this->listQuery;
     }
 }

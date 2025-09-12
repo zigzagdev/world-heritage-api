@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\ListQuery;
 
-use Tests\TestCase;
-use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Domains\WorldHeritageEntityCollection;
+use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
+use Tests\TestCase;
 
 class CreateWorldHeritageListQueryCollectionFactoryTest extends TestCase
 {
