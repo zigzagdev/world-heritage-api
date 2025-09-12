@@ -21,4 +21,9 @@ class UpdateWorldHeritageListQueryCollection
             $this->listQuery
         );
     }
+
+    public function getItems(): array
+    {
+        return $this->listQuery;
+    }
 }
