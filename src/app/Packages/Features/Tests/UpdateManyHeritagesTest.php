@@ -1,0 +1,146 @@
+<?php
+
+namespace App\Packages\Features\Tests;
+
+use Database\Seeders\DatabaseSeeder;
+use Tests\TestCase;
+use Illuminate\Support\Facades\DB;
+use App\Models\WorldHeritage;
+use App\Models\Country;
+
+class UpdateManyHeritagesTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->refresh();
+        $seeder = new DatabaseSeeder();
+        $seeder->run();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->refresh();
+        parent::tearDown();
+    }
+
+    private function refresh(): void
+    {
+        if (env('APP_ENV') === 'testing') {
+              DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
+              WorldHeritage::truncate();
+              Country::truncate();
+              DB::table('site_state_parties')->truncate();
+              DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
+    }
+
+    private static function arrayData(): array
+    {
+        return [
+            [
+                'id' => 1133,
+                'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
+                'name' => "Ancient and Primeval Beech Forests",
+                'name_jp' => null,
+                'country' => 'Slovakia',
+                'region' => 'Europe',
+                'category' => 'natural',
+                'criteria' => ['ix'],
+                'state_party' => null,
+                'year_inscribed' => 2007,
+                'area_hectares' => 99947.81,
+                'buffer_zone_hectares' => 296275.8,
+                'is_endangered' => false,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
+                'image_url' => '',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
+                'state_parties' => [
+                    'JPN'
+                ],
+                'state_parties_meta' => [
+                    'JPN' => ['is_primary' => true, 'inscription_year' => 2007],
+                ],
+            ],
+            [
+                'id' => 1442,
+                'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
+                'name' => "Silk Roads: Chang'an–Tianshan Corridor",
+                'name_jp' => 'シルクロード：長安－天山回廊の交易路網(更新したよ〜〜〜！)',
+                'country' => 'China, Kazakhstan, Kyrgyzstan',
+                'region' => 'Asia',
+                'category' => 'cultural',
+                'criteria' => ['ii','iii','vi'],
+                'state_party' => null,
+                'year_inscribed' => 2014,
+                'area_hectares' => 0.0,
+                'buffer_zone_hectares' => 0.0,
+                'is_endangered' => false,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
+                'image_url' => '',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
+                'state_parties' => ['CHN','KAZ','KGZ'],
+                'state_parties_meta' => [
+                    'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+                    'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                    'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                ],
+            ],
+        ];
+    }
+
+    public function test_feature_check(): void
+    {
+        $beforeHeritageOne = WorldHeritage::query()
+            ->where('id', 1442)
+            ->first();
+
+        $beforeHeritageSecond = DB::table('site_state_parties')
+            ->where('world_heritage_site_id', 1133)
+            ->first();
+
+        $result = $this->putJson('/api/v1/heritages', self::arrayData());
+
+        $result->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'official_name',
+                        'name',
+                        'name_jp',
+                        'country',
+                        'region',
+                        'state_party',
+                        'category',
+                        'criteria',
+                        'year_inscribed',
+                        'area_hectares',
+                        'buffer_zone_hectares',
+                        'is_endangered',
+                        'latitude',
+                        'longitude',
+                        'short_description',
+                        'image_url',
+                        'unesco_site_url',
+                        'state_party_codes',
+                        'state_parties_meta',
+                    ]
+                ]
+            ]);
+
+        $this->assertDatabaseMissing('world_heritage_sites', [
+            'id' => 1442,
+            'name_jp' => $beforeHeritageOne->name_jp,
+        ], 'mysql');
+
+        $this->assertDatabaseMissing('site_state_parties', [
+            'world_heritage_site_id' => 1133,
+            'state_party_code' => $beforeHeritageSecond->state_party_code,
+        ], 'mysql');
+    }
+}
