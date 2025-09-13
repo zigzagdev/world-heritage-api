@@ -11,4 +11,5 @@ Route::prefix('v1')->group(function () {
     Route::put('heritages/{id}', [WorldHeritageController::class, 'updateOneWorldHeritage']);
     Route::put('heritages', [WorldHeritageController::class, 'updateManyHeritages']);
     Route::delete('heritages/{id}', [WorldHeritageController::class, 'deleteOneHeritage']);
+    Route::delete('heritages', [WorldHeritageController::class, 'deleteManyHeritages']);
 });

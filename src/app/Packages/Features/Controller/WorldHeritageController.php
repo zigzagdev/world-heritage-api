@@ -9,6 +9,7 @@ use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryColl
 use App\Packages\Features\QueryUseCases\Factory\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
@@ -192,6 +193,45 @@ class WorldHeritageController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => "Heritage was deleted.",
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+
+        }
+    }
+
+    public function deleteManyHeritages(
+        Request $request,
+        DeleteWorldHeritagesUseCase $useCase
+    ): JsonResponse {
+        DB::beginTransaction();
+        try {
+
+            $request->validate([
+                'ids' => ['bail', 'required', 'string', 'regex:/^\s*\d+(?:\s*,\s*\d+)*\s*$/'],
+            ], [
+                'ids.regex' => 'IDs must be a comma-separated list of integers.',
+            ]);
+
+            $ids = $request->get('ids', []);
+            $heritageIds = array_map(
+                fn ($id) => intval($id),
+                explode(',', $ids)
+            );
+
+            $useCase->handle($heritageIds);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Heritages were deleted.",
             ], 200);
 
         } catch (Exception $e) {
