@@ -213,6 +213,12 @@ class WorldHeritageController extends Controller
         DB::beginTransaction();
         try {
 
+            $request->validate([
+                'ids' => ['bail', 'required', 'string', 'regex:/^\s*\d+(?:\s*,\s*\d+)*\s*$/'],
+            ], [
+                'ids.regex' => 'IDs must be a comma-separated list of integers.',
+            ]);
+
             $ids = $request->get('ids', []);
             $heritageIds = array_map(
                 fn ($id) => intval($id),

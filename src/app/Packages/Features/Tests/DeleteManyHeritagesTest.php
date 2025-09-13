@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\WorldHeritage;
 use App\Models\Country;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Validation\ValidationException;
 
 class DeleteManyHeritagesTest extends TestCase
 {
@@ -54,5 +55,20 @@ class DeleteManyHeritagesTest extends TestCase
                 'world_heritage_site_id' => $id,
             ]);
         }
+    }
+
+    public function test_delete_many_heritages_ng_id(): void
+    {
+        $idsToDelete = ['abs', 1442];
+
+        $response = $this->deleteJson('/api/v1/heritages?ids='.implode(',', $idsToDelete));
+
+        $response->assertStatus(500);
+        $this->assertDatabaseHas('world_heritage_sites', [
+            'id' => 1442,
+        ]);
+        $this->assertDatabaseHas('site_state_parties', [
+            'world_heritage_site_id' => 1442,
+        ]);
     }
 }
