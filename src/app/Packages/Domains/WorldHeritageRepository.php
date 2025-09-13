@@ -249,7 +249,17 @@ use RuntimeException;
         }
     }
 
-    private function parseStateParty(?string $party): array
+    public function deleteManyHeritages(array $ids): void
+    {
+        $this->worldHeritage
+            ->whereIn('id', $ids)
+            ->each(function ($heritage) {
+                $heritage->countries()->detach();
+                $heritage->delete();
+            });
+    }
+
+     private function parseStateParty(?string $party): array
     {
         if ($party === null || $party === '') return [];
 

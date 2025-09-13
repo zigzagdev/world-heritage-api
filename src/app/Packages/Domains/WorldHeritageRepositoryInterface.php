@@ -23,4 +23,8 @@ interface WorldHeritageRepositoryInterface
     public function deleteOneHeritage(
         int $id
     ): void;
+
+    public function deleteManyHeritages(
+        array $ids
+    ): void;
 }
