@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('site_state_parties', function (Blueprint $table) {
             $table->char('state_party_code', 3);
-            $table->unsignedInteger('world_heritage_site_unesco_id');
+            $table->unsignedInteger('world_heritage_site_id');
 
             $table->boolean('is_primary')->default(false);
             $table->unsignedSmallInteger('inscription_year')->nullable();
@@ -21,11 +21,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->foreign('world_heritage_site_unesco_id')
-                ->references('unesco_id')->on('world_heritage_sites')
+            $table->foreign('world_heritage_site_id')
+                ->references('id')->on('world_heritage_sites')
                 ->cascadeOnDelete();
 
-            $table->primary(['state_party_code', 'world_heritage_site_unesco_id']);
+            $table->primary(['state_party_code', 'world_heritage_site_id']);
         });
     }
 
