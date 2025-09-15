@@ -30,7 +30,6 @@ class WorldHeritage extends Model
         'latitude',
         'longitude',
         'short_description',
-        'image_url',
         'unesco_site_url'
     ];
 
@@ -63,6 +62,6 @@ class WorldHeritage extends Model
 
     public function Images(): HasMany
     {
-        return $this->hasMany(Image::class, 'world_heritage_site_id', 'id');
+        return $this->hasMany(Image::class, 'world_heritage_id', 'id');
     }
 }

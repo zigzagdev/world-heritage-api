@@ -11,7 +11,6 @@ class Image extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'world_heritage_id',
         'disk',
         'path',
         'width',
