@@ -4,8 +4,10 @@ namespace App\Packages\Domains;
 
 class ImageEntityCollection
 {
+    private array $images = [];
+
     public function __construct(
-        private array $images = []
+        ImageEntity ...$images
     ) {}
 
     public function getItems(): array
