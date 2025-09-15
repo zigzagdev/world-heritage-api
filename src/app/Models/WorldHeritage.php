@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Country;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorldHeritage extends Model
 {
@@ -30,7 +30,6 @@ class WorldHeritage extends Model
         'latitude',
         'longitude',
         'short_description',
-        'image_url',
         'unesco_site_url'
     ];
 
@@ -59,5 +58,10 @@ class WorldHeritage extends Model
             'id',
             'state_party_code'
         )->withPivot(['is_primary','inscription_year']);
+    }
+
+    public function Images(): HasMany
+    {
+        return $this->hasMany(Image::class, 'world_heritage_id', 'id');
     }
 }

@@ -21,7 +21,7 @@ class WorldHeritageEntity
         public ?float $areaHectares = null,
         public ?float $bufferZoneHectares = null,
         public ?string $shortDescription = null,
-        public ?string $imageUrl = null,
+        public ?ImageEntityCollection $collection,
         public ?string $unescoSiteUrl = null,
         private array $statePartyCodes = [],
         private array $statePartyMeta = []
@@ -107,9 +107,9 @@ class WorldHeritageEntity
         return $this->shortDescription;
     }
 
-    public function getImageUrl(): ?string
+    public function getImageCollection(): ?ImageEntityCollection
     {
-        return $this->imageUrl;
+        return $this->collection;
     }
 
     public function getUnescoSiteUrl(): ?string
@@ -196,34 +196,5 @@ class WorldHeritageEntity
             ];
         }
         $this->statePartyMeta = $normalized;
-    }
-
-    public static function buildFromRequest(
-        array $request
-    ): self {
-        return new self(
-            id: (int)($request['id'] ?? 0),
-            officialName: (string)($request['official_name'] ?? ''),
-            name: (string)($request['name'] ?? ''),
-            country: (string)($request['country'] ?? ''),
-            region: (string)($request['region'] ?? ''),
-            category: (string)($request['category'] ?? ''),
-            yearInscribed: (int)($request['year_inscribed'] ?? 0),
-            latitude: isset($request['latitude'])  ? (float)$request['latitude']  : null,
-            longitude: isset($request['longitude']) ? (float)$request['longitude'] : null,
-            isEndangered: (bool)($request['is_endangered'] ?? false),
-            nameJp: $request['name_jp'] ?? null,
-            stateParty: $request['state_party'] ?? null,
-            criteria: is_string($request['criteria'] ?? null)
-                ? json_decode($request['criteria'], true)
-                : ($request['criteria'] ?? null),
-            areaHectares: isset($request['area_hectares']) ? (float)$request['area_hectares'] : null,
-            bufferZoneHectares: isset($request['buffer_zone_hectares']) ? (float)$request['buffer_zone_hectares'] : null,
-            shortDescription: $request['short_description'] ?? null,
-            imageUrl: $request['image_url'] ?? null,
-            unescoSiteUrl: $request['unesco_site_url'] ?? null,
-            statePartyCodes: $request['state_parties'] ?? [],
-            statePartyMeta: $request['state_parties_meta'] ?? []
-        );
     }
 }
