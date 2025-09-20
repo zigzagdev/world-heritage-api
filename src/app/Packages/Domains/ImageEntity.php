@@ -6,6 +6,7 @@ class ImageEntity
 {
     public function __construct(
         readonly public ?int $id,
+        readonly public ?int $worldHeritageId,
         readonly public string $disk,
         readonly public string $path,
         readonly public ?int $width,
@@ -20,6 +21,11 @@ class ImageEntity
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getWorldHeritageId(): ?int
+    {
+        return $this->worldHeritageId;
     }
 
     public function getDisk(): string

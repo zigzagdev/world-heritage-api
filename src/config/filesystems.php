@@ -59,7 +59,14 @@ return [
             'throw' => false,
             'report' => false,
         ],
-
+        'gcs' => [
+            'driver' => 'gcs',
+            'project_id' => env('GOOGLE_CLOUD_PROJECT'),
+            'key_file'   => env('GOOGLE_CLOUD_KEY_FILE'),
+            'bucket'     => env('GCS_BUCKET'),
+            'path_prefix'=> env('GCS_PREFIX', ''),
+            'throw' => true,
+        ],
     ],
 
     /*
