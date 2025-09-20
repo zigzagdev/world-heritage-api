@@ -115,18 +115,19 @@ use RuntimeException;
         ]);
 
         $images = [];
-        foreach ($heritage->images as $m) {
+        foreach ($heritage->images as $image) {
             $images[] = new ImageEntity(
-                id:        $m->id,
-                disk:      $m->disk,
-                path:      $m->path,
-                width:     $m->width,
-                height:    $m->height,
-                format:    $m->format,
-                checksum:  $m->checksum,
-                sortOrder: $m->sort_order,
-                alt:       $m->alt,
-                credit:    $m->credit,
+                id:        $image->id,
+                worldHeritageId: $image->world_heritage_id,
+                disk:      $image->disk,
+                path:      $image->path,
+                width:     $image->width,
+                height:    $image->height,
+                format:    $image->format,
+                checksum:  $image->checksum,
+                sortOrder: $image->sort_order,
+                alt:       $image->alt,
+                credit:    $image->credit,
             );
         }
 
@@ -180,7 +181,6 @@ use RuntimeException;
              throw new RuntimeException('Heritage was not found');
          }
 
-         // 本体の更新
          $update = [
              'official_name'        => $entity->getOfficialName(),
              'name'                 => $entity->getName(),
