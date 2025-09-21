@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
-use App\Packages\Domains\WorldHeritageQueryService;
-use Tests\TestCase;
-use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
-use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use App\Common\Pagination\PaginationDto;
+use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
+use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
 use Mockery;
+use Tests\TestCase;
 
 class GetWorldHeritageByIdsUseCaseTest extends TestCase
 {
