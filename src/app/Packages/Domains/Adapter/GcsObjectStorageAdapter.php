@@ -46,6 +46,7 @@ class GcsObjectStorageAdapter implements ObjectStoragePort
         try {
             $object->delete();
         } catch (NotFoundException) {
+
         }
     }
 
