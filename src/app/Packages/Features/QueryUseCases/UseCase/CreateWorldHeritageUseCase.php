@@ -6,17 +6,23 @@ use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryFactory;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Domains\WorldHeritageEntity;
+use App\Packages\Domains\ImageEntityCollection;
 
 class CreateWorldHeritageUseCase
 {
     public function __construct(
-        private readonly WorldHeritageRepositoryInterface $repository
+        private readonly WorldHeritageRepositoryInterface $repository,
+        private readonly ImageUploadUseCase $useCase
     ){}
 
     public function handle(
         array $request
     ): WorldHeritageDto {
         $requestQuery = CreateWorldHeritageListQueryFactory::build($request);
+
+        $collection = !empty($request['images_confirmed'] ?? [])
+            ? $this->useCase->buildImageCollectionAfterPut($request['images_confirmed'])
+            : new ImageEntityCollection();
 
         $requestEntity = new WorldHeritageEntity(
             $requestQuery->getId(),
@@ -35,7 +41,7 @@ class CreateWorldHeritageUseCase
             $requestQuery->getAreaHectares() ?? null,
             $requestQuery->getBufferZoneHectares() ?? null,
             $requestQuery->getShortDescription() ?? null,
-            $requestQuery->getImageUrl() ?? null,
+            $collection,
             $requestQuery->getUnescoSiteUrl() ?? null,
             $requestQuery->getStatePartyCodes() ?? [],
             $requestQuery->getStatePartiesMeta() ?? []
@@ -62,7 +68,7 @@ class CreateWorldHeritageUseCase
             areaHectares: $result->getAreaHectares(),
             bufferZoneHectares: $result->getBufferZoneHectares(),
             shortDescription: $result->getShortDescription(),
-            imageUrl: $result->getImageUrl(),
+            collection: $collection,
             unescoSiteUrl: $result->getUnescoSiteUrl(),
             statePartyCodes: $result->getStatePartyCodes(),
             statePartiesMeta: $result->getStatePartyMeta(),

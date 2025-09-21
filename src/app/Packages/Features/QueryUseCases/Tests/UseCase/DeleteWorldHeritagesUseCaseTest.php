@@ -2,14 +2,14 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
-use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritagesUseCase;
-use Tests\TestCase;
-use Illuminate\Support\Facades\DB;
-use App\Models\WorldHeritage;
 use App\Models\Country;
+use App\Models\WorldHeritage;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
-use Mockery;
+use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritagesUseCase;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Support\Facades\DB;
+use Mockery;
+use Tests\TestCase;
 
 class DeleteWorldHeritagesUseCaseTest extends TestCase
 {
