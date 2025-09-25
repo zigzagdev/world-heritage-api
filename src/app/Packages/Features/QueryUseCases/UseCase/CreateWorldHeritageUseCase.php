@@ -16,7 +16,7 @@ class CreateWorldHeritageUseCase
     ){}
 
     public function handle(
-        array $request
+        array $request,
     ): WorldHeritageDto {
         $requestQuery = CreateWorldHeritageListQueryFactory::build($request);
 
@@ -50,7 +50,6 @@ class CreateWorldHeritageUseCase
         $result = $this->repository->insertHeritage(
             $requestEntity
         );
-
         return new WorldHeritageDto(
             id: $result->getId(),
             officialName: $result->getOfficialName(),
