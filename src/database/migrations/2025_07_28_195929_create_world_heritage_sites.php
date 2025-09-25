@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('world_heritage_sites', function (Blueprint $table) {
-            $table->unsignedInteger('unesco_id')->primary();
+            $table->unsignedInteger('id')->primary();
             $table->string('official_name');
             $table->string('name');
             $table->string('name_jp')->nullable();

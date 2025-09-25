@@ -1,21 +1,20 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
+use App\Models\Country;
+use App\Models\WorldHeritage;
 use App\Packages\Domains\WorldHeritageEntity;
-use App\Packages\Domains\WorldHeritageRepository;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
 use App\Packages\Features\QueryUseCases\ListQuery\UpdateWorldHeritageListQuery;
-use Illuminate\Http\Request;
-use Tests\TestCase;
-use Mockery;
-use Database\Seeders\DatabaseSeeder;
-use App\Models\WorldHeritage;
-use App\Models\Country;
-use Illuminate\Support\Facades\DB;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Mockery;
+use Tests\TestCase;
 
 class UpdateWorldHeritageUseCaseTest extends TestCase
 {

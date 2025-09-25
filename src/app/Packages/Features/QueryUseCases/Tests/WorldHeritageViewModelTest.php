@@ -38,7 +38,6 @@ class WorldHeritageViewModelTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
-            'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
             'state_parties' => [
                 'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -63,6 +62,18 @@ class WorldHeritageViewModelTest extends TestCase
                 'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
                 'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
             ],
+            "images" => [
+                "id" => null,
+                "disk" => "gcs",
+                "path" => "wh\/1133\/photo.jpg",
+                "width" => null,
+                "height" => null,
+                "format" => "jpg",
+                "checksum" => null,
+                "sort_order" => 1,
+                "alt" => null,
+                "credit" => null
+            ]
         ];
     }
 
@@ -135,10 +146,6 @@ class WorldHeritageViewModelTest extends TestCase
             ->andReturn(self::arrayData()['short_description']);
 
         $dto
-            ->shouldReceive('getImageUrl')
-            ->andReturn(self::arrayData()['image_url']);
-
-        $dto
             ->shouldReceive('getUnescoSiteUrl')
             ->andReturn(self::arrayData()['unesco_site_url']);
 
@@ -149,6 +156,10 @@ class WorldHeritageViewModelTest extends TestCase
         $dto
             ->shouldReceive('getStatePartiesMeta')
             ->andReturn(self::arrayData()['state_parties_meta'] ?? []);
+
+        $dto
+            ->shouldReceive('getImages')
+            ->andReturn(self::arrayData()['images'] ?? []);
 
         return $dto;
     }

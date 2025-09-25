@@ -3,12 +3,16 @@
 namespace App\Packages\Domains\Test\Repository;
 
 use App\Models\Country;
+use App\Models\Image;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepository;
 use Database\Seeders\CountrySeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\WorldHeritage;
+use App\Packages\Domains\ImageEntity;
+use App\Packages\Domains\ImageEntityCollection;
+use Illuminate\Support\Str;
 
 class WorldHeritageRepository_insertTest extends TestCase
 {
@@ -35,6 +39,7 @@ class WorldHeritageRepository_insertTest extends TestCase
             WorldHeritage::truncate();
             Country::truncate();
             DB::table('site_state_parties')->truncate();
+            Image::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -48,7 +53,7 @@ class WorldHeritageRepository_insertTest extends TestCase
             'name_jp' => '古都奈良の文化財',
             'country' => 'Japan',
             'region' => 'Asia',
-            'category' => 'cultural',
+            'category' => 'Cultural',
             'criteria' => ['ii', 'iii', 'v'],
             'state_party' => null,
             'year_inscribed' => 1998,
@@ -58,7 +63,6 @@ class WorldHeritageRepository_insertTest extends TestCase
             'latitude' => 34.6851,
             'longitude' => 135.8048,
             'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
-            'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
             'state_parties' => ['JPN'],
             'state_parties_meta' => [
@@ -79,7 +83,7 @@ class WorldHeritageRepository_insertTest extends TestCase
             'name_jp' => null,
             'country' => 'Slovakia',
             'region' => 'Europe',
-            'category' => 'natural',
+            'category' => 'Natural',
             'criteria' => ['ix'],
             'state_party' => null,
             'year_inscribed' => 2007,
@@ -89,7 +93,6 @@ class WorldHeritageRepository_insertTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
-            'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
             'state_parties' => [
                 'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -117,6 +120,37 @@ class WorldHeritageRepository_insertTest extends TestCase
         ];
     }
 
+    private static function images()
+    {
+        $firstEntity = new ImageEntity(
+            id: null,
+            disk: 'gcs',
+            path: 'sites/668/'.Str::uuid().'.webp',
+            width: 1600,
+            height: 1067,
+            format: 'webp',
+            checksum: str_repeat('a', 64),
+            sortOrder: 0,
+            alt: 'Main gate',
+            credit: 'Author'
+        );
+
+        $secondEntity = new ImageEntity(
+            id: null,
+            disk: 'gcs',
+            path: 'sites/668/'.Str::uuid().'.webp',
+            width: 1600,
+            height: 1067,
+            format: 'webp',
+            checksum: str_repeat('b', 64),
+            sortOrder: 1,
+            alt: 'Sub gate',
+            credit: 'Author2'
+        );
+
+        return [$firstEntity, $secondEntity];
+    }
+
     public function test_insert_check_single_type(): void
     {
         $entity = new WorldHeritageEntity(
@@ -136,10 +170,10 @@ class WorldHeritageRepository_insertTest extends TestCase
             self::arraySingleData()['area_hectares'],
             self::arraySingleData()['buffer_zone_hectares'],
             self::arraySingleData()['short_description'],
-            self::arraySingleData()['image_url'],
+            null,
             self::arraySingleData()['unesco_site_url'],
             self::arraySingleData()['state_parties'],
-            self::arraySingleData()['state_parties_meta']
+            self::arraySingleData()['state_parties_meta'],
         );
 
         $result = $this->repository->insertHeritage($entity);
@@ -149,6 +183,10 @@ class WorldHeritageRepository_insertTest extends TestCase
 
     public function test_insert_check_single_value(): void
     {
+        $collection = new ImageEntityCollection(
+            ...self::images()
+        );
+
         $entity = new WorldHeritageEntity(
             self::arraySingleData()['id'],
             self::arraySingleData()['official_name'],
@@ -166,7 +204,7 @@ class WorldHeritageRepository_insertTest extends TestCase
             self::arraySingleData()['area_hectares'],
             self::arraySingleData()['buffer_zone_hectares'],
             self::arraySingleData()['short_description'],
-            self::arraySingleData()['image_url'],
+            $collection,
             self::arraySingleData()['unesco_site_url'],
             self::arraySingleData()['state_parties'],
             self::arraySingleData()['state_parties_meta']
@@ -189,9 +227,22 @@ class WorldHeritageRepository_insertTest extends TestCase
         $this->assertEquals(self::arraySingleData()['area_hectares'], $result->getAreaHectares());
         $this->assertEquals(self::arraySingleData()['buffer_zone_hectares'], $result->getBufferZoneHectares());
         $this->assertEquals(self::arraySingleData()['short_description'], $result->getShortDescription());
-        $this->assertEquals(self::arraySingleData()['image_url'], $result->getImageUrl());
         $this->assertEquals(self::arraySingleData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEquals(self::arraySingleData()['state_parties'], $result->getStatePartyCodes());
+
+        foreach ($collection as $key => $value) {
+            $this->assertDatabaseHas('images', [
+                'disk' => $value->getDisk(),
+                'path' => $value->getPath(),
+                'width' => $value->getWidth(),
+                'height' => $value->getHeight(),
+                'format' => $value->getFormat(),
+                'checksum' => $value->getChecksum(),
+                'sort_order' => $value->getSortOrder(),
+                'alt' => $value->getAlt(),
+                'credit' => $value->getCredit(),
+            ], 'mysql');
+        }
     }
 
     public function test_insert_check_multi_type(): void
@@ -213,7 +264,7 @@ class WorldHeritageRepository_insertTest extends TestCase
             self::arrayMultiData()['area_hectares'],
             self::arrayMultiData()['buffer_zone_hectares'],
             self::arrayMultiData()['short_description'],
-            self::arrayMultiData()['image_url'],
+            null,
             self::arrayMultiData()['unesco_site_url'],
             self::arrayMultiData()['state_parties'],
             self::arrayMultiData()['state_parties_meta']
@@ -226,6 +277,10 @@ class WorldHeritageRepository_insertTest extends TestCase
 
     public function test_insert_check_multi_value(): void
     {
+        $collection = new ImageEntityCollection(
+            ...self::images()
+        );
+
         $entity = new WorldHeritageEntity(
             self::arrayMultiData()['id'],
             self::arrayMultiData()['official_name'],
@@ -243,7 +298,7 @@ class WorldHeritageRepository_insertTest extends TestCase
             self::arrayMultiData()['area_hectares'],
             self::arrayMultiData()['buffer_zone_hectares'],
             self::arrayMultiData()['short_description'],
-            self::arrayMultiData()['image_url'],
+            $collection,
             self::arrayMultiData()['unesco_site_url'],
             self::arrayMultiData()['state_parties'],
             self::arrayMultiData()['state_parties_meta']
@@ -266,7 +321,6 @@ class WorldHeritageRepository_insertTest extends TestCase
         $this->assertEquals(self::arrayMultiData()['area_hectares'], $result->getAreaHectares());
         $this->assertEquals(self::arrayMultiData()['buffer_zone_hectares'], $result->getBufferZoneHectares());
         $this->assertEquals(self::arrayMultiData()['short_description'], $result->getShortDescription());
-        $this->assertEquals(self::arrayMultiData()['image_url'], $result->getImageUrl());
         $this->assertEquals(self::arrayMultiData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEqualsCanonicalizing(self::arrayMultiData()['state_parties'], $result->getStatePartyCodes());
         $this->assertEquals(self::arrayMultiData()['state_parties_meta'], $result->getStatePartyMeta());
@@ -274,5 +328,19 @@ class WorldHeritageRepository_insertTest extends TestCase
             self::arrayMultiData()['state_parties_meta']['SVK'],
             $entity->getStatePartyMeta()['SVK']
         );
+
+        foreach ($collection as $key => $value) {
+            $this->assertDatabaseHas('images', [
+                'disk' => $value->getDisk(),
+                'path' => $value->getPath(),
+                'width' => $value->getWidth(),
+                'height' => $value->getHeight(),
+                'format' => $value->getFormat(),
+                'checksum' => $value->getChecksum(),
+                'sort_order' => $value->getSortOrder(),
+                'alt' => $value->getAlt(),
+                'credit' => $value->getCredit(),
+            ], 'mysql');
+        }
     }
 }

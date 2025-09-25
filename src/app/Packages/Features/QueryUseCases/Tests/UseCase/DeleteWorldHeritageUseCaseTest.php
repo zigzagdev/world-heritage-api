@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
-use Tests\TestCase;
+use App\Models\Country;
+use App\Models\WorldHeritage;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritageUseCase;
-use App\Models\WorldHeritage;
-use App\Models\Country;
-use Illuminate\Support\Facades\DB;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use RuntimeException;
+use Tests\TestCase;
 
 class DeleteWorldHeritageUseCaseTest extends TestCase
 {

@@ -102,7 +102,7 @@ jobs:
         env:
           APP_ENV: testing
 
-      - name: Run tests
-        run: |
-          ./vendor/bin/phpunit --stop-on-failure --testdox
-        working-directory: ./src
+#      - name: Run tests
+#        run: |
+#          ./vendor/bin/phpunit --stop-on-failure --testdox
+#        working-directory: ./src

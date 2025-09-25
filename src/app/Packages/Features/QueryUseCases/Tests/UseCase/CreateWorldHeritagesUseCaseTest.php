@@ -1,21 +1,27 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
 use App\Models\Country;
+use App\Models\Image;
 use App\Models\WorldHeritage;
-use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
-use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
-use Mockery;
-use Database\Seeders\CountrySeeder;
+use App\Packages\Domains\ImageEntity;
+use App\Packages\Domains\ImageEntityCollection;
 use App\Packages\Domains\WorldHeritageEntityCollection;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\ImageUploadUseCase;
+use Database\Seeders\CountrySeeder;
+use Illuminate\Support\Facades\DB;
+use Mockery;
+use Tests\TestCase;
 
 class CreateWorldHeritagesUseCaseTest extends TestCase
 {
     private $repository;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -131,6 +137,53 @@ class CreateWorldHeritagesUseCaseTest extends TestCase
         ];
     }
 
+    private function mockImage(): ImageEntityCollection
+    {
+        $arrayData = [
+            'id' => null,
+            'world_heritage_id' => null,
+            'disk' => 'gcs',
+            'path' => 'heritages/1133/001.jpg',
+            'width' => null,
+            'height' => null,
+            'format' => 'jpg',
+            'checksum' => null,
+            'sort_order' => 1,
+            'alt' => 'front',
+            'credit' => 'me'
+        ];
+
+       $entity = new ImageEntity(
+           $arrayData['id'],
+           $arrayData['world_heritage_id'],
+           $arrayData['disk'],
+           $arrayData['path'],
+           $arrayData['width'],
+           $arrayData['height'],
+           $arrayData['format'],
+           $arrayData['checksum'],
+           $arrayData['sort_order'],
+           $arrayData['alt'],
+           $arrayData['credit']
+       );
+
+       return new ImageEntityCollection($entity);
+    }
+
+    private function mockImageUploadUseCase(): ImageUploadUseCase
+    {
+        $mock = Mockery::mock(ImageUploadUseCase::class);
+
+        $mock->shouldReceive('handle')
+            ->with(Mockery::type('array'), Mockery::type('int'))
+            ->andReturnUsing(function (array $images, int $heritageId) {
+                return $this->mockImage();
+            });
+
+        return $mock;
+    }
+
+
     public function test_use_case_check_type(): void
     {
         $useCase = new CreateWorldManyHeritagesUseCase(
@@ -144,8 +197,9 @@ class CreateWorldHeritagesUseCaseTest extends TestCase
 
     public function test_use_case_check_value(): void
     {
-        $useCase = new CreateWorldManyHeritagesUseCase(
-            $this->mockRepository()
+        $useCase = new CreateWorldHeritageUseCase(
+            $this->mockRepository(),
+            $this->mockImageUploadUseCase()
         );
 
         $result = $useCase->handle(self::arrayData());

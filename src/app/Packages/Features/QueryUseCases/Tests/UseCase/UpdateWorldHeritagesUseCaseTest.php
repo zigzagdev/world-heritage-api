@@ -4,15 +4,15 @@ namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
 use App\Models\Country;
 use App\Models\WorldHeritage;
-use App\Packages\Domains\WorldHeritageRepositoryInterface;
-use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
-use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
-use Mockery;
-use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
 use App\Packages\Domains\WorldHeritageEntityCollection;
+use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use App\Packages\Features\QueryUseCases\ListQuery\UpdateWorldHeritageListQueryCollection;
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
+use Illuminate\Support\Facades\DB;
+use Mockery;
+use Tests\TestCase;
 
 
 class UpdateWorldHeritagesUseCaseTest extends TestCase

@@ -13,7 +13,7 @@ use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 class CreateWorldManyHeritagesUseCase
 {
     public function __construct(
-        private readonly WorldHeritageRepositoryInterface $repository
+        private readonly WorldHeritageRepositoryInterface $repository,
     ){}
 
     public function handle(

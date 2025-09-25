@@ -4,6 +4,7 @@ namespace App\Packages\Domains;
 
 use App\Models\WorldHeritage;
 use App\Models\Country;
+use Carbon\Carbon;
 use RuntimeException;
  readonly class WorldHeritageRepository implements WorldHeritageRepositoryInterface
 {
@@ -32,7 +33,6 @@ use RuntimeException;
         'area_hectares' => $entity->getAreaHectares(),
         'buffer_zone_hectares' => $entity->getBufferZoneHectares(),
         'short_description' => $entity->getShortDescription(),
-        'image_url' => $entity->getImageUrl(),
         'unesco_site_url' => $entity->getUnescoSiteUrl()
         ];
 
@@ -88,6 +88,51 @@ use RuntimeException;
             ];
         }
 
+        if ($entity->getImageCollection() !== null) {
+            foreach ($entity->getImageCollection()->getItems() as $image) {
+                $imageRows[] = ([
+                    'world_heritage_id' => $heritage->id,
+                    'disk'       => $image->getDisk(),
+                    'path'       => $image->getPath(),
+                    'width'      => $image->getWidth(),
+                    'height'     => $image->getHeight(),
+                    'format'     => $image->getFormat(),
+                    'checksum'   => $image->getChecksum(),
+                    'sort_order' => $image->getSortOrder(),
+                    'alt'        => $image->getAlt(),
+                    'credit'     => $image->getCredit(),
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+            }
+            if(!empty($imageRows)) {
+                $heritage->images()->insert($imageRows);
+            }
+        }
+        $heritage->load([
+            'countries' => fn($q) => $q->withPivot(['is_primary','inscription_year']),
+            'images',
+        ]);
+
+        $images = [];
+        foreach ($heritage->images as $image) {
+            $images[] = new ImageEntity(
+                id:        $image->id,
+                worldHeritageId: $image->world_heritage_id,
+                disk:      $image->disk,
+                path:      $image->path,
+                width:     $image->width,
+                height:    $image->height,
+                format:    $image->format,
+                checksum:  $image->checksum,
+                sortOrder: $image->sort_order,
+                alt:       $image->alt,
+                credit:    $image->credit,
+            );
+        }
+
+        $imageCollection = new ImageEntityCollection(...$images);
+
         return new WorldHeritageEntity(
             id: $heritage->id,
             officialName: $heritage->official_name,
@@ -100,16 +145,17 @@ use RuntimeException;
             longitude: $heritage->longitude,
             isEndangered: $heritage->is_endangered,
             nameJp: $heritage->name_jp,
+            stateParty: $heritage->state_party,
             criteria: $heritage->criteria,
             areaHectares: $heritage->area_hectares,
             bufferZoneHectares: $heritage->buffer_zone_hectares,
             shortDescription: $heritage->short_description,
-            imageUrl: $heritage->image_url,
+            collection: $imageCollection,
             unescoSiteUrl: $heritage->unesco_site_url,
             statePartyCodes: $this->parseStateParty(
                 implode(',', $heritage->countries->pluck('state_party_code')->all())
             ),
-            statePartyMeta: $partyMeta
+            statePartyMeta: $partyMeta,
         );
     }
 
@@ -135,7 +181,6 @@ use RuntimeException;
              throw new RuntimeException('Heritage was not found');
          }
 
-         // 本体の更新
          $update = [
              'official_name'        => $entity->getOfficialName(),
              'name'                 => $entity->getName(),

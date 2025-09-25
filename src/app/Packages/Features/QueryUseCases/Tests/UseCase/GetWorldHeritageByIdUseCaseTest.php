@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
 use App\Models\Country;
-use App\Packages\Domains\WorldHeritageEntity;
+use App\Models\WorldHeritage;
 use App\Packages\Domains\WorldHeritageQueryService;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
-use Tests\TestCase;
 use Database\Seeders\DatabaseSeeder;
-use App\Models\WorldHeritage;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
 final class GetWorldHeritageByIdUseCaseTest extends TestCase
 {
