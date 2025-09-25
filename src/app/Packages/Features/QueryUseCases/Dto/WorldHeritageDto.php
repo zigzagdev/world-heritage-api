@@ -109,11 +109,6 @@ class WorldHeritageDto
         return $this->shortDescription;
     }
 
-    public function getCollection(): ?ImageEntityCollection
-    {
-        return $this->collection;
-    }
-
     public function getUnescoSiteUrl(): ?string
     {
         return $this->unescoSiteUrl;
@@ -141,6 +136,11 @@ class WorldHeritageDto
         $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{2}$/', $country));
 
         return array_values(array_unique($codes));
+    }
+
+    public function getImages(): array
+    {
+        return $this->serializeImages();
     }
 
     private function serializeImages(): array
@@ -184,7 +184,7 @@ class WorldHeritageDto
             'area_hectares' => $this->getAreaHectares(),
             'buffer_zone_hectares' => $this->getBufferZoneHectares(),
             'short_description' => $this->getShortDescription(),
-            'images' => $this->serializeImages(),
+            'images' => $this->getImages(),
             'unesco_site_url' => $this->getUnescoSiteUrl(),
             'state_party_codes' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),

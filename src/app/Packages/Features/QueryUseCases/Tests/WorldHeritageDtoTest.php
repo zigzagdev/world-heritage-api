@@ -2,6 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests;
 
+use App\Models\Country;
 use App\Models\WorldHeritage;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -28,6 +29,7 @@ class WorldHeritageDtoTest extends TestCase
         if (env('APP_ENV') === 'testing') {
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
             WorldHeritage::truncate();
+            Country::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -51,7 +53,6 @@ class WorldHeritageDtoTest extends TestCase
             'latitude' => 34.6851,
             'longitude' => 135.8048,
             'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
-            'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
             'state_parties' => ['JP'],
             'state_parties_meta' => [
@@ -60,6 +61,18 @@ class WorldHeritageDtoTest extends TestCase
                     'inscription_year' => 1998,
                 ],
             ],
+            "images" => [
+                "id" => null,
+                "disk" => "gcs",
+                "path" => "wh\/1133\/photo.jpg",
+                "width" => null,
+                "height" => null,
+                "format" => "jpg",
+                "checksum" => null,
+                "sort_order" => 1,
+                "alt" => null,
+                "credit" => null
+            ]
         ];
     }
 
@@ -82,7 +95,6 @@ class WorldHeritageDtoTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
-            'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
             'state_parties' => [
                 'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -107,6 +119,18 @@ class WorldHeritageDtoTest extends TestCase
                 'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
                 'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
             ],
+            "images" => [
+                "id" => null,
+                "disk" => "gcs",
+                "path" => "wh\/1133\/photo.jpg",
+                "width" => null,
+                "height" => null,
+                "format" => "jpg",
+                "checksum" => null,
+                "sort_order" => 1,
+                "alt" => null,
+                "credit" => null
+            ]
         ];
     }
 
@@ -131,8 +155,9 @@ class WorldHeritageDtoTest extends TestCase
             $data['area_hectares'] ?? null,
             $data['buffer_zone_hectares'] ?? null,
             $data['short_description'] ?? null,
-            $data['image_url'] ?? null,
-            $data['unesco_site_url'] ?? null
+            $data['images'] ?? null,
+            $data['unesco_site_url'] ?? null,
+
         );
 
         $this->assertInstanceOf(WorldHeritageDto::class, $dto);
@@ -159,7 +184,7 @@ class WorldHeritageDtoTest extends TestCase
             $data['area_hectares'] ?? null,
             $data['buffer_zone_hectares'] ?? null,
             $data['short_description'] ?? null,
-            $data['image_url'] ?? null,
+            $data['images'] ?? null,
             $data['unesco_site_url'] ?? null,
             $data['state_parties'] ?? [],
             $data['state_parties_meta'] ?? []
@@ -182,7 +207,7 @@ class WorldHeritageDtoTest extends TestCase
         $this->assertSame($data['area_hectares'], $dto->getAreaHectares());
         $this->assertSame($data['buffer_zone_hectares'], $dto->getBufferZoneHectares());
         $this->assertSame($data['short_description'], $dto->getShortDescription());
-        $this->assertSame($data['image_url'], $dto->getImageUrl());
+        $this->assertSame($data['images'], $dto->getImages());
         $this->assertSame($data['unesco_site_url'], $dto->getUnescoSiteUrl());
         $this->assertSame($data['state_parties'], $dto->getStatePartyCodes());
         $this->assertSame($data['state_parties_meta'], $dto->getStatePartiesMeta());
@@ -239,7 +264,7 @@ class WorldHeritageDtoTest extends TestCase
             $data['area_hectares'] ?? null,
             $data['buffer_zone_hectares'] ?? null,
             $data['short_description'] ?? null,
-            $data['image_url'] ?? null,
+            $data['images'] ?? null,
             $data['unesco_site_url'] ?? null,
             $data['state_parties'] ?? [],
             $data['state_parties_meta'] ?? []
@@ -261,7 +286,7 @@ class WorldHeritageDtoTest extends TestCase
         $this->assertSame($data['area_hectares'], $dto->getAreaHectares());
         $this->assertSame($data['buffer_zone_hectares'], $dto->getBufferZoneHectares());
         $this->assertSame($data['short_description'], $dto->getShortDescription());
-        $this->assertSame($data['image_url'], $dto->getImageUrl());
+        $this->assertSame($data['images'], $dto->getImages());
         $this->assertSame($data['unesco_site_url'], $dto->getUnescoSiteUrl());
         $this->assertSame($data['state_parties'], $dto->getStatePartyCodes());
         $this->assertSame($data['state_parties_meta'], $dto->getStatePartiesMeta());
