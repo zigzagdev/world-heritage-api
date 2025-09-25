@@ -90,11 +90,6 @@ class WorldHeritageViewModel
         return $this->dto->getShortDescription();
     }
 
-    public function getImageUrl(): ?string
-    {
-        return $this->dto->getImageUrl();
-    }
-
     public function getUnescoSiteUrl(): ?string
     {
         return $this->dto->getUnescoSiteUrl();
@@ -108,6 +103,11 @@ class WorldHeritageViewModel
     public function getStatePartiesMeta(): array
     {
         return $this->dto->getStatePartiesMeta();
+    }
+
+    public function getImages(): array
+    {
+        return $this->dto->getImages();
     }
 
     public function toArray(): array
@@ -129,10 +129,10 @@ class WorldHeritageViewModel
             'area_hectares' => $this->getAreaHectares(),
             'buffer_zone_hectares' => $this->getBufferZoneHectares(),
             'short_description' => $this->getShortDescription(),
-            'image_url' => $this->getImageUrl(),
             'unesco_site_url' => $this->getUnescoSiteUrl(),
             'state_party_codes' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),
+            'images' => $this->getImages(),
         ];
     }
 }
