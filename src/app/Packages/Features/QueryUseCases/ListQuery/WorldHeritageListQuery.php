@@ -21,10 +21,10 @@ class  WorldHeritageListQuery
         private readonly ?float $area_hectares,
         private readonly ?float $buffer_zone_hectares,
         private readonly ?string $short_description,
-        private readonly ?string $image_url,
         private readonly ?string $unesco_site_url,
         private readonly ?array $state_parties_codes = null,
-        private readonly ?array $state_parties_meta = null
+        private readonly ?array $state_parties_meta = null,
+        private readonly array $collection = []
     ){}
 
     public function getId(): ?int
@@ -107,11 +107,6 @@ class  WorldHeritageListQuery
         return $this->short_description;
     }
 
-    public function getImageUrl(): ?string
-    {
-        return $this->image_url;
-    }
-
     public function getUnescoSiteUrl(): ?string
     {
         return $this->unesco_site_url;
@@ -141,6 +136,11 @@ class  WorldHeritageListQuery
         return array_values(array_unique($codes));
     }
 
+    public function getImageCollection(): array
+    {
+        return $this->collection;
+    }
+
     public function toArray(): array
     {
         return [
@@ -160,10 +160,10 @@ class  WorldHeritageListQuery
             'area_hectares' => $this->getAreaHectares(),
             'buffer_zone_hectares' => $this->getBufferZoneHectares(),
             'short_description' => $this->getShortDescription(),
-            'image_url' => $this->getImageUrl(),
             'unesco_site_url' => $this->getUnescoSiteUrl(),
             'state_parties_codes' => $this->getStatePartyCodes(),
-            'state_parties_meta' => $this->getStatePartiesMeta()
+            'state_parties_meta' => $this->getStatePartiesMeta(),
+            'images' => $this->getImageCollection(),
         ];
     }
 }
