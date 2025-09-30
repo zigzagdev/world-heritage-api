@@ -124,6 +124,7 @@ class WorldHeritageRepository_insertTest extends TestCase
     {
         $firstEntity = new ImageEntity(
             id: null,
+            worldHeritageId: self::arraySingleData()['id'],
             disk: 'gcs',
             path: 'sites/668/'.Str::uuid().'.webp',
             width: 1600,
@@ -137,6 +138,7 @@ class WorldHeritageRepository_insertTest extends TestCase
 
         $secondEntity = new ImageEntity(
             id: null,
+            worldHeritageId: self::arraySingleData()['id'],
             disk: 'gcs',
             path: 'sites/668/'.Str::uuid().'.webp',
             width: 1600,
