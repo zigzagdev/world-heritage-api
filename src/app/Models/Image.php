@@ -20,6 +20,7 @@ class Image extends Model
         'sort_order',
         'alt',
         'credit',
+        'world_heritage_id',
     ];
 
     protected $hidden = [
