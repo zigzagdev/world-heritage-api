@@ -264,7 +264,7 @@ use RuntimeException;
 
              foreach ($imageCollection->getItems() as $img) {
                  $base = [
-                     'world_heritage_id' => $model->id,
+                     'world_heritage_id' => $img->getWorldHeritageId(),
                      'disk'              => $img->getDisk(),
                      'path'              => $img->getPath(),
                      'width'             => $img->getWidth(),
@@ -289,7 +289,19 @@ use RuntimeException;
                  $model->images()->upsert(
                      $rowsUpdate,
                      ['id'],
-                     ['world_heritage_id','disk','path','width','height','format','checksum','sort_order','alt','credit','updated_at']
+                     [
+                         'world_heritage_id',
+                         'disk',
+                         'path',
+                         'width',
+                         'height',
+                         'format',
+                         'checksum',
+                         'sort_order',
+                         'alt',
+                         'credit',
+                         'updated_at'
+                     ]
                  );
              }
 
@@ -297,7 +309,17 @@ use RuntimeException;
                  $model->images()->upsert(
                      $rowsInsert,
                      ['disk','path'],
-                     ['world_heritage_id','width','height','format','checksum','sort_order','alt','credit','updated_at']
+                     [
+                         'world_heritage_id',
+                         'width',
+                         'height',
+                         'format',
+                         'checksum',
+                         'sort_order',
+                         'alt',
+                         'credit',
+                         'updated_at'
+                     ]
                  );
              }
          }
