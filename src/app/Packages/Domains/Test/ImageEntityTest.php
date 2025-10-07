@@ -20,6 +20,7 @@ class ImageEntityTest extends TestCase
     private static function arrayData(): array
     {
         return [
+            'worldHeritageId' => 1133,
             'disk' => 'public',
             'path' => 'images/sample.jpg',
             'width' => 800,
@@ -36,6 +37,7 @@ class ImageEntityTest extends TestCase
     {
         $entity = new ImageEntity(
             id: null,
+            worldHeritageId: self::arrayData()['worldHeritageId'],
             disk: self::arrayData()['disk'],
             path: self::arrayData()['path'],
             width: self::arrayData()['width'],
@@ -54,6 +56,7 @@ class ImageEntityTest extends TestCase
     {
         $entity = new ImageEntity(
             id: null,
+            worldHeritageId: self::arrayData()['worldHeritageId'],
             disk: self::arrayData()['disk'],
             path: self::arrayData()['path'],
             width: self::arrayData()['width'],
@@ -66,6 +69,7 @@ class ImageEntityTest extends TestCase
         );
 
         $this->assertSame(null, $entity->getId());
+        $this->assertSame(self::arrayData()['worldHeritageId'], $entity->getWorldHeritageId());
         $this->assertSame(self::arrayData()['disk'], $entity->getDisk());
         $this->assertSame(self::arrayData()['path'], $entity->getPath());
         $this->assertSame(self::arrayData()['width'], $entity->getWidth());

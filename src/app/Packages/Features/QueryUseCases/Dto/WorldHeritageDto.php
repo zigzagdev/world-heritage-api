@@ -151,6 +151,7 @@ class WorldHeritageDto
         foreach ($this->collection->getItems() as $img) {
             $image[] = [
                 'id'         => $img->id,
+                'world_heritage_id' => $img->worldHeritageId,
                 'disk'       => $img->disk,
                 'path'       => $img->path,
                 'width'      => $img->width,

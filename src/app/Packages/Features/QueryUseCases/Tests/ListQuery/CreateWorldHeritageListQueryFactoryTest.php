@@ -143,6 +143,7 @@ class CreateWorldHeritageListQueryFactoryTest extends TestCase
         $this->assertEquals($this->arrayData()['longitude'], $result->getLongitude());
         $this->assertEquals($this->arrayData()['short_description'], $result->getShortDescription());
         $this->assertEquals($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
+        $this->assertEquals($this->arrayData()['images_confirmed'], $result->toArray()['images']);
     }
 
     public function test_check_list_required_is_null(): void

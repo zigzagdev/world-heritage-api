@@ -4,6 +4,7 @@ namespace App\Packages\Features\QueryUseCases\Factory;
 
 use DomainException;
 use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+use Illuminate\Support\Arr;
 
 class UpdateWorldHeritageListQueryFactory
 {
@@ -14,7 +15,8 @@ class UpdateWorldHeritageListQueryFactory
         'country',
         'category',
         'region',
-        'year_inscribed'
+        'year_inscribed',
+        'images_confirmed'
     ];
 
     public static function build(array $request): WorldHeritageListQuery
@@ -40,10 +42,10 @@ class UpdateWorldHeritageListQueryFactory
             area_hectares: isset($request['area_hectares']) ? (float)$request['area_hectares'] : null,
             buffer_zone_hectares: isset($request['buffer_zone_hectares']) ? (float)$request['buffer_zone_hectares'] : null,
             short_description: $request['short_description'] ?? null,
-            image_url: $request['image_url'] ?? null,
             unesco_site_url: $request['unesco_site_url'] ?? null,
             state_parties_codes: $request['state_parties'] ?? [],
-            state_parties_meta: $request['state_parties_meta'] ?? []
+            state_parties_meta: $request['state_parties_meta'] ?? [],
+            collection: Arr::get($request, 'images_confirmed', []),
         );
     }
 
