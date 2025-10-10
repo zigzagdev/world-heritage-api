@@ -2,6 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\ViewModel;
 
+use App\Packages\Domains\ImageEntityCollection;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 
 class WorldHeritageViewModel
@@ -107,7 +108,30 @@ class WorldHeritageViewModel
 
     public function getImages(): array
     {
-        return $this->dto->getImages();
+        $collection = $this->dto->getImages() ?? null;
+
+        if ($collection instanceof ImageEntityCollection) {
+            if (method_exists($collection, 'getItems')) {
+                $items = $collection->getItems();
+                return array_map(function($img) {
+                    return [
+                        'id' => $img->getId(),
+                        'world_heritage_id' => $img->getWorldHeritageId(),
+                        'disk' => $img->getDisk(),
+                        'path' => $img->getPath(),
+                        'width' => $img->getWidth(),
+                        'height' => $img->getHeight(),
+                        'format' => $img->getFormat(),
+                        'checksum' => $img->getChecksum(),
+                        'sort_order' => $img->getSortOrder(),
+                        'alt' => $img->getAlt(),
+                        'credit' => $img->getCredit(),
+                    ];
+                }, $items ?? []);
+            }
+            return [];
+        }
+        return is_array($collection) ? $collection : [];
     }
 
     public function toArray(): array
