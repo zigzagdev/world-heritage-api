@@ -12,7 +12,8 @@ services:
       - ./src:/var/www
     ports:
       - "8700:9000"
-    depends_on: [ mysql ]
+    depends_on:
+      - mysql
     networks: [ heritage-net ]
 
   mysql:
@@ -21,8 +22,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: world-heritage
       MYSQL_USER: world-heritage
-      MYSQL_PASSWORD: world-heritage
-      MYSQL_DATABASE: world_heritage_local      # 既定は local
+      MYSQL_PASSWORD: world-heritageex
+      MYSQL_DATABASE: world_heritage_local
     ports:
       - "2306:3306"
     volumes:
@@ -37,10 +38,11 @@ services:
       PMA_HOST: mysql
       PMA_PORT: 3306
       PMA_USER: world-heritage
-      PMA_PASSWORD: world-heritage             # ← ここも統一
+      PMA_PASSWORD: world-heritage
     ports:
       - "127.0.0.1:8080:80"
-    depends_on: [ mysql ]
+    depends_on:
+      - mysql
     networks: [ heritage-net ]
 
 networks:
