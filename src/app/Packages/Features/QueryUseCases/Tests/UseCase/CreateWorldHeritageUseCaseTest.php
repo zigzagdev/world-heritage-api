@@ -160,6 +160,9 @@ class CreateWorldHeritageUseCaseTest extends TestCase
                     'inscription_year' => 1998,
                 ],
             ],
+            'images_confirmed' => [
+
+            ]
         ];
     }
 

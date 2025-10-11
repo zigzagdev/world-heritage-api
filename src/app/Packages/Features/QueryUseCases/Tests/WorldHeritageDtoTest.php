@@ -3,7 +3,10 @@
 namespace App\Packages\Features\QueryUseCases\Tests;
 
 use App\Models\Country;
+use App\Models\Image;
 use App\Models\WorldHeritage;
+use App\Packages\Domains\ImageEntity;
+use App\Packages\Domains\ImageEntityCollection;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use Database\Seeders\CountrySeeder;
@@ -30,6 +33,8 @@ class WorldHeritageDtoTest extends TestCase
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
             WorldHeritage::truncate();
             Country::truncate();
+            DB::table('site_state_parties')->truncate();
+            Image::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -61,18 +66,21 @@ class WorldHeritageDtoTest extends TestCase
                     'inscription_year' => 1998,
                 ],
             ],
-            "images" => [
-                "id" => null,
-                "disk" => "gcs",
-                "path" => "wh\/1133\/photo.jpg",
-                "width" => null,
-                "height" => null,
-                "format" => "jpg",
-                "checksum" => null,
-                "sort_order" => 1,
-                "alt" => null,
-                "credit" => null
-            ]
+            'images' => [
+                [
+                    'id' => null,
+                    'world_heritage_id' => 668,
+                    'disk' => 'gcs',
+                    'path' => 'wh/1133/photo.jpg',
+                    'width' => null,
+                    'height' => null,
+                    'format' => 'jpg',
+                    'checksum' => null,
+                    'sort_order' => 1,
+                    'alt' => null,
+                    'credit' => null,
+                ],
+            ],
         ];
     }
 
@@ -80,8 +88,8 @@ class WorldHeritageDtoTest extends TestCase
     {
         return [
             'id' => 1133,
-            'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
-            'name' => "Ancient and Primeval Beech Forests",
+            'official_name' => 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe',
+            'name' => 'Ancient and Primeval Beech Forests',
             'name_jp' => null,
             'country' => 'Slovakia',
             'region' => 'Europe',
@@ -119,24 +127,67 @@ class WorldHeritageDtoTest extends TestCase
                 'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
                 'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
             ],
-            "images" => [
-                "id" => null,
-                "disk" => "gcs",
-                "path" => "wh\/1133\/photo.jpg",
-                "width" => null,
-                "height" => null,
-                "format" => "jpg",
-                "checksum" => null,
-                "sort_order" => 1,
-                "alt" => null,
-                "credit" => null
-            ]
+            'images' => [
+                [
+                    'id' => null,
+                    'world_heritage_id' => 1133,
+                    'disk' => 'gcs',
+                    'path' => 'wh/1133/photo.jpg',
+                    'width' => null,
+                    'height' => null,
+                    'format' => 'jpg',
+                    'checksum' => null,
+                    'sort_order' => 1,
+                    'alt' => null,
+                    'credit' => null,
+                ],
+                [
+                    'id' => null,
+                    'world_heritage_id' => 1133,
+                    'disk' => 'gcs',
+                    'path' => 'wh/1133/photo2.jpg',
+                    'width' => null,
+                    'height' => null,
+                    'format' => 'jpg',
+                    'checksum' => null,
+                    'sort_order' => 2,
+                    'alt' => null,
+                    'credit' => null,
+                ],
+            ],
         ];
+    }
+
+    /**
+     * 指定した画像配列から、そのケース専用のコレクションを生成
+     *
+     * @param array<int, array<string, mixed>> $images
+     */
+    private function createImageEntityCollectionFrom(array $images): ImageEntityCollection
+    {
+        $collection = new ImageEntityCollection();
+        foreach ($images as $img) {
+            $collection->add(new ImageEntity(
+                $img['id'],
+                $img['world_heritage_id'],
+                $img['disk'],
+                $img['path'],
+                $img['width'],
+                $img['height'],
+                $img['format'],
+                $img['checksum'],
+                $img['sort_order'],
+                $img['alt'],
+                $img['credit']
+            ));
+        }
+        return $collection;
     }
 
     public function test_dto_check_single_type(): void
     {
         $data = $this->arraySingleData();
+        $images = $this->createImageEntityCollectionFrom($data['images']);
 
         $dto = new WorldHeritageDto(
             $data['id'],
@@ -155,9 +206,8 @@ class WorldHeritageDtoTest extends TestCase
             $data['area_hectares'] ?? null,
             $data['buffer_zone_hectares'] ?? null,
             $data['short_description'] ?? null,
-            $data['images'] ?? null,
-            $data['unesco_site_url'] ?? null,
-
+            $images,
+            $data['unesco_site_url'] ?? null
         );
 
         $this->assertInstanceOf(WorldHeritageDto::class, $dto);
@@ -166,6 +216,7 @@ class WorldHeritageDtoTest extends TestCase
     public function test_dto_check_single_value(): void
     {
         $data = $this->arraySingleData();
+        $images = $this->createImageEntityCollectionFrom($data['images']);
 
         $dto = new WorldHeritageDto(
             $data['id'],
@@ -184,12 +235,11 @@ class WorldHeritageDtoTest extends TestCase
             $data['area_hectares'] ?? null,
             $data['buffer_zone_hectares'] ?? null,
             $data['short_description'] ?? null,
-            $data['images'] ?? null,
+            $images,
             $data['unesco_site_url'] ?? null,
             $data['state_parties'] ?? [],
             $data['state_parties_meta'] ?? []
         );
-
 
         $this->assertSame($data['id'], $dto->getId());
         $this->assertSame($data['official_name'], $dto->getOfficialName());
@@ -216,6 +266,7 @@ class WorldHeritageDtoTest extends TestCase
     public function test_dto_check_multi_type(): void
     {
         $data = $this->arrayMultiData();
+        $images = $this->createImageEntityCollectionFrom($data['images']);
 
         $dto = new WorldHeritageDto(
             $data['id'],
@@ -234,7 +285,7 @@ class WorldHeritageDtoTest extends TestCase
             $data['area_hectares'] ?? null,
             $data['buffer_zone_hectares'] ?? null,
             $data['short_description'] ?? null,
-            $data['image_url'] ?? null,
+            $images,
             $data['unesco_site_url'] ?? null,
             $data['state_parties'] ?? [],
             $data['state_parties_meta'] ?? []
@@ -246,6 +297,7 @@ class WorldHeritageDtoTest extends TestCase
     public function test_dto_check_multi_value(): void
     {
         $data = $this->arrayMultiData();
+        $images = $this->createImageEntityCollectionFrom($data['images']);
 
         $dto = new WorldHeritageDto(
             $data['id'],
@@ -264,7 +316,7 @@ class WorldHeritageDtoTest extends TestCase
             $data['area_hectares'] ?? null,
             $data['buffer_zone_hectares'] ?? null,
             $data['short_description'] ?? null,
-            $data['images'] ?? null,
+            $images,
             $data['unesco_site_url'] ?? null,
             $data['state_parties'] ?? [],
             $data['state_parties_meta'] ?? []

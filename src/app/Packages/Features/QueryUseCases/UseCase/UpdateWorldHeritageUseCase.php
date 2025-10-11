@@ -5,23 +5,19 @@ namespace App\Packages\Features\QueryUseCases\UseCase;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
-use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
-use Illuminate\Http\Request;
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 
 class UpdateWorldHeritageUseCase
 {
     public function __construct(
-        private readonly WorldHeritageRepositoryInterface $repository
+        private readonly WorldHeritageRepositoryInterface $repository,
+        private readonly ImageUploadUseCase $useCase
     ){}
 
     public function handle(
-        int $id,
-        Request $request
+        WorldHeritageListQuery $commandObject
     ): WorldHeritageDto {
-        $commandObject = UpdateWorldHeritageListQueryFactory::build(array_merge(
-            ['id' => $id],
-            $request->all()
-        ));
+        $collection = $this->useCase->buildImageCollectionAfterPut($commandObject->getImageCollection());
 
         $updateEntity = new WorldHeritageEntity(
             id: $commandObject->getId(),
@@ -40,7 +36,7 @@ class UpdateWorldHeritageUseCase
             areaHectares: $commandObject->getAreaHectares() ?? null,
             bufferZoneHectares: $commandObject->getBufferZoneHectares() ?? null,
             shortDescription: $commandObject->getShortDescription() ?? null,
-            imageUrl: $commandObject->getImageUrl() ?? null,
+            collection: $collection,
             unescoSiteUrl: $commandObject->getUnescoSiteUrl() ?? null,
             statePartyCodes: $commandObject->getStatePartyCodesOrFallback() ?? [],
             statePartyMeta: $commandObject->getStatePartiesMeta() ?? []
@@ -65,7 +61,7 @@ class UpdateWorldHeritageUseCase
             areaHectares: $newEntity->getAreaHectares(),
             bufferZoneHectares: $newEntity->getBufferZoneHectares(),
             shortDescription: $newEntity->getShortDescription(),
-            imageUrl: $newEntity->getImageUrl(),
+            collection: $collection,
             unescoSiteUrl: $newEntity->getUnescoSiteUrl(),
             statePartyCodes: $newEntity->getStatePartyCodes(),
             statePartiesMeta: $newEntity->getStatePartyMeta()
