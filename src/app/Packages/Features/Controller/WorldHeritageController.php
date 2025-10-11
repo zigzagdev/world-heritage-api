@@ -4,7 +4,8 @@ namespace App\Packages\Features\Controller;
 
 use App\Common\Pagination\PaginationViewModel;
 use App\Http\Controllers\Controller;
-use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryFactory;
+use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
 use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Features\QueryUseCases\Factory\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
@@ -128,7 +129,9 @@ class WorldHeritageController extends Controller
     {
         DB::beginTransaction();
         try {
-            $updateTargetObject = $useCase->handle($id, $request);
+            $commandObject = UpdateWorldHeritageListQueryFactory::build($request->all());
+
+            $updateTargetObject = $useCase->handle($commandObject);
 
             $viewModel = new WorldHeritageViewModel($updateTargetObject);
 
