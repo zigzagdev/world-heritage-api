@@ -396,10 +396,13 @@ use RuntimeException;
     public function deleteOneHeritage(int $id): void
     {
         $heritageModel = $this->worldHeritage->find($id);
+
         if (!$heritageModel) {
             throw new RuntimeException('Heritage was not found');
         }
         $heritageModel->countries()->detach();
+        $heritageModel->images()->delete();
+        $heritageModel->delete();
 
         if (!$heritageModel->delete()) {
             throw new RuntimeException('Failed to delete heritage');
