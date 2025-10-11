@@ -2,12 +2,10 @@
 
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
-use App\Packages\Domains\ImageEntityCollection;
 use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
-use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
-use Illuminate\Http\Request;
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 
 class UpdateWorldHeritageUseCase
 {
@@ -17,17 +15,9 @@ class UpdateWorldHeritageUseCase
     ){}
 
     public function handle(
-        int $id,
-        Request $request
+        WorldHeritageListQuery $commandObject
     ): WorldHeritageDto {
-        $commandObject = UpdateWorldHeritageListQueryFactory::build(array_merge(
-            ['id' => $id],
-            $request->all()
-        ));
-
-        $collection = !empty($request['images_confirmed'] ?? [])
-            ? $this->useCase->buildImageCollectionAfterPut($request['images_confirmed'])
-            : new ImageEntityCollection();
+        $collection = $this->useCase->buildImageCollectionAfterPut($commandObject->getImageCollection());
 
         $updateEntity = new WorldHeritageEntity(
             id: $commandObject->getId(),

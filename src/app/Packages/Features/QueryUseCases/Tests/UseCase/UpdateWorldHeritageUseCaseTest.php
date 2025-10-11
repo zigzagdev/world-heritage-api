@@ -185,102 +185,23 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
             ->andReturn($this->arrayData()['short_description']);
 
         $mock
-            ->shouldReceive('getImageUrl')
-            ->andReturn($this->arrayData()['image_url']);
-
-        $mock
             ->shouldReceive('getUnescoSiteUrl')
             ->andReturn($this->arrayData()['unesco_site_url']);
 
         $mock
             ->shouldReceive('getStatePartyCodes')
             ->andReturn($this->arrayData()['state_parties']);
+
+        $mock
+            ->shouldReceive('getStateParty')
+            ->andReturn($this->arrayData()['state_party']);
 
         $mock
             ->shouldReceive('getStatePartiesMeta')
             ->andReturn($this->arrayData()['state_parties_meta']);
 
-        return $mock;
-    }
-
-    private function mockEntity(): WorldHeritageEntity
-    {
-        $mock = Mockery::mock(WorldHeritageEntity::class);
-
         $mock
-            ->shouldReceive('getId')
-            ->andReturn($this->arrayData()['id']);
-
-        $mock
-            ->shouldReceive('getOfficialName')
-            ->andReturn($this->arrayData()['official_name']);
-
-        $mock
-            ->shouldReceive('getName')
-            ->andReturn($this->arrayData()['name']);
-
-        $mock
-            ->shouldReceive('getNameJp')
-            ->andReturn($this->arrayData()['name_jp']);
-
-        $mock
-            ->shouldReceive('getCountry')
-            ->andReturn($this->arrayData()['country']);
-
-        $mock
-            ->shouldReceive('getRegion')
-            ->andReturn($this->arrayData()['region']);
-
-        $mock
-            ->shouldReceive('getCategory')
-            ->andReturn($this->arrayData()['category']);
-
-        $mock
-            ->shouldReceive('getCriteria')
-            ->andReturn($this->arrayData()['criteria']);
-
-        $mock
-            ->shouldReceive('getYearInscribed')
-            ->andReturn($this->arrayData()['year_inscribed']);
-
-        $mock
-            ->shouldReceive('getAreaHectares')
-            ->andReturn($this->arrayData()['area_hectares']);
-
-        $mock
-            ->shouldReceive('getBufferZoneHectares')
-            ->andReturn($this->arrayData()['buffer_zone_hectares']);
-
-        $mock
-            ->shouldReceive('isEndangered')
-            ->andReturn($this->arrayData()['is_endangered']);
-
-        $mock
-            ->shouldReceive('getLatitude')
-            ->andReturn($this->arrayData()['latitude']);
-
-        $mock
-            ->shouldReceive('getLongitude')
-            ->andReturn($this->arrayData()['longitude']);
-
-        $mock
-            ->shouldReceive('getShortDescription')
-            ->andReturn($this->arrayData()['short_description']);
-
-        $mock
-            ->shouldReceive('getImageUrl')
-            ->andReturn($this->arrayData()['image_url']);
-
-        $mock
-            ->shouldReceive('getUnescoSiteUrl')
-            ->andReturn($this->arrayData()['unesco_site_url']);
-
-        $mock
-            ->shouldReceive('getStatePartyCodes')
-            ->andReturn($this->arrayData()['state_parties']);
-
-        $mock
-            ->shouldReceive('getStatePartyMeta')
+            ->shouldReceive('getStatePartyCodesOrFallback')
             ->andReturn($this->arrayData()['state_parties_meta']);
 
         return $mock;
@@ -343,10 +264,7 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
             $this->mockImageUploadUseCase()
         );
 
-        $result = $useCase->handle(
-            $this->arrayData()['id'],
-            $this->mockRequest()
-        );
+        $result = $useCase->handle($this->mockListQuery());
 
         $this->assertInstanceOf(WorldHeritageDto::class, $result);
     }
@@ -400,17 +318,12 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
 
     public function test_use_case_check_value(): void
     {
-        $this->mockListQuery();
-
         $useCase = new UpdateWorldHeritageUseCase(
             $this->mockRepository(),
             $this->mockImageUploadUseCase()
         );
 
-        $result = $useCase->handle(
-            $this->arrayData()['id'],
-            $this->mockRequest()
-        );
+        $result = $useCase->handle($this->mockListQuery());
 
         $this->assertSame($this->arrayData()['id'], $result->getId());
         $this->assertSame($this->arrayData()['official_name'], $result->getOfficialName());
@@ -430,6 +343,6 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
         $this->assertSame($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertSame($this->arrayData()['state_parties'], $result->getStatePartyCodes());
         $this->assertSame($this->arrayData()['state_parties_meta'], $result->getStatePartiesMeta());
-        $this->assertNotNull($result->getImages()[0]);
+        $this->assertNotNull($result->getImages());
     }
 }
