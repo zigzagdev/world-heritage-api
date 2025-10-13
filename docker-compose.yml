@@ -14,35 +14,21 @@ services:
       - "8700:9000"
     depends_on:
       - mysql
-      - mysql-test
     networks: [ heritage-net ]
 
   mysql:
     image: mysql:8.0
     container_name: heritage-mysql
     environment:
-      MYSQL_DATABASE: world_heritage_local
       MYSQL_ROOT_PASSWORD: world-heritage
       MYSQL_USER: world-heritage
-      MYSQL_PASSWORD: world-heritage
+      MYSQL_PASSWORD: world-heritageex
+      MYSQL_DATABASE: world_heritage_local
     ports:
       - "2306:3306"
     volumes:
       - db_data:/var/lib/mysql
-    networks: [ heritage-net ]
-
-  mysql-test:
-    image: mysql:8.0
-    container_name: heritage-mysql-test
-    environment:
-      MYSQL_DATABASE: world_heritage_test
-      MYSQL_ROOT_PASSWORD: world-heritage
-      MYSQL_USER: world-heritage
-      MYSQL_PASSWORD: world-heritage
-    ports:
-      - "2307:3306"
-    volumes:
-      - db_data_test:/var/lib/mysql
+      - ./environment/mysql-init:/docker-entrypoint-initdb.d:ro
     networks: [ heritage-net ]
 
   phpmyadmin:
@@ -59,23 +45,8 @@ services:
       - mysql
     networks: [ heritage-net ]
 
-  phpmyadmin_test:
-    image: phpmyadmin/phpmyadmin:latest
-    container_name: heritage-phpmyadmin-test
-    environment:
-      PMA_HOST: mysql-test
-      PMA_PORT: 3306
-      PMA_USER: world-heritage
-      PMA_PASSWORD: world-heritage
-    ports:
-      - "8081:80"
-    depends_on:
-      - mysql-test
-    networks: [ heritage-net ]
-
 networks:
   heritage-net:
 
 volumes:
   db_data:
-  db_data_test:

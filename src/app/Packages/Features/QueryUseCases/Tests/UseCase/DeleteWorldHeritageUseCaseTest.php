@@ -4,6 +4,7 @@ namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
 use App\Models\Country;
 use App\Models\WorldHeritage;
+use App\Packages\Domains\Ports\ObjectRemovePort;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritageUseCase;
 use Database\Seeders\DatabaseSeeder;
@@ -14,12 +15,13 @@ use Tests\TestCase;
 
 class DeleteWorldHeritageUseCaseTest extends TestCase
 {
+    private int $id;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->refresh();
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        $this->id = 1418;
     }
 
     protected function tearDown(): void
@@ -52,10 +54,22 @@ class DeleteWorldHeritageUseCaseTest extends TestCase
         return $mock;
     }
 
+    private function mockRemover(): ObjectRemovePort
+    {
+        $port = Mockery::mock(ObjectRemovePort::class);
+
+        $port->shouldReceive('removeByPrefix')
+            ->with('gcs', "heritages/{$this->id}/")
+            ->andReturn(3);
+
+        return $port;
+    }
+
     public function test_use_case(): void
     {
         $useCase = new DeleteWorldHeritageUseCase(
-            $this->mockRepository()
+            $this->mockRepository(),
+            $this->mockRemover()
         );
         $useCase->handle(1418);
 
@@ -70,11 +84,11 @@ class DeleteWorldHeritageUseCaseTest extends TestCase
         $mock
             ->shouldReceive('deleteOneHeritage')
             ->with(Mockery::type('int'))
-            ->once()
             ->andThrow(new RuntimeException());
 
         $useCase = new DeleteWorldHeritageUseCase(
-            $mock
+            $mock,
+            $this->mockRemover()
         );
         $useCase->handle(9999);
     }

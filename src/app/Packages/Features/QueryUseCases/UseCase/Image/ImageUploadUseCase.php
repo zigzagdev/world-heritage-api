@@ -1,12 +1,12 @@
 <?php
-namespace App\Packages\Features\QueryUseCases\UseCase;
+namespace App\Packages\Features\QueryUseCases\UseCase\Image;
 
-use App\Packages\Domains\Ports\SignedUrlPort;
-use App\Packages\Domains\Ports\ObjectStoragePort;
 use App\Packages\Domains\ImageEntity;
 use App\Packages\Domains\ImageEntityCollection;
-use RuntimeException;
+use App\Packages\Domains\Ports\ObjectStoragePort;
+use App\Packages\Domains\Ports\SignedUrlPort;
 use InvalidArgumentException;
+use RuntimeException;
 
 class ImageUploadUseCase
 {

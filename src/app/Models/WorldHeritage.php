@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorldHeritage extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'world_heritage_sites';
-    protected $connection = 'mysql';
     public $incrementing = false;
     protected $primaryKey = 'id';
 

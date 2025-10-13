@@ -2,6 +2,7 @@
 
 namespace App\Packages\Domains\Test\Repository;
 
+use App\Models\Image;
 use App\Packages\Domains\WorldHeritageRepository;
 use Tests\TestCase;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,7 @@ class WorldHeritageRepository_deleteTest extends TestCase
              WorldHeritage::truncate();
              Country::truncate();
              DB::table('site_state_parties')->truncate();
+             Image::truncate();
              DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -43,11 +45,14 @@ class WorldHeritageRepository_deleteTest extends TestCase
     {
         $this->repository->deleteOneHeritage(1418);
 
-        $this->assertDatabaseMissing('world_heritage_sites', [
+        $this->assertDatabaseHas('world_heritage_sites', [
             'id' => 1418,
+            'deleted_at' => now(),
         ]);
-        $this->assertDatabaseMissing('site_state_parties', [
-            'world_heritage_site_id' => 1418,
+
+        $this->assertDatabaseHas('images', [
+            'world_heritage_id' => 1418,
+            'deleted_at' => now(),
         ]);
     }
 

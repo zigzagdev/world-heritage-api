@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Packages\Domains\Adapter\GcsObjectStorageAdapter;
 use App\Packages\Domains\Adapter\GcsSignedUrlAdapter;
+use App\Packages\Domains\Infra\GcsImageObjectRemover;
+use App\Packages\Domains\Ports\ObjectRemovePort;
 use App\Packages\Domains\Ports\ObjectStoragePort;
 use App\Packages\Domains\Ports\SignedUrlPort;
 use Illuminate\Support\ServiceProvider;
@@ -30,6 +32,11 @@ class PortsServiceProvider extends ServiceProvider
         $this->app->bind(SignedUrlPort::class, function ($app) {
             return new GcsSignedUrlAdapter($app->make(StorageClient::class));
         });
+
+        $this->app->bind(
+            ObjectRemovePort::class,
+            GcsImageObjectRemover::class
+        );
     }
 
     /**
