@@ -11,7 +11,8 @@ use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
-use App\Packages\Features\QueryUseCases\UseCase\ImageUploadUseCase;
+use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+use App\Packages\Features\QueryUseCases\UseCase\Image\ImageUploadUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Http\Request;
@@ -19,7 +20,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Tests\TestCase;
-use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 
 class UpdateWorldHeritageUseCaseTest extends TestCase
 {
@@ -77,7 +77,6 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
-            'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
             'state_parties' => [
                 'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -203,6 +202,10 @@ class UpdateWorldHeritageUseCaseTest extends TestCase
         $mock
             ->shouldReceive('getStatePartyCodesOrFallback')
             ->andReturn($this->arrayData()['state_parties_meta']);
+
+        $mock
+            ->shouldReceive('getImageCollection')
+            ->andReturn($this->arrayData()['images_confirmed']);
 
         return $mock;
     }

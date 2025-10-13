@@ -11,11 +11,11 @@ use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\Image\ImageUploadUseCase;
 use Database\Seeders\CountrySeeder;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
-use App\Packages\Features\QueryUseCases\UseCase\ImageUploadUseCase;
 
 class CreateWorldHeritageUseCaseTest extends TestCase
 {

@@ -103,7 +103,6 @@ class UpdateWorldHeritagesUseCaseTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
                 'state_parties' => ['CHN','KAZ','KGZ'],
                 'state_parties_meta' => [
@@ -155,7 +154,6 @@ class UpdateWorldHeritagesUseCaseTest extends TestCase
                 area_hectares: isset($row['area_hectares']) ? (float)$row['area_hectares'] : null,
                 buffer_zone_hectares: isset($row['buffer_zone_hectares']) ? (float)$row['buffer_zone_hectares'] : null,
                 short_description: $row['short_description'] ?? null,
-                image_url: $row['image_url'] ?? null,
                 unesco_site_url: $row['unesco_site_url'] ?? null,
                 state_parties_codes: $row['state_parties'] ?? [],
                 state_parties_meta: $row['state_parties_meta'] ?? []
@@ -200,7 +198,6 @@ class UpdateWorldHeritagesUseCaseTest extends TestCase
             $this->assertSame(self::arrayData()[$key]['latitude'], $value['latitude']);
             $this->assertSame(self::arrayData()[$key]['longitude'], $value['longitude']);
             $this->assertSame(self::arrayData()[$key]['short_description'], $value['shortDescription']);
-            $this->assertSame(self::arrayData()[$key]['image_url'], $value['imageUrl']);
             $this->assertSame(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
         }
     }
