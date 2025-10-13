@@ -26,10 +26,30 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     ->orderBy('countries.state_party_code', 'asc')
                     ->orderBy('site_state_parties.inscription_year', 'asc');
             }])
+            ->with(['images' => function ($q) {
+                $q->orderBy('sort_order', 'asc');
+            }])
             ->findOrFail($id);
 
         if (!$heritage) {
             throw new RuntimeException("World Heritage was not found.");
+        }
+
+        $imageCollection = new ImageEntityCollection();
+        foreach (($heritage->images ?? collect()) as $img) {
+            $imageCollection->add(new ImageEntity(
+                id:              $img->id,
+                worldHeritageId: $img->world_heritage_id ?? null,
+                disk:            $img->disk ?? 'gcs',
+                path:            $img->path,
+                width:           $img->width,
+                height:          $img->height,
+                format:          $img->format,
+                checksum:        $img->checksum,
+                sortOrder:       (int) $img->sort_order,
+                alt:             $img->alt,
+                credit:          $img->credit,
+            ));
         }
 
         $statePartyCodes = $heritage->countries
@@ -62,7 +82,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             areaHectares: $heritage->area_hectares,
             bufferZoneHectares: $heritage->buffer_zone_hectares,
             shortDescription: $heritage->short_description,
-            imageUrl: $heritage->image_url,
+            collection: $imageCollection,
             unescoSiteUrl: $heritage->unesco_site_url,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta
