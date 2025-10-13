@@ -3,7 +3,6 @@
 namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
 use App\Models\Country;
-use App\Models\Image;
 use App\Models\WorldHeritage;
 use App\Packages\Domains\ImageEntity;
 use App\Packages\Domains\ImageEntityCollection;
@@ -12,7 +11,7 @@ use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
-use App\Packages\Features\QueryUseCases\UseCase\ImageUploadUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\Image\ImageUploadUseCase;
 use Database\Seeders\CountrySeeder;
 use Illuminate\Support\Facades\DB;
 use Mockery;

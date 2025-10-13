@@ -35,11 +35,6 @@ class CreateOneWorldHeritageTest extends TestCase
             {
                 Storage::disk($this->disk)->put($key, $payload);
             }
-
-            public function delete(string $disk, string $key): void
-            {
-                Storage::disk($this->disk)->delete($key);
-            }
         };
         $this->app->instance(ObjectStoragePort::class, $fakeObject);
 

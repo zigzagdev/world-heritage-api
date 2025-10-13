@@ -2,10 +2,10 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
-use App\Packages\Domains\Ports\SignedUrlPort;
-use App\Packages\Domains\Ports\ObjectStoragePort;
-use App\Packages\Features\QueryUseCases\UseCase\ImageUploadUseCase;
 use App\Packages\Domains\ImageEntityCollection;
+use App\Packages\Domains\Ports\ObjectStoragePort;
+use App\Packages\Domains\Ports\SignedUrlPort;
+use App\Packages\Features\QueryUseCases\UseCase\Image\ImageUploadUseCase;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\TestCase;
