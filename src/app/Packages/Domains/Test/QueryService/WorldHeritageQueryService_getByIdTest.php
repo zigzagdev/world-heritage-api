@@ -9,6 +9,7 @@ use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use App\Models\Image;
 
 class WorldHeritageQueryService_getByIdTest extends TestCase
 {
@@ -34,6 +35,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
             WorldHeritage::truncate();
             Country::truncate();
+            Image::truncate();
             DB::table('site_state_parties')->truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
@@ -59,7 +61,6 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
                 'state_parties_codes' => [
                     'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -145,9 +146,9 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($this->arrayData()['latitude'], $result->getLatitude());
         $this->assertEquals($this->arrayData()['longitude'], $result->getLongitude());
         $this->assertEquals($this->arrayData()['short_description'], $result->getShortDescription());
-        $this->assertEquals($this->arrayData()['image_url'], $result->getImageUrl());
         $this->assertEquals($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEquals($expectedCodes, $result->getStatePartyCodes());
         $this->assertEquals($orderedExpected, $result->getStatePartiesMeta());
+        $this->assertNotNull($result->toArray()['images']);
     }
 }
