@@ -10,6 +10,8 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\Image;
+use App\Packages\Features\QueryUseCases\Dto\ImageDto;
+use App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
 
 class WorldHeritageQueryService_getByIdTest extends TestCase
 {
@@ -129,7 +131,6 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         foreach ($expectedCodes as $code) {
             $orderedExpected[$code] = $expected[$code];
         }
-
         $this->assertEquals($this->arrayData()['id'], $result->getId());
         $this->assertEquals($this->arrayData()['official_name'], $result->getOfficialName());
         $this->assertEquals($this->arrayData()['name'], $result->getName());
@@ -149,6 +150,17 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEquals($expectedCodes, $result->getStatePartyCodes());
         $this->assertEquals($orderedExpected, $result->getStatePartiesMeta());
-        $this->assertNotNull($result->toArray()['images']);
+        foreach ($result->getImages() as $image) {
+            $this->assertNotEmpty($image['id']);
+            $this->assertNotEmpty($image['url']);
+            $this->assertNotEmpty($image['path']);
+            $this->assertNotEmpty($image['width']);
+            $this->assertNotEmpty($image['height']);
+            $this->assertNotEmpty($image['format']);
+            $this->assertNotEmpty($image['alt']);
+            $this->assertNotEmpty($image['credit']);
+            $this->assertNotEmpty($image['checksum']);
+            $this->assertIsBool($image['is_primary']);
+        }
     }
 }
