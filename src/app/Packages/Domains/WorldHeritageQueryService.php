@@ -4,16 +4,21 @@ namespace App\Packages\Domains;
 
 use App\Common\Pagination\PaginationDto;
 use App\Models\WorldHeritage;
+use App\Packages\Features\QueryUseCases\Dto\ImageDto;
+use App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use App\Packages\Features\QueryUseCases\Factory\WorldHeritageDtoCollectionFactory;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use RuntimeException;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
+use App\Packages\Domains\Ports\SignedUrlPort;
+use Illuminate\Support\Facades\Storage;
 
 class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
 {
     public function __construct(
-        private readonly WorldHeritage $model
+        private readonly WorldHeritage $model,
+        private readonly SignedUrlPort $signedUrl
     ){}
 
     public function getHeritageById(
@@ -35,20 +40,27 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             throw new RuntimeException("World Heritage was not found.");
         }
 
-        $imageCollection = new ImageEntityCollection();
-        foreach (($heritage->images ?? collect()) as $img) {
-            $imageCollection->add(new ImageEntity(
-                id:              $img->id,
-                worldHeritageId: $img->world_heritage_id ?? null,
-                disk:            $img->disk ?? 'gcs',
-                path:            $img->path,
-                width:           $img->width,
-                height:          $img->height,
-                format:          $img->format,
-                checksum:        $img->checksum,
-                sortOrder:       (int) $img->sort_order,
-                alt:             $img->alt,
-                credit:          $img->credit,
+        $imageCollection = new ImageDtoCollection();
+        foreach (($heritage->images ?? collect()) as $idx => $img) {
+            $disk = $img->disk ?: config('filesystems.cloud', 'gcs');
+
+            if (in_array($disk, ['gcs', 'gcs_public'], true)) {
+                $url = $this->signedUrl->forGet($disk, $img->path, 300);
+            } else {
+                $url = Storage::disk($disk)->url($img->path);
+            }
+
+            $imageCollection->add(new ImageDto(
+                id:        $img->id,
+                url:       $url,
+                sortOrder: (int) $img->sort_order,
+                width:     $img->width,
+                height:    $img->height,
+                format:    $img->format,
+                alt:       $img->alt,
+                credit:    $img->credit,
+                isPrimary: $idx === 0,
+                checksum:  $img->checksum,
             ));
         }
 
