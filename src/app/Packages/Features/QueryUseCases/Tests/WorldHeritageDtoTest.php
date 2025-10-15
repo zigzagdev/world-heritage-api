@@ -5,8 +5,8 @@ namespace App\Packages\Features\QueryUseCases\Tests;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
-use App\Packages\Domains\ImageEntity;
-use App\Packages\Domains\ImageEntityCollection;
+use App\Packages\Features\QueryUseCases\Dto\ImageDto;
+use App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use Database\Seeders\CountrySeeder;
@@ -158,27 +158,21 @@ class WorldHeritageDtoTest extends TestCase
         ];
     }
 
-    /**
-     * 指定した画像配列から、そのケース専用のコレクションを生成
-     *
-     * @param array<int, array<string, mixed>> $images
-     */
-    private function createImageEntityCollectionFrom(array $images): ImageEntityCollection
+    private function createImageEntityCollectionFrom(array $images): ImageDtoCollection
     {
-        $collection = new ImageEntityCollection();
+        $collection = new ImageDtoCollection();
         foreach ($images as $img) {
-            $collection->add(new ImageEntity(
+            $collection->add(new ImageDto(
                 $img['id'],
-                $img['world_heritage_id'],
-                $img['disk'],
-                $img['path'],
+                'http://localhost/storage/' . ltrim($img['path'], '/'),
+                (int) $img['sort_order'],
                 $img['width'],
                 $img['height'],
                 $img['format'],
-                $img['checksum'],
-                $img['sort_order'],
                 $img['alt'],
-                $img['credit']
+                $img['credit'],
+                ((int) $img['sort_order']) === 1,
+                $img['checksum'],
             ));
         }
         return $collection;
@@ -257,10 +251,27 @@ class WorldHeritageDtoTest extends TestCase
         $this->assertSame($data['area_hectares'], $dto->getAreaHectares());
         $this->assertSame($data['buffer_zone_hectares'], $dto->getBufferZoneHectares());
         $this->assertSame($data['short_description'], $dto->getShortDescription());
-        $this->assertSame($data['images'], $dto->getImages());
         $this->assertSame($data['unesco_site_url'], $dto->getUnescoSiteUrl());
         $this->assertSame($data['state_parties'], $dto->getStatePartyCodes());
         $this->assertSame($data['state_parties_meta'], $dto->getStatePartiesMeta());
+
+        $actualImages = $dto->getImages();
+        $expectedImages = array_map(function ($img) {
+            return [
+                'id'         => $img['id'],
+                'url'        => 'http://localhost/storage/' . ltrim($img['path'], '/'),
+                'sort_order' => (int) $img['sort_order'],
+                'width'      => $img['width'],
+                'height'     => $img['height'],
+                'format'     => $img['format'],
+                'alt'        => $img['alt'],
+                'credit'     => $img['credit'],
+                'is_primary' => ((int) $img['sort_order']) === 1,
+                'checksum'   => $img['checksum'],
+            ];
+        }, $data['images']);
+
+        $this->assertSame($expectedImages, $actualImages);
     }
 
     public function test_dto_check_multi_type(): void
@@ -338,9 +349,26 @@ class WorldHeritageDtoTest extends TestCase
         $this->assertSame($data['area_hectares'], $dto->getAreaHectares());
         $this->assertSame($data['buffer_zone_hectares'], $dto->getBufferZoneHectares());
         $this->assertSame($data['short_description'], $dto->getShortDescription());
-        $this->assertSame($data['images'], $dto->getImages());
         $this->assertSame($data['unesco_site_url'], $dto->getUnescoSiteUrl());
         $this->assertSame($data['state_parties'], $dto->getStatePartyCodes());
         $this->assertSame($data['state_parties_meta'], $dto->getStatePartiesMeta());
+
+        $actualImages = $dto->getImages();
+        $expectedImages = array_map(function ($img) {
+            return [
+                'id' => $img['id'],
+                'url' => 'http://localhost/storage/' . ltrim($img['path'], '/'),
+                'sort_order' => (int) $img['sort_order'],
+                'width' => $img['width'],
+                'height' => $img['height'],
+                'format' => $img['format'],
+                'alt' => $img['alt'],
+                'credit' => $img['credit'],
+                'is_primary' => ((int) $img['sort_order']) === 1,
+                'checksum' => $img['checksum'],
+            ];
+        }, $data['images']);
+
+        $this->assertSame($expectedImages, $actualImages);
     }
 }
