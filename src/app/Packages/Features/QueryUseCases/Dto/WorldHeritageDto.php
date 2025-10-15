@@ -2,8 +2,6 @@
 
 namespace App\Packages\Features\QueryUseCases\Dto;
 
-use App\Packages\Domains\ImageEntityCollection;
-
 class WorldHeritageDto
 {
     public function __construct(
@@ -140,29 +138,7 @@ class WorldHeritageDto
 
     public function getImages(): array
     {
-        return $this->serializeImages();
-    }
-
-    private function serializeImages(): array
-    {
-        if (!$this->collection) return [];
-
-        $image = [];
-        foreach ($this->collection->toArray() as $img) {
-            $image[] = [
-                'id' => $img['id'],
-                'url' => $img['url'],
-                'path' => $img['sort_order'],
-                'width' => $img['width'],
-                'height' => $img['height'],
-                'format' => $img['format'],
-                'alt' => $img['checksum'],
-                'credit' => $img['credit'],
-                'is_primary' => $img['is_primary'],
-                'checksum' => $img['checksum'],
-            ];
-        }
-        return $image;
+        return $this->collection ? $this->collection->toArray() : [];
     }
 
     public function toArray(): array
