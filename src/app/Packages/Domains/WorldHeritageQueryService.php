@@ -4,16 +4,21 @@ namespace App\Packages\Domains;
 
 use App\Common\Pagination\PaginationDto;
 use App\Models\WorldHeritage;
+use App\Packages\Features\QueryUseCases\Dto\ImageDto;
+use App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use App\Packages\Features\QueryUseCases\Factory\WorldHeritageDtoCollectionFactory;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use RuntimeException;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
+use App\Packages\Domains\Ports\SignedUrlPort;
+use Illuminate\Support\Facades\Storage;
 
 class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
 {
     public function __construct(
-        private readonly WorldHeritage $model
+        private readonly WorldHeritage $model,
+        private readonly SignedUrlPort $signedUrl
     ){}
 
     public function getHeritageById(
@@ -26,10 +31,33 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     ->orderBy('countries.state_party_code', 'asc')
                     ->orderBy('site_state_parties.inscription_year', 'asc');
             }])
+            ->with(['images' => function ($q) {
+                $q->orderBy('sort_order', 'asc');
+            }])
             ->findOrFail($id);
 
         if (!$heritage) {
             throw new RuntimeException("World Heritage was not found.");
+        }
+
+        $imageCollection = new ImageDtoCollection();
+
+        foreach (($heritage->images ?? collect()) as $idx => $img) {
+            $disk = $img->disk ?? 'gcs';
+            $url  = $this->signedUrl->forGet($disk, ltrim($img->path, '/'), 300);
+
+            $imageCollection->add(new ImageDto(
+                id:        $img->id,
+                url:       $url,
+                sortOrder: (int) $img->sort_order,
+                width:     $img->width,
+                height:    $img->height,
+                format:    $img->format,
+                alt:       $img->alt,
+                credit:    $img->credit,
+                isPrimary: $idx === 0,
+                checksum:  $img->checksum,
+            ));
         }
 
         $statePartyCodes = $heritage->countries
@@ -62,7 +90,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             areaHectares: $heritage->area_hectares,
             bufferZoneHectares: $heritage->buffer_zone_hectares,
             shortDescription: $heritage->short_description,
-            imageUrl: $heritage->image_url,
+            collection: $imageCollection,
             unescoSiteUrl: $heritage->unesco_site_url,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta

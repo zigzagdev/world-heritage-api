@@ -9,6 +9,9 @@ use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use App\Models\Image;
+use App\Packages\Domains\Ports\SignedUrlPort;
+use Mockery;
 
 class WorldHeritageQueryService_getByIdTest extends TestCase
 {
@@ -17,6 +20,21 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
+
+        $this->app->bind(SignedUrlPort::class, function () {
+            $mock = Mockery::mock(SignedUrlPort::class);
+            $mock->shouldReceive('forGet')
+                ->andReturnUsing(fn($disk, $key, $ttl = 300) =>
+                "https://example.test/get/{$disk}/{$key}?ttl={$ttl}"
+                );
+            $mock->shouldReceive('forPut')
+                ->andReturnUsing(fn($disk, $key, $mime, $ttl = 600) =>
+                "https://example.test/put/{$disk}/{$key}?ttl={$ttl}"
+                );
+            return $mock;
+        });
+
+
         $this->repository = app(WorldHeritageQueryService::class);
         $seeder = new DatabaseSeeder();
         $seeder->run();
@@ -34,6 +52,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
             WorldHeritage::truncate();
             Country::truncate();
+            Image::truncate();
             DB::table('site_state_parties')->truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
@@ -59,7 +78,6 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
                 'state_parties_codes' => [
                     'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -128,7 +146,6 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         foreach ($expectedCodes as $code) {
             $orderedExpected[$code] = $expected[$code];
         }
-
         $this->assertEquals($this->arrayData()['id'], $result->getId());
         $this->assertEquals($this->arrayData()['official_name'], $result->getOfficialName());
         $this->assertEquals($this->arrayData()['name'], $result->getName());
@@ -145,9 +162,23 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($this->arrayData()['latitude'], $result->getLatitude());
         $this->assertEquals($this->arrayData()['longitude'], $result->getLongitude());
         $this->assertEquals($this->arrayData()['short_description'], $result->getShortDescription());
-        $this->assertEquals($this->arrayData()['image_url'], $result->getImageUrl());
         $this->assertEquals($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEquals($expectedCodes, $result->getStatePartyCodes());
         $this->assertEquals($orderedExpected, $result->getStatePartiesMeta());
+        foreach ($result->getImages() as $img) {
+            $this->assertArrayHasKey('id',         $img);
+            $this->assertArrayHasKey('url',        $img);
+            $this->assertArrayHasKey('sort_order', $img);
+            $this->assertArrayHasKey('width',      $img);
+            $this->assertArrayHasKey('height',     $img);
+            $this->assertArrayHasKey('format',     $img);
+            $this->assertArrayHasKey('alt',        $img);
+            $this->assertArrayHasKey('credit',     $img);
+            $this->assertArrayHasKey('is_primary', $img);
+            $this->assertArrayHasKey('checksum',   $img);
+
+            $this->assertIsBool($img['is_primary']);
+            $this->assertNotEmpty($img['url']);
+        }
     }
 }

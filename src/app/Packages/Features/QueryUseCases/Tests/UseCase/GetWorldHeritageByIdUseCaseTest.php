@@ -4,21 +4,27 @@ namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
 use App\Models\Country;
 use App\Models\WorldHeritage;
+use App\Models\Image;
 use App\Packages\Domains\WorldHeritageQueryService;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use App\Packages\Domains\Ports\SignedUrlPort;
+use Mockery;
 
-final class GetWorldHeritageByIdUseCaseTest extends TestCase
+class GetWorldHeritageByIdUseCaseTest extends TestCase
 {
     private $queryService;
     protected function setUp(): void
     {
         parent::setUp();
         $this->refresh();
+
+        $this->app->instance(SignedUrlPort::class, $this->mockSignedUrlPort());
         $this->queryService = app(WorldHeritageQueryService::class);
+
         $seeder = new DatabaseSeeder();
         $seeder->run();
     }
@@ -36,8 +42,22 @@ final class GetWorldHeritageByIdUseCaseTest extends TestCase
             WorldHeritage::truncate();
             Country::truncate();
             DB::table('site_state_parties')->truncate();
+            Image::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
+    }
+
+    private function mockSignedUrlPort(): SignedUrlPort
+    {
+        $mock = Mockery::mock(SignedUrlPort::class);
+
+        $mock
+            ->shouldReceive('forGet')
+            ->andReturnUsing(function ($disk, $path, $expiration) {
+                return "https://example.com/{$disk}/{$path}?expires_in={$expiration}";
+            });
+
+        return $mock;
     }
 
     private static function arrayData(): array

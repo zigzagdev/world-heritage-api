@@ -2,8 +2,6 @@
 
 namespace App\Packages\Features\QueryUseCases\Dto;
 
-use App\Packages\Domains\ImageEntityCollection;
-
 class WorldHeritageDto
 {
     public function __construct(
@@ -23,7 +21,7 @@ class WorldHeritageDto
         private readonly ?float $areaHectares = null,
         private readonly ?float $bufferZoneHectares = null,
         private readonly ?string $shortDescription = null,
-        private readonly ?ImageEntityCollection $collection = null,
+        private readonly ?ImageDtoCollection $collection = null,
         private readonly ?string $unescoSiteUrl = null,
         private readonly array $statePartyCodes = [],
         private readonly array $statePartiesMeta = [],
@@ -140,30 +138,7 @@ class WorldHeritageDto
 
     public function getImages(): array
     {
-        return $this->serializeImages();
-    }
-
-    private function serializeImages(): array
-    {
-        if (!$this->collection) return [];
-
-        $image = [];
-        foreach ($this->collection->getItems() as $img) {
-            $image[] = [
-                'id'         => $img->id,
-                'world_heritage_id' => $img->worldHeritageId,
-                'disk'       => $img->disk,
-                'path'       => $img->path,
-                'width'      => $img->width,
-                'height'     => $img->height,
-                'format'     => $img->format,
-                'checksum'   => $img->checksum,
-                'sort_order' => $img->sortOrder,
-                'alt'        => $img->alt,
-                'credit'     => $img->credit,
-            ];
-        }
-        return $image;
+        return $this->collection ? $this->collection->toArray() : [];
     }
 
     public function toArray(): array
