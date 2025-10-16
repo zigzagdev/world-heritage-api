@@ -12,7 +12,6 @@ use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQuery
 use RuntimeException;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Domains\Ports\SignedUrlPort;
-use Illuminate\Support\Facades\Storage;
 
 class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
 {
@@ -49,7 +48,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             $imageCollection->add(new ImageDto(
                 id:        $img->id,
                 url:       $url,
-                sortOrder: (int) $img->sort_order,
+                sortOrder: $img->sort_order,
                 width:     $img->width,
                 height:    $img->height,
                 format:    $img->format,
@@ -104,11 +103,14 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
     ): PaginationDto {
 
         $heritages = $this->model
-            ->with(['countries' => function ($q) {
-                $q->withPivot(['is_primary', 'inscription_year'])
-                    ->orderBy('countries.state_party_code', 'asc')
-                    ->orderBy('site_state_parties.inscription_year', 'asc');
-            }])
+            ->with([
+                'countries' => function ($q) {
+                    $q->withPivot(['is_primary', 'inscription_year'])
+                        ->orderBy('countries.state_party_code', 'asc')
+                        ->orderBy('site_state_parties.inscription_year', 'asc');
+                },
+                'images' => fn($q) => $q->orderBy('sort_order', 'asc'),
+            ])
             ->whereIn('id', $ids)
             ->paginate($perPage, ['*'], 'page', $currentPage)
             ->through(function ($heritage) {
@@ -125,9 +127,31 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     ];
                 }
 
+                $thumb = null;
+                if ($heritage->images && $heritage->images->isNotEmpty()) {
+                    $img  = $heritage->images->first();
+                    $disk = $img->disk ?? 'gcs';
+                    if ($disk === 'gcs') {
+                        $url = $this->signedUrl->forGet('gcs', ltrim($img->path, '/'), 300);
+                    } else {
+                        $url = url('storage/' . ltrim($img->path, '/'));
+                    }
+                    $thumb = [
+                        'url'        => $url,
+                        'width'      => $img->width,
+                        'height'     => $img->height,
+                        'alt'        => $img->alt,
+                        'format'     => $img->format,
+                        'checksum'   => $img->checksum,
+                        'sort_order' => (int) $img->sort_order,
+                    ];
+                }
+
                 $arr = $heritage->toArray();
                 $arr['state_parties']      = $statePartyCodes;
                 $arr['state_parties_meta'] = $statePartiesMeta;
+                $arr['thumbnail']          = $thumb;
+
                 return $arr;
             });
 

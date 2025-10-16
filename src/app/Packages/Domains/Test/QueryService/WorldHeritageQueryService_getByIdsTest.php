@@ -4,6 +4,7 @@ namespace App\Packages\Domains\Test\QueryService;
 
 use App\Common\Pagination\PaginationDto;
 use App\Models\Country;
+use App\Models\Image;
 use App\Models\WorldHeritage;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,7 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
             WorldHeritage::truncate();
             Country::truncate();
             DB::table('site_state_parties')->truncate();
+            Image::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -64,7 +66,6 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
                 'state_parties_codes' => [
                     'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -107,7 +108,6 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => '中国・カザフスタン・キルギスにまたがるオアシス都市や遺跡群で構成され、東西交流の歴史を物証する文化遺産群。',
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442',
                 'state_parties' => ['CHN','KAZ','KGZ'],
                 'state_parties_meta' => [
@@ -157,7 +157,6 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
             $this->assertSame(self::arrayData()[$key]['latitude'], $value['latitude']);
             $this->assertSame(self::arrayData()[$key]['longitude'], $value['longitude']);
             $this->assertSame(self::arrayData()[$key]['short_description'], $value['shortDescription']);
-            $this->assertSame(self::arrayData()[$key]['image_url'], $value['imageUrl']);
             $this->assertSame(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
             $this->assertArrayHasKey('statePartyCodes', $value);
             $this->assertArrayHasKey('statePartiesMeta', $value);
