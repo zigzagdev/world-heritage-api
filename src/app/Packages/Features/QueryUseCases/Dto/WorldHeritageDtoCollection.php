@@ -31,7 +31,6 @@ class WorldHeritageDtoCollection
                 'areaHectares' => $heritage->getAreaHectares(),
                 'bufferZoneHectares' => $heritage->getBufferZoneHectares(),
                 'shortDescription' => $heritage->getShortDescription(),
-                'imageUrl' => $heritage->getImageUrl(),
                 'unescoSiteUrl' => $heritage->getUnescoSiteUrl(),
                 'statePartyCodes' => $heritage->getStatePartyCodes(),
                 'statePartiesMeta' => $heritage->getStatePartiesMeta(),
