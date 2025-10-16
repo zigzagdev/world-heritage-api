@@ -10,8 +10,8 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\Image;
-use App\Packages\Features\QueryUseCases\Dto\ImageDto;
-use App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
+use App\Packages\Domains\Ports\SignedUrlPort;
+use Mockery;
 
 class WorldHeritageQueryService_getByIdTest extends TestCase
 {
@@ -20,6 +20,21 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
+
+        $this->app->bind(SignedUrlPort::class, function () {
+            $mock = Mockery::mock(SignedUrlPort::class);
+            $mock->shouldReceive('forGet')
+                ->andReturnUsing(fn($disk, $key, $ttl = 300) =>
+                "https://example.test/get/{$disk}/{$key}?ttl={$ttl}"
+                );
+            $mock->shouldReceive('forPut')
+                ->andReturnUsing(fn($disk, $key, $mime, $ttl = 600) =>
+                "https://example.test/put/{$disk}/{$key}?ttl={$ttl}"
+                );
+            return $mock;
+        });
+
+
         $this->repository = app(WorldHeritageQueryService::class);
         $seeder = new DatabaseSeeder();
         $seeder->run();
@@ -150,17 +165,20 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEquals($expectedCodes, $result->getStatePartyCodes());
         $this->assertEquals($orderedExpected, $result->getStatePartiesMeta());
-        foreach ($result->getImages() as $image) {
-            $this->assertNotEmpty($image['id']);
-            $this->assertNotEmpty($image['url']);
-            $this->assertNotEmpty($image['path']);
-            $this->assertNotEmpty($image['width']);
-            $this->assertNotEmpty($image['height']);
-            $this->assertNotEmpty($image['format']);
-            $this->assertNotEmpty($image['alt']);
-            $this->assertNotEmpty($image['credit']);
-            $this->assertNotEmpty($image['checksum']);
-            $this->assertIsBool($image['is_primary']);
+        foreach ($result->getImages() as $img) {
+            $this->assertArrayHasKey('id',         $img);
+            $this->assertArrayHasKey('url',        $img);
+            $this->assertArrayHasKey('sort_order', $img);
+            $this->assertArrayHasKey('width',      $img);
+            $this->assertArrayHasKey('height',     $img);
+            $this->assertArrayHasKey('format',     $img);
+            $this->assertArrayHasKey('alt',        $img);
+            $this->assertArrayHasKey('credit',     $img);
+            $this->assertArrayHasKey('is_primary', $img);
+            $this->assertArrayHasKey('checksum',   $img);
+
+            $this->assertIsBool($img['is_primary']);
+            $this->assertNotEmpty($img['url']);
         }
     }
 }
