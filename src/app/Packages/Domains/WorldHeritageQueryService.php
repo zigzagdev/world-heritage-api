@@ -41,14 +41,10 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
         }
 
         $imageCollection = new ImageDtoCollection();
-        foreach (($heritage->images ?? collect()) as $idx => $img) {
-            $disk = $img->disk ?: config('filesystems.cloud', 'gcs');
 
-            if (in_array($disk, ['gcs', 'gcs_public'], true)) {
-                $url = $this->signedUrl->forGet($disk, $img->path, 300);
-            } else {
-                $url = Storage::disk($disk)->url($img->path);
-            }
+        foreach (($heritage->images ?? collect()) as $idx => $img) {
+            $disk = $img->disk ?? 'gcs';
+            $url  = $this->signedUrl->forGet($disk, ltrim($img->path, '/'), 300);
 
             $imageCollection->add(new ImageDto(
                 id:        $img->id,
