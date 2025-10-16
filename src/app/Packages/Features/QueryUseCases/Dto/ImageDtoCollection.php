@@ -21,7 +21,7 @@ class ImageDtoCollection
         return $this->images;
     }
 
-    public function isEmpty(): bool
+    public function getIsEmpty(): bool
     {
         return $this->images === [];
     }
@@ -34,7 +34,7 @@ class ImageDtoCollection
     public function primary(): ?ImageDto
     {
         foreach ($this->images as $img) {
-            if ($img->isPrimary) return $img;
+            if ($img->getIsPrimary()) return $img;
         }
         return $this->first();
     }
@@ -58,27 +58,4 @@ class ImageDtoCollection
     {
         return $this->toArray();
     }
-
-    private function createImageEntityCollectionFrom(array $images): ImageDtoCollection
-    {
-        $collection = new ImageDtoCollection();
-        foreach ($images as $img) {
-            $url = 'http://localhost/storage/' . ltrim($img['path'], '/'); // ← URL化
-
-            $collection->add(new ImageDto(
-                id:        $img['id'],
-                url:       $url,
-                sortOrder: (int) $img['sort_order'],
-                width:     $img['width'],
-                height:    $img['height'],
-                format:    $img['format'],
-                alt:       $img['alt'],
-                credit:    $img['credit'],
-                isPrimary: ((int) $img['sort_order']) === 1,  // ← primary を正しく設定
-                checksum:  $img['checksum'],
-            ));
-        }
-        return $collection;
-    }
-
 }
