@@ -160,6 +160,7 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
             $this->assertSame(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
             $this->assertArrayHasKey('statePartyCodes', $value);
             $this->assertArrayHasKey('statePartiesMeta', $value);
+            $this->assertArrayHasKey('thumbnail', $value);
         }
 
         $expectedFirstCodes = [
