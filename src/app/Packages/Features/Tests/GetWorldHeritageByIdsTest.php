@@ -2,6 +2,7 @@
 
 namespace App\Packages\Features\Tests;
 
+use App\Models\Image;
 use Database\Seeders\DatabaseSeeder;
 use Tests\TestCase;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,7 @@ class GetWorldHeritageByIdsTest extends TestCase
              WorldHeritage::truncate();
              Country::truncate();
              DB::table('site_state_parties')->truncate();
+             Image::truncate();
              DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -56,7 +58,6 @@ class GetWorldHeritageByIdsTest extends TestCase
                 'latitude' => 34.6147,
                 'longitude' => 135.7355,
                 'short_description' => "Early Buddhist wooden structures including the world's oldest wooden building.",
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/660/',
             ],
             [
@@ -77,7 +78,6 @@ class GetWorldHeritageByIdsTest extends TestCase
                 'latitude' => 34.8394,
                 'longitude' => 134.6939,
                 'short_description' => "A masterpiece of Japanese castle architecture in original form.",
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/661/',
             ],
             [
@@ -98,7 +98,6 @@ class GetWorldHeritageByIdsTest extends TestCase
                 'latitude' => 30.3581,
                 'longitude' => 130.546,
                 'short_description' => "A subtropical island with ancient cedar forests and diverse ecosystems.",
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/662/',
             ],
             [
@@ -119,7 +118,6 @@ class GetWorldHeritageByIdsTest extends TestCase
                 'latitude' => 40.5167,
                 'longitude' => 140.05,
                 'short_description' => "Pristine beech forest with minimal human impact.",
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/663/',
             ]
         ];
@@ -152,7 +150,6 @@ class GetWorldHeritageByIdsTest extends TestCase
             $this->assertEquals(self::arrayData()[$key]['latitude'], $value['latitude']);
             $this->assertEquals(self::arrayData()[$key]['longitude'], $value['longitude']);
             $this->assertEquals(self::arrayData()[$key]['short_description'], $value['shortDescription']);
-            $this->assertEquals(self::arrayData()[$key]['image_url'], $value['imageUrl']);
             $this->assertEquals(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
         }
     }
