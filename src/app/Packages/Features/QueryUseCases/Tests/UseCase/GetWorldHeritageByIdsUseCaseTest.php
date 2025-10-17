@@ -183,7 +183,7 @@ class GetWorldHeritageByIdsUseCaseTest extends TestCase
         $this->assertInstanceOf(PaginationDto::class, $result);
     }
 
-    public function test_use_case_check_value(): void
+    public function test_use_case_check_value_1(): void
     {
         $ids = array_column(self::arrayData(), 'id');
         $queryService = $this->mockQueryService();
@@ -217,6 +217,24 @@ class GetWorldHeritageByIdsUseCaseTest extends TestCase
             } else {
                 $this->assertSame($result->toArray()[$key], $value);
             }
+        }
+    }
+
+    public function test_use_case_check_value(): void
+    {
+        $ids = array_column(self::arrayData(), 'id');
+        $queryService = $this->mockQueryService();
+        $useCase = new GetWorldHeritageByIdsUseCase($queryService);
+
+        $result = $useCase->handle($ids, $this->currentPage, $this->perPage);
+
+        $data = $result->toArray()['data'];
+        $this->assertCount(2, $data);
+
+        foreach ($data as $row) {
+            $this->assertArrayHasKey('image_url', $row);
+            $this->assertIsString($row['image_url']);
+            $this->assertMatchesRegularExpression('#^https?://#', $row['image_url']);
         }
     }
 }

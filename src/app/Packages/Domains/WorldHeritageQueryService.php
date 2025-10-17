@@ -12,6 +12,7 @@ use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQuery
 use RuntimeException;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Domains\Ports\SignedUrlPort;
+use Illuminate\Support\Facades\Storage;
 
 class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
 {
@@ -102,14 +103,16 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
         int $perPage
     ): PaginationDto {
 
-        $heritages = $this->model
+        $paginator = $this->model
             ->with([
                 'countries' => function ($q) {
                     $q->withPivot(['is_primary', 'inscription_year'])
                         ->orderBy('countries.state_party_code', 'asc')
                         ->orderBy('site_state_parties.inscription_year', 'asc');
                 },
-                'images' => fn($q) => $q->orderBy('sort_order', 'asc'),
+                'getThumbnailImageUrl' => function ($q) {
+                    $q->select('id','world_heritage_id','disk','path','width','height','format','checksum','sort_order','alt','credit');
+                },
             ])
             ->whereIn('id', $ids)
             ->paginate($perPage, ['*'], 'page', $currentPage)
@@ -127,40 +130,48 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     ];
                 }
 
-                $thumb = null;
-                if ($heritage->images && $heritage->images->isNotEmpty()) {
-                    $img  = $heritage->images->first();
-                    $disk = $img->disk ?? 'gcs';
-                    if ($disk === 'gcs') {
-                        $url = $this->signedUrl->forGet('gcs', ltrim($img->path, '/'), 300);
+                $thumb = $heritage->getThumbnailImageUrl;
+                $imageUrl = null;
+                if ($thumb) {
+                    $disk = $thumb->disk ?: config('filesystems.cloud', 'gcs');
+                    $path = ltrim($thumb->path, '/');
+                    if (in_array($disk, ['gcs', 'gcs_public'], true)) {
+                        $imageUrl = $this->signedUrl->forGet($disk, $path, 300);
                     } else {
-                        $url = url('storage/' . ltrim($img->path, '/'));
+                        $imageUrl = Storage::disk($disk)->url($path);
                     }
-                    $thumb = [
-                        'url'        => $url,
-                        'width'      => $img->width,
-                        'height'     => $img->height,
-                        'alt'        => $img->alt,
-                        'format'     => $img->format,
-                        'checksum'   => $img->checksum,
-                        'sort_order' => (int) $img->sort_order,
-                    ];
                 }
 
-                $arr = $heritage->toArray();
-                $arr['state_parties']      = $statePartyCodes;
-                $arr['state_parties_meta'] = $statePartiesMeta;
-                $arr['thumbnail']          = $thumb;
-
-                return $arr;
+                return [
+                    'id' => $heritage->id,
+                    'official_name' => $heritage->official_name,
+                    'name' => $heritage->name,
+                    'name_jp' => $heritage->name_jp,
+                    'country' => $heritage->country,
+                    'region' => $heritage->region,
+                    'category' => $heritage->category,
+                    'criteria' => $heritage->criteria,
+                    'state_party' => $heritage->state_party,
+                    'year_inscribed' => $heritage->year_inscribed,
+                    'area_hectares' => $heritage->area_hectares,
+                    'buffer_zone_hectares' => $heritage->buffer_zone_hectares,
+                    'is_endangered' => (bool) $heritage->is_endangered,
+                    'latitude' => $heritage->latitude,
+                    'longitude' => $heritage->longitude,
+                    'short_description' => $heritage->short_description,
+                    'image_url' => $imageUrl,
+                    'unesco_site_url' => $heritage->unesco_site_url,
+                    'state_parties' => $statePartyCodes,
+                    'state_parties_meta' => $statePartiesMeta,
+                ];
             });
 
-
-        $dtoCollection = $this->buildDtoFromCollection($heritages->toArray()['data']);
+        $paginationArray = $paginator->toArray();
+        $dtoCollection = $this->buildDtoFromCollection($paginationArray['data']);
 
         return new PaginationDto(
             collection: $dtoCollection,
-            pagination: collect($heritages)->except('data')->toArray()
+            pagination: collect($paginationArray)->except('data')->toArray()
         );
     }
 
