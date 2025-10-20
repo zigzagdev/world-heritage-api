@@ -6,7 +6,7 @@ use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
 use App\Packages\Domains\WorldHeritageEntityCollection;
-use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\ListQuery\CreateWorldHeritageListQueryCollectionFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;

@@ -4,24 +4,23 @@ namespace App\Packages\Features\Controller;
 
 use App\Common\Pagination\PaginationViewModel;
 use App\Http\Controllers\Controller;
-use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryFactory;
-use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
-use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryCollectionFactory;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageViewModelCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\ListQuery\UpdateWorldHeritageListQueryCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\ListQuery\UpdateWorldHeritageListQueryFactory;
+use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Exception;
 
 class WorldHeritageController extends Controller
 {

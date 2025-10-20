@@ -7,11 +7,12 @@ use App\Models\WorldHeritage;
 use App\Packages\Features\QueryUseCases\Dto\ImageDto;
 use App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageDtoCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\Dto\WorldHeritageDetailFactory;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use RuntimeException;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Domains\Ports\SignedUrlPort;
+use App\Packages\Features\QueryUseCases\Factory\Dto\WorldHeritageDtoCollectionFactory;
 use Illuminate\Support\Facades\Storage;
 
 class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
@@ -73,28 +74,28 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             ];
         }
 
-        return new WorldHeritageDto(
-            id: $heritage->id,
-            officialName: $heritage->official_name,
-            name: $heritage->name,
-            country: $heritage->country,
-            region: $heritage->region,
-            category: $heritage->category,
-            yearInscribed: $heritage->year_inscribed,
-            latitude: $heritage->latitude,
-            longitude: $heritage->longitude,
-            isEndangered: $heritage->is_endangered,
-            nameJp: $heritage->name_jp,
-            stateParty: $heritage->state_party,
-            criteria: $heritage->criteria,
-            areaHectares: $heritage->area_hectares,
-            bufferZoneHectares: $heritage->buffer_zone_hectares,
-            shortDescription: $heritage->short_description,
-            collection: $imageCollection,
-            unescoSiteUrl: $heritage->unesco_site_url,
-            statePartyCodes: $statePartyCodes,
-            statePartiesMeta: $statePartiesMeta
-        );
+        return WorldHeritageDetailFactory::build([
+            'id' => $heritage->id,
+            'official_name' => $heritage->official_name,
+            'name' => $heritage->name,
+            'country' => $heritage->country,
+            'region' => $heritage->region,
+            'category' => $heritage->category,
+            'year_inscribed' => $heritage->year_inscribed,
+            'latitude' => $heritage->latitude,
+            'longitude' => $heritage->longitude,
+            'is_endangered' => (bool) $heritage->is_endangered,
+            'name_jp' => $heritage->name_jp,
+            'state_party' => $heritage->state_party,
+            'criteria' => $heritage->criteria,
+            'area_hectares' => $heritage->area_hectares,
+            'buffer_zone_hectares' => $heritage->buffer_zone_hectares,
+            'short_description' => $heritage->short_description,
+            'images' => $imageCollection->toArray(),
+            'unesco_site_url' => $heritage->unesco_site_url,
+            'state_party_codes' => $statePartyCodes,
+            'state_parties_meta' => $statePartiesMeta,
+        ]);
     }
 
     public function getHeritagesByIds(
@@ -111,7 +112,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                         ->orderBy('site_state_parties.inscription_year', 'asc');
                 },
                 'getThumbnailImageUrl' => function ($q) {
-                    $q->select('id','world_heritage_id','disk','path','width','height','format','checksum','sort_order','alt','credit');
+                    $q->select('id','images.world_heritage_id','disk','path','width','height','format','checksum','sort_order','alt','credit');
                 },
             ])
             ->whereIn('id', $ids)
@@ -125,7 +126,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                 $statePartiesMeta = [];
                 foreach ($heritage->countries as $country) {
                     $statePartiesMeta[$country->state_party_code] = [
-                        'is_primary'       => (bool) data_get($country, 'pivot.is_primary', false),
+                        'is_primary' => (bool) data_get($country, 'pivot.is_primary', false),
                         'inscription_year' => data_get($country, 'pivot.inscription_year'),
                     ];
                 }

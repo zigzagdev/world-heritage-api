@@ -4,11 +4,11 @@ namespace App\Packages\Features\QueryUseCases\Tests;
 
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
-use Tests\TestCase;
-use Mockery;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageViewModelCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\Dto\WorldHeritageDtoCollectionFactory;
+use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModelCollection;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageDtoCollectionFactory;
+use Mockery;
+use Tests\TestCase;
 
 class WorldHeritageViewModelCollectionFactoryTest extends TestCase
 {

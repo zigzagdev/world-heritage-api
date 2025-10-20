@@ -2,11 +2,11 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests\ListQuery;
 
-use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryFactory;
+use App\Packages\Features\QueryUseCases\Factory\ListQuery\CreateWorldHeritageListQueryFactory;
 use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 use DomainException;
-use Tests\TestCase;
 use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 class CreateWorldHeritageListQueryFactoryTest extends TestCase
 {
