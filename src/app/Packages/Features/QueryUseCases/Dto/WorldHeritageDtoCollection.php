@@ -13,6 +13,14 @@ class WorldHeritageDtoCollection
 
     public function toArray(): array
     {
+        return array_map(
+            fn (WorldHeritageDto $heritage) => $heritage->toArray(),
+            $this->heritages
+        );
+    }
+
+    public function toSummaryArray(): array
+    {
         return array_map(function (WorldHeritageDto $heritage) {
             return [
                 'id' => $heritage->getId(),
@@ -31,10 +39,10 @@ class WorldHeritageDtoCollection
                 'areaHectares' => $heritage->getAreaHectares(),
                 'bufferZoneHectares' => $heritage->getBufferZoneHectares(),
                 'shortDescription' => $heritage->getShortDescription(),
-                'imageUrl' => $heritage->getImageUrl(),
                 'unescoSiteUrl' => $heritage->getUnescoSiteUrl(),
                 'statePartyCodes' => $heritage->getStatePartyCodes(),
                 'statePartiesMeta' => $heritage->getStatePartiesMeta(),
+                'thumbnail' => $heritage->getThumbnailUrl(),
             ];
         }, $this->heritages);
     }
@@ -42,5 +50,12 @@ class WorldHeritageDtoCollection
     public function getHeritages(): array
     {
         return $this->heritages;
+    }
+
+    public function add(WorldHeritageDto $dto): self
+    {
+        $this->heritages[] = $dto;
+
+        return $this;
     }
 }

@@ -2,12 +2,12 @@
 
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
+use App\Packages\Domains\WorldHeritageEntity;
 use App\Packages\Domains\WorldHeritageEntityCollection;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
-use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
-use App\Packages\Features\QueryUseCases\Factory\CreateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
-use App\Packages\Domains\WorldHeritageEntity;
+use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+use App\Packages\Features\QueryUseCases\Factory\ListQuery\CreateWorldHeritageListQueryCollectionFactory;
 use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 
 class CreateWorldManyHeritagesUseCase

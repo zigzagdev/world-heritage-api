@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\Dto;
 
-use Database\Seeders\CountrySeeder;
-use Tests\TestCase;
-use Illuminate\Support\Facades\DB;
-use App\Models\WorldHeritage;
 use App\Models\Country;
-use App\Packages\Features\QueryUseCases\Factory\WorldHeritageDtoCollectionFactory;
-use Illuminate\Support\Str;
+use App\Models\Image;
+use App\Models\WorldHeritage;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+use App\Packages\Features\QueryUseCases\Factory\Dto\WorldHeritageDtoCollectionFactory;
+use Database\Seeders\CountrySeeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Tests\TestCase;
 
 class WorldHeritageDtoCollectionTest extends TestCase
 {
@@ -17,8 +18,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
-        $seeder = new CountrySeeder();
-        $seeder->run();
+        (new CountrySeeder())->run();
     }
 
     protected function tearDown(): void
@@ -34,6 +34,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
             WorldHeritage::truncate();
             Country::truncate();
             DB::table('site_state_parties')->truncate();
+            Image::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -60,9 +61,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
                 'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
-                'state_parties' => [
-                    'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
-                ],
+                'state_parties' => ['ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'],
                 'state_parties_meta' => [
                     'ALB' => ['is_primary' => false, 'inscription_year' => 2007],
                     'AUT' => ['is_primary' => false, 'inscription_year' => 2007],
@@ -121,36 +120,82 @@ class WorldHeritageDtoCollectionTest extends TestCase
         $this->assertInstanceOf(WorldHeritageDtoCollection::class, $dtoCollection);
     }
 
-    public function test_check_dto_collection_value(): void
+    public function test_collection_check_value_without_thumbnail(): void
     {
         $data = self::arrayData();
         $dtoCollection = WorldHeritageDtoCollectionFactory::build($data);
 
-        $arrayDtoCollection = count($dtoCollection->toArray());
+        $expectFirstCode = [
+            0 => "ALB",
+            1 => "AUT",
+            2 => "BEL",
+            3 => "BIH",
+            4 => "BGR",
+            5 => "HRV",
+            6 => "CZE",
+            7 => "FRA",
+            8 => "DEU",
+            9 => "ITA",
+            10 => "MKD",
+            11 => "POL",
+            12 => "ROU",
+            13 => "SVK",
+            14 => "SVN",
+            15 => "ESP",
+            16 => "CHE",
+            17 => "UKR",
+        ];
 
-        $this->assertEquals(count($data), $arrayDtoCollection);
-        $actual = collect($dtoCollection->toArray())->map(function($item) {
-            if (is_array($item['statePartyCodes'])) {
-                $item['state_parties'] = collect($item['statePartyCodes'])->map(function($code) {
-                    return Str::upper($code);
-                })->toArray();
-            }
-            return collect($item)->keyBy(function($value, $key) {
-                return Str::snake($key);
-            })->toArray();
+        $expectSecondCode = [
+            0 => "CHN",
+            1 => "KAZ",
+            2 => "KGZ",
+        ];
+
+        foreach ($dtoCollection->getHeritages() as $index => $dto) {
+            $eachData = self::arrayData()[$index];
+
+            $this->assertSame($eachData['id'], $dto->getId());
+            $this->assertSame($eachData['official_name'], $dto->getOfficialName());
+            $this->assertSame($eachData['name'], $dto->getName());
+            $this->assertSame($eachData['country'], $dto->getCountry());
+            $this->assertSame($eachData['region'], $dto->getRegion());
+            $this->assertSame($eachData['category'], $dto->getCategory());
+            $this->assertSame($eachData['year_inscribed'], $dto->getYearInscribed());
+            $this->assertSame($eachData['area_hectares'], $dto->getAreaHectares());
+            $this->assertSame($eachData['buffer_zone_hectares'], $dto->getBufferZoneHectares());
+            $this->assertSame($eachData['is_endangered'], $dto->isEndangered());
+            $this->assertSame($eachData['latitude'], $dto->getLatitude());
+            $this->assertSame($eachData['longitude'], $dto->getLongitude());
+            $this->assertSame($eachData['short_description'], $dto->getShortDescription());
+            $this->assertSame($eachData['unesco_site_url'], $dto->getUnescoSiteUrl());
+
+            $this->assertEqualsCanonicalizing($eachData['criteria'] ?? [], $dto->getCriteria() ?? []);
+
+            $expectedCodes = $eachData['state_party_codes'] ?? $eachData['state_parties'] ?? [];
+            $this->assertEqualsCanonicalizing($expectedCodes, $dto->getStatePartyCodes());
+
+            $this->assertEquals($eachData['state_parties_meta'] ?? [], $dto->getStatePartiesMeta());
+        }
+    }
+
+    public function test_summary_array_matches_expected_with_thumbnail(): void
+    {
+        $data = self::arrayData();
+        $dtoCollection = WorldHeritageDtoCollectionFactory::build($data);
+
+        $summary = $dtoCollection->toSummaryArray();
+
+        $this->assertCount(count($data), $summary);
+
+        collect($summary)->map(function ($item) {
+            $this->assertArrayNotHasKey('images', $item);
+            $this->assertArrayNotHasKey('imageUrl', $item);
+            $this->assertArrayNotHasKey('state_parties', $item);
+            $this->assertArrayHasKey('thumbnail', $item);
+            $this->assertTrue(is_string($item['thumbnail']) || is_null($item['thumbnail']));
+
+            return collect($item)->keyBy(fn($v,$k)=>Str::snake($k))->toArray();
         })->toArray();
-
-        $expected = collect($data)->map(function($item) {
-            if (is_array($item['state_parties'])) {
-                $item['state_party_codes'] = collect($item['state_parties'])->map(function($code) {
-                    return Str::upper($code);
-                })->toArray();
-            }
-            return collect($item)->keyBy(function($value, $key) {
-                return Str::snake($key);
-            })->toArray();
-        })->toArray();
-
-        $this->assertEquals($expected, $actual);
     }
 }
