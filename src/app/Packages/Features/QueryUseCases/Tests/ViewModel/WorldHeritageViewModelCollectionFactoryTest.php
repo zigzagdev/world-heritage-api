@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\ViewModel;
 
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
-use App\Packages\Features\QueryUseCases\Factory\Dto\WorldHeritageDtoCollectionFactory;
 use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModelCollection;
-use Mockery;
 use Tests\TestCase;
+use App\Packages\Features\QueryUseCases\Dto\ImageDto;
 
 class WorldHeritageViewModelCollectionFactoryTest extends TestCase
 {
@@ -42,7 +41,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
-                'image_url' => '',
+                'thumbnail_url' => 'https://example.com/en/list/1133/',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
                 'state_parties' => [
                     'AL','AT','BE','BA','BG','HR','CZ','FR','DE','IT','MK','PL','RO','SK','SI','ES','CH','UA'
@@ -85,7 +84,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
-                'image_url' => '',
+                'thumbnail_url' => 'https://example.com/en/list/1442/',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
                 'state_parties' => ['CN','KZ','KG'],
                 'state_parties_meta' => [
@@ -99,43 +98,48 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
 
     private function mockDtoCollection(): WorldHeritageDtoCollection
     {
-        $factory = Mockery::mock(
-            'alias' . WorldHeritageDtoCollectionFactory::class
-        );
-        $mock = Mockery::mock(WorldHeritageDtoCollection::class);
+        $dtos = array_map(function (array $data) {
+            $thumbnail = isset($data['thumbnail_url']) && $data['thumbnail_url']
+                ? new ImageDto(
+                    id: $data['id'] ?? 0,
+                    url: $data['thumbnail_url'],
+                    sortOrder: 0,
+                    width: null,
+                    height: null,
+                    format: null,
+                    alt: null,
+                    credit: null,
+                    isPrimary: true,
+                    checksum: null,
+                )
+                : null;
 
-        $dtos = array_map(
-            fn (array $data) => new WorldHeritageDto(
+            return new WorldHeritageDto(
                 id: $data['id'],
                 officialName: $data['official_name'],
                 name: $data['name'],
                 country: $data['country'],
                 region: $data['region'],
-                stateParty: $data['state_party'],
                 category: $data['category'],
-                criteria: $data['criteria'],
                 yearInscribed: $data['year_inscribed'],
-                areaHectares: $data['area_hectares'],
-                bufferZoneHectares: $data['buffer_zone_hectares'],
-                isEndangered: $data['is_endangered'] ?? false,
                 latitude: $data['latitude'],
                 longitude: $data['longitude'],
+                isEndangered: $data['is_endangered'] ?? false,
+                nameJp: $data['name_jp'] ?? null,
+                stateParty: $data['state_party'] ?? null,
+                criteria: $data['criteria'] ?? null,
+                areaHectares: $data['area_hectares'] ?? null,
+                bufferZoneHectares: $data['buffer_zone_hectares'] ?? null,
                 shortDescription: $data['short_description'] ?? null,
-                imageUrl: $data['image_url'] ?? null,
-                unescoSiteUrl: $data['unesco_site_url'] ?? null
-            ), self::arrayData()
-        );
+                collection: null,
+                unescoSiteUrl: $data['unesco_site_url'] ?? null,
+                statePartyCodes: $data['state_party_codes'] ?? ($data['state_parties'] ?? []),
+                statePartiesMeta: $data['state_parties_meta'] ?? [],
+                thumbnail: $thumbnail,
+            );
+        }, self::arrayData());
 
-        $factory
-            ->shouldReceive('build')
-            ->with(self::arrayData())
-            ->andReturn($mock);
-
-        $mock
-            ->shouldReceive('getHeritages')
-            ->andReturn($dtos);
-
-        return $mock;
+        return new WorldHeritageDtoCollection(...$dtos);
     }
 
     public function test_view_model_collection_check_type(): void
@@ -155,7 +159,6 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
         $result = WorldHeritageViewModelCollectionFactory::build(
             $this->mockDtoCollection()
         );
-
         foreach ($result->toArray() as $key => $value) {
             $this->assertEquals(self::arrayData()[$key]['id'], $value['id']);
             $this->assertEquals(self::arrayData()[$key]['official_name'], $value['official_name']);
@@ -172,7 +175,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
             $this->assertEquals(self::arrayData()[$key]['latitude'], $value['latitude']);
             $this->assertEquals(self::arrayData()[$key]['longitude'], $value['longitude']);
             $this->assertEquals(self::arrayData()[$key]['short_description'], $value['short_description']);
-            $this->assertEquals(self::arrayData()[$key]['image_url'], $value['image_url']);
+            $this->assertEquals(self::arrayData()[$key]['thumbnail_url'], $value['thumbnail_url']);
             $this->assertEquals(self::arrayData()[$key]['unesco_site_url'], $value['unesco_site_url']);
         }
     }

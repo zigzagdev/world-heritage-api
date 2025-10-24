@@ -3,32 +3,42 @@
 namespace App\Packages\Features\QueryUseCases\Factory\ViewModel;
 
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
+use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
 
 class WorldHeritageSummaryViewModelFactory
 {
-    public static function build(WorldHeritageDto $dto): array
+    public function __construct(
+        private readonly WorldHeritageDto $dto
+    ) {}
+
+    public static function build(WorldHeritageDto $dto): WorldHeritageViewModel
+    {
+        return new WorldHeritageViewModel($dto);
+    }
+
+    public function toArray(): array
     {
         return [
-            'id' => $dto->getId(),
-            'official_name' => $dto->getOfficialName(),
-            'name' => $dto->getName(),
-            'name_jp' => $dto->getNameJp(),
-            'country' => $dto->getCountry(),
-            'region' => $dto->getRegion(),
-            'category' => $dto->getCategory(),
-            'criteria' => $dto->getCriteria(),
-            'year_inscribed' => $dto->getYearInscribed(),
-            'area_hectares' => $dto->getAreaHectares(),
-            'buffer_zone_hectares' => $dto->getBufferZoneHectares(),
-            'is_endangered' => $dto->isEndangered(),
-            'latitude' => $dto->getLatitude(),
-            'longitude' => $dto->getLongitude(),
-            'short_description' => $dto->getShortDescription(),
-            'unesco_site_url' => $dto->getUnescoSiteUrl(),
-            'state_party' => $dto->getStateParty(),
-            'state_party_codes' => $dto->getStatePartyCodes(),
-            'state_parties_meta' => $dto->getStatePartiesMeta(),
-            'thumbnail_url' => $dto->getThumbnailUrl(),
+            'id' => $this->dto->getId(),
+            'official_name' => $this->dto->getOfficialName(),
+            'name' => $this->dto->getName(),
+            'name_jp' => $this->dto->getNameJp(),
+            'country' => $this->dto->getCountry(),
+            'region' => $this->dto->getRegion(),
+            'category' => $this->dto->getCategory(),
+            'criteria' => $this->dto->getCriteria(),
+            'year_inscribed' => $this->dto->getYearInscribed(),
+            'area_hectares' => $this->dto->getAreaHectares(),
+            'buffer_zone_hectares' => $this->dto->getBufferZoneHectares(),
+            'is_endangered' => $this->dto->isEndangered(),
+            'latitude' => $this->dto->getLatitude(),
+            'longitude' => $this->dto->getLongitude(),
+            'short_description' => $this->dto->getShortDescription(),
+            'unesco_site_url' => $this->dto->getUnescoSiteUrl(),
+            'state_party' => $this->dto->getStateParty(),
+            'state_party_codes' => $this->dto->getStatePartyCodes(),
+            'state_parties_meta' => $this->dto->getStatePartiesMeta(),
+            'thumbnail_url' => $this->dto->getThumbnailUrl(),
         ];
     }
 }
