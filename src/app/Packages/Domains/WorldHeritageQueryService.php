@@ -112,7 +112,11 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                         ->orderBy('site_state_parties.inscription_year', 'asc');
                 },
                 'getThumbnailImageUrl' => function ($q) {
-                    $q->select('id','images.world_heritage_id','disk','path','width','height','format','checksum','sort_order','alt','credit');
+                    $q->select([
+                        'images.id', 'images.world_heritage_id', 'disk', 'path',
+                        'width', 'height', 'format', 'checksum',
+                        'sort_order', 'alt', 'credit',
+                    ]);
                 },
             ])
             ->whereIn('id', $ids)
@@ -122,7 +126,6 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     ->pluck('state_party_code')
                     ->map(fn($c) => strtoupper($c))
                     ->all();
-
                 $statePartiesMeta = [];
                 foreach ($heritage->countries as $country) {
                     $statePartiesMeta[$country->state_party_code] = [
@@ -160,7 +163,8 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     'latitude' => $heritage->latitude,
                     'longitude' => $heritage->longitude,
                     'short_description' => $heritage->short_description,
-                    'image_url' => $imageUrl,
+                    'thumbnail_id' => $thumb->id,
+                    'thumbnail_url' => $imageUrl,
                     'unesco_site_url' => $heritage->unesco_site_url,
                     'state_parties' => $statePartyCodes,
                     'state_parties_meta' => $statePartiesMeta,

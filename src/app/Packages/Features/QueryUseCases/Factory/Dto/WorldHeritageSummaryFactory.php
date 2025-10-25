@@ -9,21 +9,19 @@ class WorldHeritageSummaryFactory
 {
     public static function build(array $data): WorldHeritageDto
     {
-        $thumb = null;
-        $imageArr = $data['image'] ?? null;
+        $thumbnail = null;
+        $imageArr  = is_array($data['image'] ?? null) ? $data['image'] : null;
 
-        $imageId =
-            $data['image_id']
+        $imageId = $data['image_id']
             ?? $data['thumbnail_id']
             ?? ($imageArr['id'] ?? null);
 
-        $imageUrl =
-            $data['image_url']
-            ?? $data['thumbnail_url']
+        $imageUrl = $data['thumbnail_url']
+            ?? $data['image_url']
             ?? ($imageArr['url'] ?? null);
 
-        if ($imageId !== null && !empty($imageUrl)) {
-            $thumb = new ImageDto(
+        if (!empty($imageUrl)) {
+            $thumbnail = new ImageDto(
                 id: (int) $imageId,
                 url: (string) $imageUrl,
                 sortOrder: (int) ($data['image_sort_order'] ?? $imageArr['sort_order'] ?? 0),
@@ -58,7 +56,7 @@ class WorldHeritageSummaryFactory
             unescoSiteUrl: $data['unesco_site_url'] ?? null,
             statePartyCodes: $data['state_parties'] ?? [],
             statePartiesMeta: is_array($data['state_parties_meta'] ?? null) ? $data['state_parties_meta'] : [],
-            thumbnail: $thumb
+            thumbnail: $thumbnail
         );
     }
 }
