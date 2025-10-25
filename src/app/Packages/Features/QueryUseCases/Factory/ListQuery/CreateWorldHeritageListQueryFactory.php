@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Factory;
+namespace App\Packages\Features\QueryUseCases\Factory\ListQuery;
 
 use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 use DomainException;

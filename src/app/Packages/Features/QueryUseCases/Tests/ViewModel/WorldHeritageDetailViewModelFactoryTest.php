@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Tests;
+namespace App\Packages\Features\QueryUseCases\Tests\ViewModel;
 
-use Tests\TestCase;
-use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
+use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
 use Mockery;
+use Tests\TestCase;
 
-class WorldHeritageViewModelTest extends TestCase
+class WorldHeritageDetailViewModelFactoryTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -63,16 +63,20 @@ class WorldHeritageViewModelTest extends TestCase
                 'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
             ],
             "images" => [
-                "id" => 1,
-                "disk" => "gcs",
-                "path" => "wh\/1133\/photo.jpg",
-                "width" => 200,
-                "height" => 200,
-                "format" => "jpg",
-                "checksum" => null,
-                "sort_order" => 1,
-                "alt" => null,
-                "credit" => null
+                [
+                    'id' => 1,
+                    'world_heritage_id' => 1133,
+                    'image_url' => 'https://example.com/image1.jpg',
+                    'caption' => 'A beautiful beech forest',
+                    'attribution' => 'Photo by John Doe',
+                ],
+                [
+                    'id' => 2,
+                    'world_heritage_id' => 1133,
+                    'image_url' => 'https://example.com/image2.jpg',
+                    'caption' => 'Sunlight through the trees',
+                    'attribution' => 'Photo by Jane Smith',
+                ],
             ]
         ];
     }

@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests\ListQuery;
 
-use App\Packages\Features\QueryUseCases\Factory\UpdateWorldHeritageListQueryFactory;
+use App\Packages\Features\QueryUseCases\Factory\ListQuery\UpdateWorldHeritageListQueryFactory;
 use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
 use DomainException;
 use Illuminate\Support\Facades\Storage;

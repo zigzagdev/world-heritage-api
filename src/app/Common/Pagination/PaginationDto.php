@@ -85,20 +85,20 @@ class PaginationDto
     public function toArray(): array
     {
         return [
-            'data' => $this->collection->toArray(),
+            'data' => $this->collection->toSummaryArray(),
             'pagination' => [
-                'current_page' => $this->getCurrentPage(),
-                'from' => $this->getFrom(),
-                'to' => $this->getTo(),
-                'per_page' => $this->getPerPage(),
-                'path' => $this->getPath(),
-                'last_page' => $this->getLastPage(),
-                'total' => $this->getTotal(),
+                'current_page'   => $this->getCurrentPage(),
+                'from'           => $this->getFrom(),
+                'to'             => $this->getTo(),
+                'per_page'       => $this->getPerPage(),
+                'path'           => $this->getPath(),
+                'last_page'      => $this->getLastPage(),
+                'total'          => $this->getTotal(),
                 'first_page_url' => $this->getFirstPageUrl(),
-                'last_page_url' => $this->getLastPageUrl(),
-                'next_page_url' => $this->getNextPageUrl(),
-                'prev_page_url' => $this->getPrevPageUrl(),
-                'links' => $this->getLinks(),
+                'last_page_url'  => $this->getLastPageUrl(),
+                'next_page_url'  => $this->getNextPageUrl(),
+                'prev_page_url'  => $this->getPrevPageUrl(),
+                'links'          => $this->getLinks(),
             ],
         ];
     }

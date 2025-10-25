@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Packages\Features\QueryUseCases\Factory;
+namespace App\Packages\Features\QueryUseCases\Factory\ListQuery;
 
-use DomainException;
 use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+use DomainException;
 use Illuminate\Support\Arr;
 
 class UpdateWorldHeritageListQueryFactory
