@@ -41,84 +41,81 @@ class GetWorldHeritageByIdsTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'unesco_id' => '660',
-                'official_name' => 'Buddhist Monuments in the Horyu-ji Area',
-                'name' => 'Buddhist Monuments in the Horyu-ji Area',
-                'name_jp' => '法隆寺地域の仏教建造物',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'cultural',
-                'criteria' => ['ii', 'iii', 'v'],
-                'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
-                'is_endangered' => false,
-                'latitude' => 34.6147,
-                'longitude' => 135.7355,
-                'short_description' => "Early Buddhist wooden structures including the world's oldest wooden building.",
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/660/',
-            ],
-            [
-                'id' => 2,
-                'unesco_id' => '661',
+                'id' => '661',
                 'official_name' => 'Himeji-jo',
                 'name' => 'Himeji-jo',
                 'name_jp' => '姫路城',
                 'country' => 'Japan',
                 'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'cultural',
+                'state_party' => 'JPN',
+                'category' => 'Cultural',
                 'criteria' => ['ii', 'iii', 'v'],
                 'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'area_hectares' => 107.0,
+                'buffer_zone_hectares' => 143.0,
                 'is_endangered' => false,
                 'latitude' => 34.8394,
                 'longitude' => 134.6939,
-                'short_description' => "A masterpiece of Japanese castle architecture in original form.",
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/661/',
+                'short_description' => "白鷺城の名で知られる城郭建築の傑作。天守群と縄張りが良好に保存される。",
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/661',
             ],
             [
-                'id' => 3,
-                'unesco_id' => '662',
+                'id' => '662',
                 'official_name' => 'Yakushima',
                 'name' => 'Yakushima',
                 'name_jp' => '屋久島',
                 'country' => 'Japan',
                 'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'natural',
+                'state_party' => 'JPN',
+                'category' => 'Natural',
                 'criteria' => ['ii', 'iii', 'v'],
                 'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'area_hectares' => 10747.0,
+                'buffer_zone_hectares' => null,
                 'is_endangered' => false,
-                'latitude' => 30.3581,
-                'longitude' => 130.546,
-                'short_description' => "A subtropical island with ancient cedar forests and diverse ecosystems.",
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/662/',
+                'latitude' => null,
+                'longitude' => null,
+                'short_description' => "巨樹・照葉樹林に代表される生態系と景観が特筆される島。",
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/662',
             ],
             [
-                'id' => 4,
-                'unesco_id' => '663',
+                'id' => '663',
                 'official_name' => 'Shirakami-Sanchi',
                 'name' => 'Shirakami-Sanchi',
                 'name_jp' => '白神山地',
                 'country' => 'Japan',
                 'region' => 'Asia',
-                'state_party' => 'JP',
-                'category' => 'natural',
+                'state_party' => 'JPN',
+                'category' => 'Natural',
                 'criteria' => ['ii', 'iii', 'v'],
                 'year_inscribed' => 1993,
-                'area_hectares' => 442.0,
-                'buffer_zone_hectares' => 320.0,
+                'area_hectares' => 16971.0,
+                'buffer_zone_hectares' => 6832.0,
                 'is_endangered' => false,
-                'latitude' => 40.5167,
-                'longitude' => 140.05,
-                'short_description' => "Pristine beech forest with minimal human impact.",
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/663/',
+                'latitude' => null,
+                'longitude' => null,
+                'short_description' => "日本最大級のブナ天然林を中心とする山地生態系。",
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/663',
+            ],
+            [
+                'id' => '1442',
+                'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
+                'name' => "Silk·Roads:·Chang'an–Tianshan·Corridor",
+                'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
+                'country' => 'China',
+                'region' => 'Asia',
+                'state_party' => null,
+                'category' => 'Cultural',
+                'criteria' => json_encode(['ii','iii','vi']),
+                'year_inscribed' => 2014,
+                'area_hectares' => 42668.16,
+                'buffer_zone_hectares' => 189963.1,
+                'is_endangered' => false,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => '中国・カザフスタン・キルギスにまたがるオアシス都市や遺跡群で構成され、東西交流の歴史を物証する文化遺産群。',
+                'image_url' => '',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1442',
             ]
         ];
     }
@@ -130,27 +127,98 @@ class GetWorldHeritageByIdsTest extends TestCase
         $result = $this->getJson(
             '/api/v1/heritages?ids=' . implode(',', $ids)
         );
+
         $result->assertStatus(200);
-        $arrayData = $result->getOriginalContent()['data']['data'];
+        $arrayData = $result->getOriginalContent()['data'];
+
+        $expectedCriteria = [
+            661 => ['i','iv'],
+            662 => ['vii','ix'],
+            663 => ['ix','x'],
+            1442 => ['ii','iii','vi'],
+        ];
+
+
+        $expectedCodes = [
+            661 => ['JPN'],
+            662 => ['JPN'],
+            663 => ['JPN'],
+            1442 => ['CHN','KAZ','KGZ'],
+        ];
+        $expectedMeta = [
+            661 => ['JPN' => ['is_primary' => true,  'inscription_year' => 1993]],
+            662 => ['JPN' => ['is_primary' => true,  'inscription_year' => 1993]],
+            663 => ['JPN' => ['is_primary' => true,  'inscription_year' => 1993]],
+            1442 => [
+                'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
+                'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
+                'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
+            ],
+        ];
+
+        $expectedById = [];
+        foreach (self::arrayData() as $row) {
+            $expectedById[$row['id']] = $row;
+        }
+
+
         foreach ($arrayData as $key => $value) {
-            $this->assertEquals(self::arrayData()[$key]['id'], $value['id']);
-            $this->assertEquals(self::arrayData()[$key]['unesco_id'], $value['unescoId']);
-            $this->assertEquals(self::arrayData()[$key]['official_name'], $value['officialName']);
-            $this->assertEquals(self::arrayData()[$key]['name'], $value['name']);
-            $this->assertEquals(self::arrayData()[$key]['name_jp'], $value['nameJp']);
-            $this->assertEquals(self::arrayData()[$key]['country'], $value['country']);
-            $this->assertEquals(self::arrayData()[$key]['region'], $value['region']);
-            $this->assertEquals(self::arrayData()[$key]['state_party'], $value['stateParty']);
-            $this->assertEquals(self::arrayData()[$key]['category'], $value['category']);
-            $this->assertEquals(self::arrayData()[$key]['criteria'], $value['criteria']);
-            $this->assertEquals(self::arrayData()[$key]['year_inscribed'], $value['yearInscribed']);
-            $this->assertEquals(self::arrayData()[$key]['area_hectares'], $value['areaHectares']);
-            $this->assertEquals(self::arrayData()[$key]['buffer_zone_hectares'], $value['bufferZoneHectares']);
-            $this->assertEquals(self::arrayData()[$key]['is_endangered'], $value['isEndangered']);
-            $this->assertEquals(self::arrayData()[$key]['latitude'], $value['latitude']);
-            $this->assertEquals(self::arrayData()[$key]['longitude'], $value['longitude']);
-            $this->assertEquals(self::arrayData()[$key]['short_description'], $value['shortDescription']);
-            $this->assertEquals(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
+            $this->assertArrayHasKey('id', $value);
+            $this->assertArrayHasKey($value['id'], $expectedById, "Unexpected id={$value['id']} in response");
+
+            $expected = $expectedById[$value['id']];
+
+            $this->assertEquals($expected['id'], $value['id']);
+            $this->assertEquals($expected['official_name'], $value['official_name']);
+            $this->assertEquals($expected['name'], $value['name']);
+            $this->assertEquals($expected['name_jp'], $value['name_jp']);
+            $this->assertEquals($expected['country'], $value['country']);
+            $this->assertEquals($expected['region'], $value['region']);
+            $this->assertEquals($expected['category'], $value['category']);
+            $this->assertEquals($expected['year_inscribed'], $value['year_inscribed']);
+
+            $this->assertEquals($expected['state_party'] ?? null, $value['state_party'] ?? null);
+
+            $this->assertEquals($expected['area_hectares'], $value['area_hectares']);
+            $this->assertEquals($expected['buffer_zone_hectares'], $value['buffer_zone_hectares']);
+            $this->assertEquals($expected['is_endangered'], $value['is_endangered']);
+            $this->assertEquals($expected['latitude'], $value['latitude']);
+            $this->assertEquals($expected['longitude'], $value['longitude']);
+            $this->assertEquals($expected['short_description'], $value['short_description']);
+
+            if (array_key_exists('unesco_siteUrl', $value)) {
+                $this->assertEquals($expected['unesco_site_url'], $value['unesco_siteUrl']);
+            } else {
+                $this->assertEquals($expected['unesco_site_url'], $value['unesco_site_url']);
+            }
+
+            $this->assertArrayHasKey('state_party_codes', $value);
+
+            $this->assertEqualsCanonicalizing(
+                $expectedCriteria[$value['id']],
+                $value['criteria'],
+            );
+
+            $this->assertEqualsCanonicalizing(
+                $expectedCodes[$value['id']],
+                $value['state_party_codes'],
+            );
+
+            $this->assertEqualsCanonicalizing(
+                array_keys($expectedMeta[$value['id']]),
+                array_keys($value['state_parties_meta']),
+                "state_parties_meta keys mismatch for id={$value['id']}"
+            );
+
+            $this->assertArrayHasKey('thumbnail', $value);
+            $this->assertIsString($value['thumbnail']);
+            $this->assertNotEmpty($value['thumbnail']);
+
+            $this->assertMatchesRegularExpression(
+                '#^https?://[^/]+/storage/world_heritage/'.$value['id'].'/img\d+\.(jpg|jpeg|png)$#',
+                $value['thumbnail'],
+                "thumbnail url format mismatch for id={$value['id']}"
+            );
         }
     }
 }

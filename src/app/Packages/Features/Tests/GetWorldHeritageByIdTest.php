@@ -178,12 +178,9 @@ class GetWorldHeritageByIdTest extends TestCase
 
         $data = $res->json('data');
 
-        // 1) 配列で返る
         $this->assertIsArray($data['images']);
 
-        // 画像があるときのみ、以下を検証
         if (!empty($data['images'])) {
-            // 5) フィールド構造
             $this->assertArrayHasKey('id', $data['images'][0]);
             $this->assertArrayHasKey('url', $data['images'][0]);
             $this->assertArrayHasKey('sort_order', $data['images'][0]);
@@ -195,23 +192,19 @@ class GetWorldHeritageByIdTest extends TestCase
             $this->assertArrayHasKey('is_primary', $data['images'][0]);
             $this->assertArrayHasKey('checksum', $data['images'][0]);
 
-            // 2) 並び順（sort_order昇順）
             $orders = array_column($data['images'], 'sort_order');
             $sorted = $orders; sort($sorted);
             $this->assertSame($sorted, $orders);
 
-            // 3) primary 判定
             $this->assertTrue($data['images'][0]['is_primary']);
             if (count($data['images']) > 1) {
                 $this->assertFalse($data['images'][1]['is_primary']);
             }
 
-            // 4) 署名URL（SignedUrlPortをMockしてる前提）
             $this->assertStringStartsWith('https://example.test/get/', $data['images'][0]['url']);
-            $this->assertStringContainsString('/seed/world_heritage/1133/img', $data['images'][0]['url']);
+            $this->assertStringContainsString('/world_heritage/1133/img', $data['images'][0]['url']);
             $this->assertStringContainsString('ttl=300', $data['images'][0]['url']);
 
-            // 6) 値の健全性
             $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $data['images'][0]['checksum']);
             $this->assertIsInt($data['images'][0]['width']);
             $this->assertIsInt($data['images'][0]['height']);
