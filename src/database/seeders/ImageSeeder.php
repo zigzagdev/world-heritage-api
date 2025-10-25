@@ -26,7 +26,7 @@ class ImageSeeder extends Seeder
 
             for ($i = 1; $i <= $count; $i++) {
                 $disk = 'public';
-                $path = "seed/world_heritage/{$site->id}/img{$i}.jpg";
+                $path = "world_heritage/{$site->id}/img{$i}.jpg";
 
                 $site->images()->create([
                     'disk'       => $disk,

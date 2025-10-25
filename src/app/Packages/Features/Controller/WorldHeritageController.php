@@ -16,6 +16,8 @@ use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
+use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageDetailViewModelFactory;
+use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageSummaryViewModelFactory;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,11 +38,9 @@ class WorldHeritageController extends Controller
 
         $dto = $useCase->handle($id);
 
-        $viewModel = new WorldHeritageViewModel($dto);
-
         return response()->json([
             'status' => 'success',
-            'data' => $viewModel->toArray(),
+            'data' => WorldHeritageDetailViewModelFactory::build($dto)
         ], 200);
     }
 

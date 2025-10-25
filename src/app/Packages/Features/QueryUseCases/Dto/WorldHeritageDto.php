@@ -116,7 +116,10 @@ class WorldHeritageDto
     {
         return $this->statePartyCodes ?: $this->getStatePartyCodesOrFallback();
     }
-    public function getStatePartiesMeta(): array { return $this->statePartiesMeta; }
+    public function getStatePartiesMeta(): array
+    {
+        return $this->statePartiesMeta;
+    }
 
     private function getStatePartyCodesOrFallback(): array
     {
