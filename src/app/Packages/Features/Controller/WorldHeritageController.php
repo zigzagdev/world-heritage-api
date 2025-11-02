@@ -17,7 +17,7 @@ use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
 use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageDetailViewModelFactory;
-use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageSummaryViewModelFactory;
+use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritagesUseCase;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,25 +47,38 @@ class WorldHeritageController extends Controller
     public function getWorldHeritagesByIds(
         Request $request,
         GetWorldHeritageByIdsUseCase $useCase,
+        GetWorldHeritagesUseCase $indexUseCase
     ): JsonResponse
     {
         $ids = $request->get('ids', []);
 
-        $heritageIds = array_map(
-            fn ($user_id) => intval($user_id),
-            explode(',', $ids)
-        );
-        $currentPage = $request->get('current_page', 1);
-        $perPage = $request->get('per_page', 30);
+        if (empty($ids)) {
+            $dtoCollection = $indexUseCase->handle();
 
-        $dto = $useCase->handle($heritageIds, $currentPage, $perPage);
+            $viewModel = WorldHeritageViewModelCollectionFactory::build($dtoCollection);
 
-        $viewModel = new PaginationViewModel($dto);
+            return response()->json(
+                $viewModel->toArray(),
+                200
+            );
+        } else {
 
-        return response()->json(
-            $viewModel->toArray(),
-            200
-        );
+            $heritageIds = array_map(
+                fn ($user_id) => intval($user_id),
+                explode(',', $ids)
+            );
+            $currentPage = $request->get('current_page', 1);
+            $perPage = $request->get('per_page', 30);
+
+            $dto = $useCase->handle($heritageIds, $currentPage, $perPage);
+
+            $viewModel = new PaginationViewModel($dto);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $viewModel->toArray(),
+            ], 200);
+        }
     }
 
     public function registerOneWorldHeritage(
