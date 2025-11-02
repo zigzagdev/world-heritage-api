@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\WorldHeritage;
 use App\Models\Country;
 
-class GetWorldHeritageByIdsTest extends TestCase
+class GetWorldHeritagesTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -120,7 +120,7 @@ class GetWorldHeritageByIdsTest extends TestCase
         ];
     }
 
-    public function test_feature_api_ok(): void
+    public function test_feature_api_ok_with_ids(): void
     {
         $ids = array_column(self::arrayData(), 'id');
 
@@ -162,9 +162,9 @@ class GetWorldHeritageByIdsTest extends TestCase
         }
 
 
-        foreach ($arrayData as $key => $value) {
+        foreach ($arrayData['data'] as $key => $value) {
             $this->assertArrayHasKey('id', $value);
-            $this->assertArrayHasKey($value['id'], $expectedById, "Unexpected id={$value['id']} in response");
+            $this->assertArrayHasKey($value['id'], $expectedById);
 
             $expected = $expectedById[$value['id']];
 
@@ -220,5 +220,14 @@ class GetWorldHeritageByIdsTest extends TestCase
                 "thumbnail url format mismatch for id={$value['id']}"
             );
         }
+    }
+
+    public function test_feature_api_ok_without_ids(): void
+    {
+        $result = $this->getJson(
+            '/api/v1/heritages'
+        );
+
+        $result->assertStatus(200);
     }
 }

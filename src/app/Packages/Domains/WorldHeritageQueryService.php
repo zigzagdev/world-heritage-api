@@ -188,7 +188,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                         ->orderBy('countries.state_party_code', 'asc')
                         ->orderBy('site_state_parties.inscription_year', 'asc');
                 },
-                'getThumbnailImageUrl' => function ($q) {
+                'thumbnail' => function ($q) {
                     $q->select([
                         'images.id', 'images.world_heritage_id', 'disk', 'path',
                         'width', 'height', 'format', 'checksum',
@@ -211,7 +211,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     ];
                 }
 
-                $thumb = $heritage->getThumbnailImageUrl;
+                $thumb = $heritage->thumbnail;
                 $imageUrl = null;
                 if ($thumb) {
                     $disk = $thumb->disk ?: config('filesystems.cloud', 'gcs');
