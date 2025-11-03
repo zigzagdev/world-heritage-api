@@ -68,8 +68,8 @@ class WorldHeritage extends Model
         return $this->hasMany(Image::class, 'world_heritage_id', 'id');
     }
 
-    public function getThumbnailImageUrl(): HasOne
+    public function thumbnail(): HasOne
     {
-        return $this->hasOne(Image::class)->ofMany('sort_order', 'min');
+        return $this->hasOne(Image::class, 'world_heritage_id')->ofMany('sort_order', 'min');
     }
 }

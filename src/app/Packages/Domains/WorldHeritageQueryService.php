@@ -22,6 +22,83 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
         private readonly SignedUrlPort $signedUrl
     ){}
 
+    public function getAllHeritages(): WorldHeritageDtoCollection
+    {
+        $items = $this->model
+            ->select([
+                'id','official_name','name','name_jp','country','region','category','criteria',
+                'state_party','year_inscribed','area_hectares','buffer_zone_hectares',
+                'is_endangered','latitude','longitude','short_description','unesco_site_url',
+            ])
+            ->with([
+                'countries' => fn($q) => $q->orderBy('countries.state_party_code','asc'),
+                'thumbnail' => fn($q) => $q->select([
+                    'images.id',
+                    'images.world_heritage_id',
+                    'images.disk','images.path','images.width','images.height',
+                    'images.format','images.checksum','images.sort_order',
+                    'images.alt','images.credit',
+                ]),
+            ])
+            ->limit(30)
+            ->get();
+
+        $array = $items->map(function ($heritage) {
+            $statePartyCodes = optional($heritage->countries)
+                ->pluck('state_party_code')
+                ->map(fn ($c) => strtoupper($c))
+                ->values()
+                ->all();
+
+            $statePartiesMeta = optional($heritage->countries)
+                ->mapWithKeys(function ($country) {
+                    return [
+                        $country->state_party_code => [
+                            'is_primary'       => (bool) ($country->pivot->is_primary ?? false),
+                            'inscription_year' => $country->pivot->inscription_year ?? null,
+                        ],
+                    ];
+                })
+                ->all();
+
+            $thumb = $heritage->thumbnail;
+            $imageUrl = null;
+            if ($thumb) {
+                $disk = $thumb->disk ?: config('filesystems.cloud', 'gcs');
+                $path = ltrim($thumb->path, '/');
+                $imageUrl = in_array($disk, ['gcs','gcs_public'], true)
+                    ? $this->signedUrl->forGet($disk, $path, 300)
+                    : Storage::disk($disk)->url($path);
+            }
+
+            return [
+                'id' => $heritage->id,
+                'official_name' => $heritage->official_name,
+                'name' => $heritage->name,
+                'name_jp' => $heritage->name_jp,
+                'country' => $heritage->country,
+                'region' => $heritage->region,
+                'category' => $heritage->category,
+                'criteria' => $heritage->criteria ?? [],
+                'state_party' => $heritage->state_party,
+                'year_inscribed' => $heritage->year_inscribed,
+                'area_hectares' => $heritage->area_hectares,
+                'buffer_zone_hectares' => $heritage->buffer_zone_hectares,
+                'is_endangered' => (bool) $heritage->is_endangered,
+                'latitude' => $heritage->latitude,
+                'longitude' => $heritage->longitude,
+                'short_description' => $heritage->short_description,
+                'thumbnail_id' => $thumb?->id,
+                'thumbnail_url' => $imageUrl,
+                'unesco_site_url' => $heritage->unesco_site_url,
+                'state_parties' => $statePartyCodes,
+                'state_parties_meta' => $statePartiesMeta,
+            ];
+        })->all();
+
+        return $this->buildDtoFromCollection($array);
+    }
+
     public function getHeritageById(
         int $id
     ): WorldHeritageDto {
@@ -48,16 +125,16 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             $url  = $this->signedUrl->forGet($disk, ltrim($img->path, '/'), 300);
 
             $imageCollection->add(new ImageDto(
-                id:        $img->id,
-                url:       $url,
+                id: $img->id,
+                url: $url,
                 sortOrder: $img->sort_order,
-                width:     $img->width,
-                height:    $img->height,
-                format:    $img->format,
-                alt:       $img->alt,
-                credit:    $img->credit,
+                width: $img->width,
+                height: $img->height,
+                format: $img->format,
+                alt: $img->alt,
+                credit: $img->credit,
                 isPrimary: $idx === 0,
-                checksum:  $img->checksum,
+                checksum: $img->checksum,
             ));
         }
 
@@ -69,7 +146,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
         $statePartiesMeta = [];
         foreach ($heritage->countries as $country) {
             $statePartiesMeta[$country->state_party_code] = [
-                'is_primary'       => (bool) data_get($country, 'pivot.is_primary', false),
+                'is_primary' => (bool) data_get($country, 'pivot.is_primary', false),
                 'inscription_year' => data_get($country, 'pivot.inscription_year'),
             ];
         }
@@ -111,7 +188,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                         ->orderBy('countries.state_party_code', 'asc')
                         ->orderBy('site_state_parties.inscription_year', 'asc');
                 },
-                'getThumbnailImageUrl' => function ($q) {
+                'thumbnail' => function ($q) {
                     $q->select([
                         'images.id', 'images.world_heritage_id', 'disk', 'path',
                         'width', 'height', 'format', 'checksum',
@@ -134,7 +211,7 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     ];
                 }
 
-                $thumb = $heritage->getThumbnailImageUrl;
+                $thumb = $heritage->thumbnail;
                 $imageUrl = null;
                 if ($thumb) {
                     $disk = $thumb->disk ?: config('filesystems.cloud', 'gcs');
