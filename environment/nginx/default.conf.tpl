@@ -1,0 +1,51 @@
+server {
+    listen ${PORT};
+    server_name _;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: https://laravel.com; font-src 'self' https://fonts.bunny.net; style-src 'self' 'unsafe-inline' https://fonts.bunny.net; script-src 'self'; connect-src 'self'; frame-ancestors 'self'" always;
+
+    gzip on;
+    gzip_types text/html text/css application/javascript application/json image/svg+xml;
+
+    root /var/www/public;
+    index index.php index.html;
+
+    server_tokens off;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi.conf;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_read_timeout 60s;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~* \.(?:css|js|jpg|jpeg|png|gif|ico|svg|webp|woff2?)$ {
+        expires 7d;
+        access_log off;
+        try_files $uri =404;
+    }
+
+    location = /healthz {
+        add_header Content-Type text/plain;
+        return 200 'ok';
+    }
+
+    location ~ /\. { deny all; }
+
+    client_max_body_size 10m;
+
+    sendfile on;
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+}
