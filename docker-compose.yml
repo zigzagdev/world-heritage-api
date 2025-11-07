@@ -11,6 +11,9 @@ services:
       PORT: 8080
     depends_on:
       - mysql
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
     networks: [ heritage-net ]
 
   mysql:
