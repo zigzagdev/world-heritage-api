@@ -27,6 +27,7 @@ class WorldHeritageDto
         private readonly ?ImageDto $thumbnail = null,
     ){}
 
+
     public function getId(): int
     {
         return $this->id;
@@ -78,10 +79,7 @@ class WorldHeritageDto
     }
 
     public function getNameJp(): ?string
-    {
-        return $this->nameJp;
-    }
-
+    { return $this->nameJp; }
     public function getStateParty(): ?string
     {
         return $this->stateParty;
@@ -116,19 +114,37 @@ class WorldHeritageDto
     {
         return $this->statePartyCodes ?: $this->getStatePartyCodesOrFallback();
     }
+
     public function getStatePartiesMeta(): array
     {
         return $this->statePartiesMeta;
     }
 
+    public function getPrimaryStatePartyCode(): ?string
+    {
+        foreach ($this->getStatePartiesMeta() as $code => $meta) {
+            if (!empty($meta['is_primary'])) {
+                return $code;
+            }
+        }
+
+        return null;
+    }
+
     private function getStatePartyCodesOrFallback(): array
     {
-        if ($this->statePartyCodes) return $this->statePartyCodes;
-
-        if (!$this->stateParty) return [];
+        if ($this->statePartyCodes) {
+            return $this->statePartyCodes;
+        }
+        if (!$this->stateParty) {
+            return [];
+        }
 
         $parts = preg_split('/[;,\s]+/', strtoupper($this->stateParty));
-        $codes = array_filter($parts, fn($c) => preg_match('/^[A-Z]{2}$/', $c));
+        $codes = array_filter(
+            $parts,
+            fn ($countryCode) => preg_match('/^[A-Z]{3}$/', $countryCode)
+        );
 
         return array_values(array_unique($codes));
     }
@@ -143,7 +159,6 @@ class WorldHeritageDto
         return $this->collection ? $this->collection->toArray() : [];
     }
 
-
     public function getThumbnailImage(): ?ImageDto
     {
         return $this->thumbnail;
@@ -156,7 +171,7 @@ class WorldHeritageDto
 
     public function toArray(): array
     {
-        $base = [
+        $value = [
             'id' => $this->getId(),
             'official_name' => $this->getOfficialName(),
             'name' => $this->getName(),
@@ -176,14 +191,15 @@ class WorldHeritageDto
             'unesco_site_url' => $this->getUnescoSiteUrl(),
             'state_party_codes' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),
+            'primary_state_party_code' => $this->getPrimaryStatePartyCode(),
         ];
 
         if ($this->hasImages()) {
-            $base['images'] = $this->getImages();
+            $value['images'] = $this->getImages();
         } elseif ($this->thumbnail !== null) {
-            $base['thumbnail'] = $this->getThumbnailUrl();
+            $value['thumbnail_url'] = $this->getThumbnailUrl();
         }
 
-        return $base;
+        return $value;
     }
 }
