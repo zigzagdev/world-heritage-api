@@ -110,6 +110,11 @@ class WorldHeritageViewModel
         return $this->dto->getStatePartiesMeta();
     }
 
+    public function getPrimaryStatePartyCode(): ?string
+    {
+        return $this->dto->getPrimaryStatePartyCode();
+    }
+
     public function getImages(): array
     {
         return $this->dto->getImages();
@@ -137,6 +142,7 @@ class WorldHeritageViewModel
             'unesco_site_url' => $this->getUnescoSiteUrl(),
             'state_party_codes' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),
+            'primary_state_party_code' => $this->getPrimaryStatePartyCode(),
             'thumbnail_url' => $this->getThumbnailUrl(),
             'images' => $this->getImages(),
         ];
