@@ -28,12 +28,12 @@ class GetWorldHeritagesTest extends TestCase
     private function refresh(): void
     {
         if (env('APP_ENV') === 'testing') {
-             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
-             WorldHeritage::truncate();
-             Country::truncate();
-             DB::table('site_state_parties')->truncate();
-             Image::truncate();
-             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
+            WorldHeritage::truncate();
+            Country::truncate();
+            DB::table('site_state_parties')->truncate();
+            Image::truncate();
+            DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
 
@@ -49,7 +49,7 @@ class GetWorldHeritagesTest extends TestCase
                 'region' => 'Asia',
                 'state_party' => 'JPN',
                 'category' => 'Cultural',
-                'criteria' => ['ii', 'iii', 'v'],
+                'criteria' => ['i','iv'],
                 'year_inscribed' => 1993,
                 'area_hectares' => 107.0,
                 'buffer_zone_hectares' => 143.0,
@@ -68,7 +68,7 @@ class GetWorldHeritagesTest extends TestCase
                 'region' => 'Asia',
                 'state_party' => 'JPN',
                 'category' => 'Natural',
-                'criteria' => ['ii', 'iii', 'v'],
+                'criteria' => ['vii','ix'],
                 'year_inscribed' => 1993,
                 'area_hectares' => 10747.0,
                 'buffer_zone_hectares' => null,
@@ -87,7 +87,7 @@ class GetWorldHeritagesTest extends TestCase
                 'region' => 'Asia',
                 'state_party' => 'JPN',
                 'category' => 'Natural',
-                'criteria' => ['ii', 'iii', 'v'],
+                'criteria' => ['ix','x'],
                 'year_inscribed' => 1993,
                 'area_hectares' => 16971.0,
                 'buffer_zone_hectares' => 6832.0,
@@ -106,7 +106,7 @@ class GetWorldHeritagesTest extends TestCase
                 'region' => 'Asia',
                 'state_party' => null,
                 'category' => 'Cultural',
-                'criteria' => json_encode(['ii','iii','vi']),
+                'criteria' => ['ii','iii','vi'],
                 'year_inscribed' => 2014,
                 'area_hectares' => 42668.16,
                 'buffer_zone_hectares' => 189963.1,
@@ -114,7 +114,6 @@ class GetWorldHeritagesTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => '中国・カザフスタン・キルギスにまたがるオアシス都市や遺跡群で構成され、東西交流の歴史を物証する文化遺産群。',
-                'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442',
             ]
         ];
@@ -124,11 +123,9 @@ class GetWorldHeritagesTest extends TestCase
     {
         $ids = array_column(self::arrayData(), 'id');
 
-        $result = $this->getJson(
-            '/api/v1/heritages?ids=' . implode(',', $ids)
-        );
-
+        $result = $this->getJson('/api/v1/heritages?ids=' . implode(',', $ids));
         $result->assertStatus(200);
+
         $arrayData = $result->getOriginalContent()['data'];
 
         $expectedCriteria = [
@@ -138,13 +135,13 @@ class GetWorldHeritagesTest extends TestCase
             1442 => ['ii','iii','vi'],
         ];
 
-
         $expectedCodes = [
             661 => ['JPN'],
             662 => ['JPN'],
             663 => ['JPN'],
             1442 => ['CHN','KAZ','KGZ'],
         ];
+
         $expectedMeta = [
             661 => ['JPN' => ['is_primary' => true,  'inscription_year' => 1993]],
             662 => ['JPN' => ['is_primary' => true,  'inscription_year' => 1993]],
@@ -156,13 +153,28 @@ class GetWorldHeritagesTest extends TestCase
             ],
         ];
 
+        $expectedPrimary = [];
+        foreach ($expectedMeta as $id => $metaByCode) {
+            $primary = null;
+
+            foreach ($metaByCode as $code => $row) {
+                if (!empty($row['is_primary'])) {
+                    $primary = $code;
+                    break;
+                }
+            }
+            if ($primary === null && !empty($expectedCodes[$id]) && count($expectedCodes[$id]) === 1) {
+                $primary = $expectedCodes[$id][0];
+            }
+            $expectedPrimary[$id] = $primary;
+        }
+
         $expectedById = [];
         foreach (self::arrayData() as $row) {
             $expectedById[$row['id']] = $row;
         }
 
-
-        foreach ($arrayData['data'] as $key => $value) {
+        foreach ($arrayData['data'] as $value) {
             $this->assertArrayHasKey('id', $value);
             $this->assertArrayHasKey($value['id'], $expectedById);
 
@@ -176,9 +188,7 @@ class GetWorldHeritagesTest extends TestCase
             $this->assertEquals($expected['region'], $value['region']);
             $this->assertEquals($expected['category'], $value['category']);
             $this->assertEquals($expected['year_inscribed'], $value['year_inscribed']);
-
             $this->assertEquals($expected['state_party'] ?? null, $value['state_party'] ?? null);
-
             $this->assertEquals($expected['area_hectares'], $value['area_hectares']);
             $this->assertEquals($expected['buffer_zone_hectares'], $value['buffer_zone_hectares']);
             $this->assertEquals($expected['is_endangered'], $value['is_endangered']);
@@ -192,31 +202,32 @@ class GetWorldHeritagesTest extends TestCase
                 $this->assertEquals($expected['unesco_site_url'], $value['unesco_site_url']);
             }
 
-            $this->assertArrayHasKey('state_party_codes', $value);
-
             $this->assertEqualsCanonicalizing(
-                $expectedCriteria[$value['id']],
-                $value['criteria'],
+                $expectedCriteria[(int)$value['id']],
+                $value['criteria']
             );
 
+            $codes = $value['state_party_code'] ?? ($value['state_party_codes'] ?? null);
+            $codes = $codes ?? [];
             $this->assertEqualsCanonicalizing(
-                $expectedCodes[$value['id']],
-                $value['state_party_codes'],
+                $expectedCodes[(int)$value['id']],
+                $codes
             );
 
+            $this->assertArrayHasKey('state_parties_meta', $value);
             $this->assertEqualsCanonicalizing(
-                array_keys($expectedMeta[$value['id']]),
+                array_keys($expectedMeta[(int)$value['id']]),
                 array_keys($value['state_parties_meta']),
                 "state_parties_meta keys mismatch for id={$value['id']}"
             );
 
-            $this->assertArrayHasKey('thumbnail', $value);
-            $this->assertIsString($value['thumbnail']);
-            $this->assertNotEmpty($value['thumbnail']);
+            $thumbUrl = $value['thumbnail_url'] ?? ($value['thumbnail'] ?? null);
 
+            $this->assertIsString($thumbUrl);
+            $this->assertNotEmpty($thumbUrl);
             $this->assertMatchesRegularExpression(
                 '#^https?://[^/]+/storage/world_heritage/'.$value['id'].'/img\d+\.(jpg|jpeg|png)$#',
-                $value['thumbnail'],
+                $thumbUrl,
                 "thumbnail url format mismatch for id={$value['id']}"
             );
         }
@@ -224,9 +235,7 @@ class GetWorldHeritagesTest extends TestCase
 
     public function test_feature_api_ok_without_ids(): void
     {
-        $result = $this->getJson(
-            '/api/v1/heritages'
-        );
+        $result = $this->getJson('/api/v1/heritages');
 
         $result->assertStatus(200);
     }

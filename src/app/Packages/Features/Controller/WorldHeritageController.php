@@ -16,7 +16,6 @@ use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
-use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageDetailViewModelFactory;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritagesUseCase;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -40,7 +39,7 @@ class WorldHeritageController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => WorldHeritageDetailViewModelFactory::build($dto)
+            'data' => $dto->toArray()
         ], 200);
     }
 
@@ -55,10 +54,8 @@ class WorldHeritageController extends Controller
         if (empty($ids)) {
             $dtoCollection = $indexUseCase->handle();
 
-            $viewModel = WorldHeritageViewModelCollectionFactory::build($dtoCollection);
-
             return response()->json(
-                $viewModel->toArray(),
+                $dtoCollection->toArray(),
                 200
             );
         } else {
@@ -72,11 +69,9 @@ class WorldHeritageController extends Controller
 
             $dto = $useCase->handle($heritageIds, $currentPage, $perPage);
 
-            $viewModel = new PaginationViewModel($dto);
-
             return response()->json([
                 'status' => 'success',
-                'data' => $viewModel->toArray(),
+                'data' => $dto->toArray(),
             ], 200);
         }
     }
