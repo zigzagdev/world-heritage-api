@@ -15,94 +15,58 @@ use App\Packages\Domains\Ports\SignedUrlPort;
 use App\Packages\Features\QueryUseCases\Factory\Dto\WorldHeritageDtoCollectionFactory;
 use Illuminate\Support\Facades\Storage;
 
-class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
+class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 {
     public function __construct(
         private readonly WorldHeritage $model,
         private readonly SignedUrlPort $signedUrl
-    ){}
+    ) {}
 
+    /**
+     * 一覧（最大30件）: サムネのみ、state_party/state_party_code を要件通りに整形
+     */
     public function getAllHeritages(): WorldHeritageDtoCollection
     {
         $items = $this->model
             ->select([
                 'id','official_name','name','name_jp','country','region','category','criteria',
-                'state_party','year_inscribed','area_hectares','buffer_zone_hectares',
-                'is_endangered','latitude','longitude','short_description','unesco_site_url',
+                'year_inscribed','area_hectares','buffer_zone_hectares','is_endangered',
+                'latitude','longitude','short_description','unesco_site_url'
             ])
             ->with([
-                'countries' => fn($q) => $q->orderBy('countries.state_party_code','asc'),
-                'thumbnail' => fn($q) => $q->select([
+                'countries' => fn ($q) =>
+                $q->withPivot(['is_primary', 'inscription_year'])
+                    ->orderBy('countries.state_party_code', 'asc'),
+                'thumbnail' => fn ($q) => $q->select([
                     'images.id',
                     'images.world_heritage_id',
-                    'images.disk','images.path','images.width','images.height',
-                    'images.format','images.checksum','images.sort_order',
-                    'images.alt','images.credit',
+                    'images.disk',
+                    'images.path',
+                    'images.width',
+                    'images.height',
+                    'images.format',
+                    'images.checksum',
+                    'images.sort_order',
+                    'images.alt',
+                    'images.credit',
                 ]),
             ])
             ->limit(30)
             ->get();
 
-        $array = $items->map(function ($heritage) {
-            $statePartyCodes = optional($heritage->countries)
-                ->pluck('state_party_code')
-                ->map(fn ($c) => strtoupper($c))
-                ->values()
-                ->all();
-
-            $statePartiesMeta = optional($heritage->countries)
-                ->mapWithKeys(function ($country) {
-                    return [
-                        $country->state_party_code => [
-                            'is_primary'       => (bool) ($country->pivot->is_primary ?? false),
-                            'inscription_year' => $country->pivot->inscription_year ?? null,
-                        ],
-                    ];
-                })
-                ->all();
-
-            $thumb = $heritage->thumbnail;
-            $imageUrl = null;
-            if ($thumb) {
-                $disk = $thumb->disk ?: config('filesystems.cloud', 'gcs');
-                $path = ltrim($thumb->path, '/');
-                $imageUrl = in_array($disk, ['gcs','gcs_public'], true)
-                    ? $this->signedUrl->forGet($disk, $path, 300)
-                    : Storage::disk($disk)->url($path);
-            }
-
-            return [
-                'id' => $heritage->id,
-                'official_name' => $heritage->official_name,
-                'name' => $heritage->name,
-                'name_jp' => $heritage->name_jp,
-                'country' => $heritage->country,
-                'region' => $heritage->region,
-                'category' => $heritage->category,
-                'criteria' => $heritage->criteria ?? [],
-                'state_party' => $heritage->state_party,
-                'year_inscribed' => $heritage->year_inscribed,
-                'area_hectares' => $heritage->area_hectares,
-                'buffer_zone_hectares' => $heritage->buffer_zone_hectares,
-                'is_endangered' => (bool) $heritage->is_endangered,
-                'latitude' => $heritage->latitude,
-                'longitude' => $heritage->longitude,
-                'short_description' => $heritage->short_description,
-                'thumbnail_id' => $thumb?->id,
-                'thumbnail_url' => $imageUrl,
-                'unesco_site_url' => $heritage->unesco_site_url,
-                'state_parties' => $statePartyCodes,
-                'state_parties_meta' => $statePartiesMeta,
-            ];
-        })->all();
+        $array = $items
+            ->map(fn ($heritage) => $this->buildWorldHeritagePayload($heritage))
+            ->all();
 
         return $this->buildDtoFromCollection($array);
     }
 
-    public function getHeritageById(
-        int $id
-    ): WorldHeritageDto {
-
+    /**
+     * 詳細：複数画像のみ、サムネは返さない。state_party/state_party_code を要件通りに整形。
+     * 互換のため state_party_codes（配列）も維持。
+     */
+    public function getHeritageById(int $id): WorldHeritageDto
+    {
         $heritage = $this->model
             ->with(['countries' => function ($q) {
                 $q->withPivot(['is_primary', 'inscription_year'])
@@ -118,8 +82,8 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             throw new RuntimeException("World Heritage was not found.");
         }
 
+        // 画像（複数）
         $imageCollection = new ImageDtoCollection();
-
         foreach (($heritage->images ?? collect()) as $idx => $img) {
             $disk = $img->disk ?? 'gcs';
             $url  = $this->signedUrl->forGet($disk, ltrim($img->path, '/'), 300);
@@ -138,18 +102,37 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             ));
         }
 
-        $statePartyCodes = $heritage->countries
+        $codes = $heritage->countries
             ->pluck('state_party_code')
-            ->map(fn($code) => strtoupper($code))
-            ->all();
+            ->filter()
+            ->map(fn ($c) => strtoupper($c))
+            ->unique()
+            ->values();
+
+        $statePartyName  = null;
+        $statePartyCodes = null;
+
+        if ($codes->count() === 1) {
+            $onlyCode     = $codes->first();
+            $countryModel = $heritage->countries->first(fn ($c) => strtoupper($c->state_party_code) === $onlyCode);
+            $statePartyName  = $countryModel->name ?? null; // 国名プロパティに合わせて
+            $statePartyCodes = null;
+        } elseif ($codes->count() > 1) {
+            $statePartyName  = null;
+            $statePartyCodes = $codes->all();
+        }
 
         $statePartiesMeta = [];
         foreach ($heritage->countries as $country) {
-            $statePartiesMeta[$country->state_party_code] = [
-                'is_primary' => (bool) data_get($country, 'pivot.is_primary', false),
+            $code = strtoupper($country->state_party_code);
+            if (!$code) continue;
+            $statePartiesMeta[$code] = [
+                'is_primary'       => (bool) data_get($country, 'pivot.is_primary', false),
                 'inscription_year' => data_get($country, 'pivot.inscription_year'),
             ];
         }
+
+        $statePartyCodesCompat = $codes->all();
 
         return WorldHeritageDetailFactory::build([
             'id' => $heritage->id,
@@ -163,14 +146,15 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             'longitude' => $heritage->longitude,
             'is_endangered' => (bool) $heritage->is_endangered,
             'name_jp' => $heritage->name_jp,
-            'state_party' => $heritage->state_party,
+            'state_party' => $statePartyName,
             'criteria' => $heritage->criteria,
             'area_hectares' => $heritage->area_hectares,
             'buffer_zone_hectares' => $heritage->buffer_zone_hectares,
             'short_description' => $heritage->short_description,
             'images' => $imageCollection->toArray(),
             'unesco_site_url' => $heritage->unesco_site_url,
-            'state_party_codes' => $statePartyCodes,
+            'state_party_code' => $statePartyCodes,
+            'state_party_codes' => $statePartyCodesCompat,
             'state_parties_meta' => $statePartiesMeta,
         ]);
     }
@@ -182,6 +166,21 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
     ): PaginationDto {
 
         $paginator = $this->model
+            ->select([
+                'id',
+                'official_name',
+                'name','name_jp',
+                'country','region',
+                'category','criteria',
+                'year_inscribed',
+                'area_hectares',
+                'buffer_zone_hectares',
+                'is_endangered',
+                'latitude',
+                'longitude',
+                'short_description',
+                'unesco_site_url'
+            ])
             ->with([
                 'countries' => function ($q) {
                     $q->withPivot(['is_primary', 'inscription_year'])
@@ -199,13 +198,34 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
             ->whereIn('id', $ids)
             ->paginate($perPage, ['*'], 'page', $currentPage)
             ->through(function ($heritage) {
-                $statePartyCodes = $heritage->countries
-                    ->pluck('state_party_code')
-                    ->map(fn($c) => strtoupper($c))
-                    ->all();
+                $countries = $heritage->countries ?? collect();
+
+                $codes = $countries->pluck('state_party_code')
+                    ->filter()
+                    ->map(fn ($c) => strtoupper($c))
+                    ->unique()
+                    ->values();
+
+                $statePartyName  = null;
+                $statePartyCodes = null;
+                $stateParties = [];
+
+                if ($codes->count() === 1) {
+                    $onlyCode = $codes->first();
+                    $countryModel = $countries->first(fn ($c) => strtoupper($c->state_party_code) === $onlyCode);
+                    $statePartyName  = $countryModel->name ?? $heritage->country ?? null;
+                    $statePartyCodes = null;
+                } elseif ($codes->count() > 1) {
+                    $statePartyName = null;
+                    $statePartyCodes = $codes->all();
+                    $stateParties = $codes->all();
+                }
+
                 $statePartiesMeta = [];
-                foreach ($heritage->countries as $country) {
-                    $statePartiesMeta[$country->state_party_code] = [
+                foreach ($countries as $country) {
+                    $code = strtoupper($country->state_party_code);
+                    if (!$code) continue;
+                    $statePartiesMeta[$code] = [
                         'is_primary' => (bool) data_get($country, 'pivot.is_primary', false),
                         'inscription_year' => data_get($country, 'pivot.inscription_year'),
                     ];
@@ -213,14 +233,13 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
 
                 $thumb = $heritage->thumbnail;
                 $imageUrl = null;
+
                 if ($thumb) {
                     $disk = $thumb->disk ?: config('filesystems.cloud', 'gcs');
                     $path = ltrim($thumb->path, '/');
-                    if (in_array($disk, ['gcs', 'gcs_public'], true)) {
-                        $imageUrl = $this->signedUrl->forGet($disk, $path, 300);
-                    } else {
-                        $imageUrl = Storage::disk($disk)->url($path);
-                    }
+                    $imageUrl = in_array($disk, ['gcs', 'gcs_public'], true)
+                        ? $this->signedUrl->forGet($disk, $path, 300)
+                        : Storage::disk($disk)->url($path);
                 }
 
                 return [
@@ -232,7 +251,8 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     'region' => $heritage->region,
                     'category' => $heritage->category,
                     'criteria' => $heritage->criteria,
-                    'state_party' => $heritage->state_party,
+                    'state_party' => $statePartyName,
+                    'state_party_code' => $statePartyCodes,
                     'year_inscribed' => $heritage->year_inscribed,
                     'area_hectares' => $heritage->area_hectares,
                     'buffer_zone_hectares' => $heritage->buffer_zone_hectares,
@@ -240,10 +260,10 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
                     'latitude' => $heritage->latitude,
                     'longitude' => $heritage->longitude,
                     'short_description' => $heritage->short_description,
-                    'thumbnail_id' => $thumb->id,
+                    'thumbnail_id' => $thumb?->id,
                     'thumbnail_url' => $imageUrl,
                     'unesco_site_url' => $heritage->unesco_site_url,
-                    'state_parties' => $statePartyCodes,
+                    'state_parties' => $stateParties,
                     'state_parties_meta' => $statePartiesMeta,
                 ];
             });
@@ -257,8 +277,81 @@ class WorldHeritageQueryService implements  WorldHeritageQueryServiceInterface
         );
     }
 
-    private function buildDtoFromCollection(array $data): WorldHeritageDtoCollection
+    private function buildWorldHeritagePayload($heritage): array
     {
-        return WorldHeritageDtoCollectionFactory::build($data);
+        $countries = $heritage->countries ?? collect();
+
+        $codes = $countries
+            ->pluck('state_party_code')
+            ->filter()
+            ->map(fn ($c) => strtoupper($c))
+            ->unique()
+            ->values();
+
+        $statePartyName  = null;
+        $statePartyCodes = null;
+        $stateParties = [];
+
+        if ($codes->count() === 1) {
+            $onlyCode = $codes->first();
+            $countryModel = $countries->first(fn ($c) => strtoupper($c->state_party_code) === $onlyCode);
+            $statePartyName  = $countryModel->name ?? $heritage->country ?? null;
+            $statePartyCodes = null;
+        } elseif ($codes->count() > 1) {
+            $statePartyName  = null;
+            $statePartyCodes = $codes->all();
+            $stateParties    = $codes->all();
+        }
+
+        $statePartiesMeta = [];
+        foreach ($countries as $country) {
+            $code = strtoupper($country->state_party_code);
+            if (!$code) continue;
+
+            $statePartiesMeta[$code] = [
+                'is_primary' => (bool) ($country->pivot->is_primary ?? false),
+                'inscription_year' => $country->pivot->inscription_year ?? null,
+            ];
+        }
+
+        $thumb = $heritage->thumbnail;
+        $imageUrl = null;
+        if ($thumb) {
+            $disk = $thumb->disk ?: config('filesystems.cloud', 'gcs');
+            $path = ltrim($thumb->path, '/');
+            $imageUrl = in_array($disk, ['gcs', 'gcs_public'], true)
+                ? $this->signedUrl->forGet($disk, $path, 300)
+                : Storage::disk($disk)->url($path);
+        }
+
+        return [
+            'id' => $heritage->id,
+            'official_name' => $heritage->official_name,
+            'name' => $heritage->name,
+            'name_jp' => $heritage->name_jp,
+            'country' => $heritage->country,
+            'region' => $heritage->region,
+            'category' => $heritage->category,
+            'criteria' => $heritage->criteria ?? [],
+            'state_party' => $statePartyName,
+            'state_party_code' => $statePartyCodes,
+            'year_inscribed' => $heritage->year_inscribed,
+            'area_hectares' => $heritage->area_hectares,
+            'buffer_zone_hectares' => $heritage->buffer_zone_hectares,
+            'is_endangered' => (bool) $heritage->is_endangered,
+            'latitude' => $heritage->latitude,
+            'longitude' => $heritage->longitude,
+            'short_description' => $heritage->short_description,
+            'thumbnail_id' => $thumb?->id,
+            'thumbnail_url' => $imageUrl,
+            'unesco_site_url' => $heritage->unesco_site_url,
+            'state_parties' => $stateParties,
+            'state_parties_meta' => $statePartiesMeta,
+        ];
+    }
+
+    private function buildDtoFromCollection(array $array): WorldHeritageDtoCollection
+    {
+        return WorldHeritageDtoCollectionFactory::build($array);
     }
 }
