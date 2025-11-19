@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-export PORT="${PORT:-8080}"
+export PORT="${PORT}"
 command -v envsubst >/dev/null 2>&1 || { echo "envsubst not found"; exit 1; }
 
 envsubst '$PORT' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
