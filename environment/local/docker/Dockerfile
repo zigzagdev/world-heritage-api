@@ -33,14 +33,16 @@ ENV COMPOSER_HOME=/var/www/.composer
 ENV COMPOSER_CACHE_DIR=/var/www/.composer/cache
 RUN mkdir -p /var/www/.composer && chown -R www-data:www-data /var/www/.composer
 
-COPY environment/nginx/default.conf.tpl /etc/nginx/templates/default.conf.template
-COPY environment/docker/php.ini /usr/local/etc/php/conf.d/zz-prod.ini
-COPY environment/docker/php-fpm.conf /usr/local/etc/php-fpm.d/zz-pool.conf
-COPY environment/docker/entrypoint.sh /entrypoint.sh
+COPY environment/nginx/app.common.conf /etc/nginx/app.common.conf
+
+COPY environment/local/nginx/app.local.conf.tpl /etc/nginx/templates/default.conf.template
+
+COPY environment/local/docker/php-local.ini /usr/local/etc/php/conf.d/zz-local.ini
+COPY environment/local/docker/php-fpm.conf /usr/local/etc/php-fpm.d/zz-pool.conf
+
+COPY environment/local/docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENV PORT=8080
-EXPOSE 8080
 
 USER www-data
 CMD ["/entrypoint.sh"]
