@@ -6,6 +6,7 @@ use App\Packages\Domains\Ports\ObjectStoragePort;
 use Google\Cloud\Core\Exception\NotFoundException;
 use Google\Cloud\Storage\StorageClient;
 use InvalidArgumentException;
+use Illuminate\Support\Facades\Storage;
 
 class GcsObjectStorageAdapter implements ObjectStoragePort
 {
@@ -41,13 +42,29 @@ class GcsObjectStorageAdapter implements ObjectStoragePort
 
     public function delete(string $disk, string $key): void
     {
-        [$bucket, $objectPath] = $this->resolve($disk, $key);
-        $object = $bucket->object($objectPath);
-        try {
-            $object->delete();
-        } catch (NotFoundException) {
-
+        $cfg = config("filesystems.disks.{$disk}");
+        if (! $cfg) {
+            throw new InvalidArgumentException("Disk '{$disk}' is not defined.");
         }
+
+        $driver = $cfg['driver'] ?? null;
+
+        if ($driver === 'gcs') {
+            [$bucket, $objectPath] = $this->resolveGcs($cfg, $key);
+            $object = $bucket->object($objectPath);
+            try {
+                $object->delete();
+            } catch (NotFoundException) {
+            }
+            return;
+        }
+
+        if ($driver === 'local') {
+            Storage::disk($disk)->delete($key);
+            return;
+        }
+
+        throw new InvalidArgumentException("Disk '{$disk}' is not supported for ObjectStorageAdapter.");
     }
 
     public function exists(string $disk, string $key): bool
@@ -56,18 +73,43 @@ class GcsObjectStorageAdapter implements ObjectStoragePort
         return $bucket->object($objectPath)->exists();
     }
 
-    /**
-     * @return array{\Google\Cloud\Storage\Bucket,string}
-     */
     private function resolve(string $disk, string $key): array
     {
-        $cfg = config("filesystems.disks.{$disk}");
-        if (!$cfg || ($cfg['driver'] ?? null) !== 'gcs') {
+        $config = config("filesystems.disks.{$disk}");
+
+        if (! $config) {
+            throw new InvalidArgumentException("Disk '{$disk}' is not defined.");
+        }
+
+        if (($config['driver'] ?? null) !== 'gcs') {
             throw new InvalidArgumentException("Disk '{$disk}' is not configured for GCS.");
         }
+
+        $bucket = $this->storage->bucket($config['bucket']);
+        $prefix = rtrim($config['root'] ?? $config['path_prefix'] ?? '', '/');
+
+        $objectPath = ltrim(
+            ($prefix ? "{$prefix}/" : '') . ltrim($key, '/'),
+            '/'
+        );
+
+        return [$bucket, $objectPath];
+    }
+
+    private function resolveGcs(array $cfg, string $key): array
+    {
+        if (($cfg['driver'] ?? null) !== 'gcs') {
+            throw new InvalidArgumentException('resolveGcs called with non-gcs disk config.');
+        }
+
         $bucket = $this->storage->bucket($cfg['bucket']);
-        $prefix = rtrim($cfg['root'] ?? '', '/');
-        $objectPath = ltrim(($prefix ? "{$prefix}/" : '') . ltrim($key, '/'), '/');
+        $prefix = rtrim($cfg['root'] ?? $cfg['path_prefix'] ?? '', '/');
+
+        $objectPath = ltrim(
+            ($prefix ? "{$prefix}/" : '') . ltrim($key, '/'),
+            '/'
+        );
+
         return [$bucket, $objectPath];
     }
 }
