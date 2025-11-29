@@ -8,77 +8,12 @@ use Illuminate\Database\Seeder;
 
 class WorldHeritageSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $now = Carbon::now();
 
         $sites = [
-            [
-                'id' => 1133,
-                'official_name' => 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe',
-                'name' => 'Ancient and Primeval Beech Forests',
-                'name_jp' => 'カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林',
-                'country' => 'Slovakia',
-                'region' => 'Europe',
-                'state_party' => null,
-                'category' => 'Natural',
-                'criteria' => json_encode(['ix']),
-                'year_inscribed' => 2007,
-                'area_hectares' => 99947.81,
-                'buffer_zone_hectares' => 296275.8,
-                'is_endangered' => false,
-                'latitude' => 0.0,
-                'longitude' => 0.0,
-                'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
-                'created_at' => $now, 'updated_at' => $now,
-            ],
-            [
-                'id' => 1442,
-                'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
-                'name' => "Silk·Roads:·Chang'an–Tianshan·Corridor",
-                'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
-                'country' => 'China',
-                'region' => 'Asia',
-                'state_party' => null,
-                'category' => 'Cultural',
-                'criteria' => json_encode(['ii','iii','vi']),
-                'year_inscribed' => 2014,
-                'area_hectares' => 42668.16,
-                'buffer_zone_hectares' => 189963.1,
-                'is_endangered' => false,
-                'latitude' => 0.0,
-                'longitude' => 0.0,
-                'short_description' => '中国・カザフスタン・キルギスにまたがるオアシス都市や遺跡群で構成され、東西交流の歴史を物証する文化遺産群。',
-                'image_url' => '',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/1442',
-                'created_at' => $now, 'updated_at' => $now,
-            ],
-            [
-                'id' => 1662,
-                'official_name' => 'Silk Roads: Zarafshan-Karakum Corridor',
-                'name' => 'Silk Roads: Zarafshan-Karakum Corridor',
-                'name_jp' => 'シルクロード：ザラフシャン-カラクム回廊',
-                'country' => 'Tajikistan',
-                'region' => 'Asia',
-                'state_party' => null,
-                'category' => 'Cultural',
-                'criteria' => json_encode(['ii','iii']),
-                'year_inscribed' => 2023,
-                'area_hectares' => 0.0,
-                'buffer_zone_hectares' => null,
-                'is_endangered' => false,
-                'latitude' => 0.0,
-                'longitude' => 0.0,
-                'short_description' => '中央アジアのザラフシャン谷からカラクム砂漠にかけて展開するオアシス都市・交易遺跡群の連続資産。',
-                'image_url' => null,
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/1662',
-                'created_at' => $now, 'updated_at' => $now,
-            ],
+            // 661 Himeji-jo
             [
                 'id' => 661,
                 'official_name' => 'Himeji-jo',
@@ -86,7 +21,7 @@ class WorldHeritageSeeder extends Seeder
                 'name_jp' => '姫路城',
                 'country' => 'Japan',
                 'region' => 'Asia',
-                'state_party' => 'JPN',
+                'state_party' => 'JPN', // ISO3 を持たせておく
                 'category' => 'Cultural',
                 'criteria' => json_encode(['i','iv']),
                 'year_inscribed' => 1993,
@@ -100,27 +35,8 @@ class WorldHeritageSeeder extends Seeder
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/661',
                 'created_at' => $now, 'updated_at' => $now,
             ],
-            [
-                'id' => 688,
-                'official_name' => 'Historic Monuments of Ancient Kyoto (Kyoto, Uji and Otsu Cities)',
-                'name' => 'Historic Monuments of Ancient Kyoto',
-                'name_jp' => '古都京都の文化財',
-                'country' => 'Japan',
-                'region' => 'Asia',
-                'state_party' => 'JPN',
-                'category' => 'Cultural',
-                'criteria' => json_encode(['ii','iv']),
-                'year_inscribed' => 1994,
-                'area_hectares' => 1056.0,
-                'buffer_zone_hectares' => 3579.0,
-                'is_endangered' => false,
-                'latitude' => null,
-                'longitude' => null,
-                'short_description' => '京都・宇治・大津に点在する社寺・庭園・城郭などから成る文化遺産群。',
-                'image_url' => null,
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/688',
-                'created_at' => $now, 'updated_at' => $now,
-            ],
+
+            // 662 Yakushima
             [
                 'id' => 662,
                 'official_name' => 'Yakushima',
@@ -142,6 +58,8 @@ class WorldHeritageSeeder extends Seeder
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/662',
                 'created_at' => $now, 'updated_at' => $now,
             ],
+
+            // 663 Shirakami-Sanchi
             [
                 'id' => 663,
                 'official_name' => 'Shirakami-Sanchi',
@@ -163,6 +81,54 @@ class WorldHeritageSeeder extends Seeder
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/663',
                 'created_at' => $now, 'updated_at' => $now,
             ],
+
+            // 688 Historic Monuments of Ancient Kyoto
+            [
+                'id' => 688,
+                'official_name' => 'Historic Monuments of Ancient Kyoto (Kyoto, Uji and Otsu Cities)',
+                'name' => 'Historic Monuments of Ancient Kyoto',
+                'name_jp' => '古都京都の文化財',
+                'country' => 'Japan',
+                'region' => 'Asia',
+                'state_party' => 'JPN',
+                'category' => 'Cultural',
+                'criteria' => json_encode(['ii','iv']),
+                'year_inscribed' => 1994,
+                'area_hectares' => 1056.0,
+                'buffer_zone_hectares' => 3579.0,
+                'is_endangered' => false,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => '京都・宇治・大津に点在する社寺・庭園・城郭などから成る文化遺産群。',
+                'image_url' => null,
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/688',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+
+            // 1133 Ancient and Primeval Beech Forests
+            [
+                'id' => 1133,
+                'official_name' => 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe',
+                'name' => 'Ancient and Primeval Beech Forests',
+                'name_jp' => 'カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林',
+                'country' => 'Slovakia',
+                'region' => 'Europe',
+                'state_party' => null, // 越境資産なので primary は pivot から出してる想定
+                'category' => 'Natural',
+                'criteria' => json_encode(['ix']),
+                'year_inscribed' => 2007,
+                'area_hectares' => 99947.81,
+                'buffer_zone_hectares' => 296275.8,
+                'is_endangered' => false,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
+                'image_url' => '',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+
+            // 1142 Kii Mountain Range
             [
                 'id' => 1142,
                 'official_name' => 'Sacred Sites and Pilgrimage Routes in the Kii Mountain Range',
@@ -177,13 +143,15 @@ class WorldHeritageSeeder extends Seeder
                 'area_hectares' => 506.4,
                 'buffer_zone_hectares' => 12100.0,
                 'is_endangered' => false,
-                'latitude' => null,
-                'longitude' => null,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
                 'short_description' => '熊野三山・高野山・吉野・大峯を結ぶ霊場と参詣道の文化的景観。',
                 'image_url' => null,
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1142',
                 'created_at' => $now, 'updated_at' => $now,
             ],
+
+            // 1418 Fujisan
             [
                 'id' => 1418,
                 'official_name' => 'Fujisan, sacred place and source of artistic inspiration',
@@ -198,14 +166,61 @@ class WorldHeritageSeeder extends Seeder
                 'area_hectares' => 20702.1,
                 'buffer_zone_hectares' => 49627.7,
                 'is_endangered' => false,
-                'latitude' => null,
-                'longitude' => null,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
                 'short_description' => '日本の象徴たる霊峰。信仰・芸術・登拝文化に深い影響を与えた文化的景観。',
                 'image_url' => null,
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1418',
                 'created_at' => $now, 'updated_at' => $now,
             ],
+
+            // 1442 Silk Roads (Chang'an–Tianshan Corridor)
+            [
+                'id' => 1442,
+                'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
+                'name' => "Silk·Roads:·Chang'an–Tianshan·Corridor",
+                'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
+                'country' => 'China',
+                'region' => 'Asia',
+                'state_party' => null, // primary は pivot CHN
+                'category' => 'Cultural',
+                'criteria' => json_encode(['ii','iii','vi']),
+                'year_inscribed' => 2014,
+                'area_hectares' => 42668.16,
+                'buffer_zone_hectares' => 189963.1,
+                'is_endangered' => false,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => '中国・カザフスタン・キルギスにまたがるオアシス都市や遺跡群で構成され、東西交流の歴史を物証する文化遺産群。',
+                'image_url' => '',
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1442',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+
+            // 1662 Silk Roads: Zarafshan-Karakum Corridor
+            [
+                'id' => 1662,
+                'official_name' => 'Silk Roads: Zarafshan-Karakum Corridor',
+                'name' => 'Silk Roads: Zarafshan-Karakum Corridor',
+                'name_jp' => 'シルクロード：ザラフシャン-カラクム回廊',
+                'country' => 'Tajikistan',
+                'region' => 'Asia',
+                'state_party' => null,
+                'category' => 'Cultural',
+                'criteria' => json_encode(['ii','iii']),
+                'year_inscribed' => 2023,
+                'area_hectares' => 0.0,
+                'buffer_zone_hectares' => 0.0,
+                'is_endangered' => false,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'short_description' => '中央アジアのザラフシャン谷からカラクム砂漠にかけて展開するオアシス都市・交易遺跡群の連続資産。',
+                'image_url' => null,
+                'unesco_site_url' => 'https://whc.unesco.org/en/list/1662',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
         ];
+
         DB::table('world_heritage_sites')->upsert($sites, ['id']);
     }
 }
