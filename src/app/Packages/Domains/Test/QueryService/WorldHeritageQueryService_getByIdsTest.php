@@ -142,24 +142,24 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
 
         foreach ($result->toArray()['data'] as $key => $value) {
             $this->assertSame(self::arrayData()[$key]['id'], $value['id']);
-            $this->assertSame(self::arrayData()[$key]['official_name'], $value['officialName']);
+            $this->assertSame(self::arrayData()[$key]['official_name'], $value['official_name']);
             $this->assertSame(self::arrayData()[$key]['name'], $value['name']);
-            $this->assertSame(self::arrayData()[$key]['name_jp'], $value['nameJp']);
+            $this->assertSame(self::arrayData()[$key]['name_jp'], $value['name_jp']);
             $this->assertSame(self::arrayData()[$key]['country'], $value['country']);
             $this->assertSame(self::arrayData()[$key]['region'], $value['region']);
-            $this->assertSame(self::arrayData()[$key]['state_party'], $value['stateParty']);
+            $this->assertNull($value['state_party']);
             $this->assertSame(self::arrayData()[$key]['category'], $value['category']);
             $this->assertSame(self::arrayData()[$key]['criteria'], $value['criteria']);
-            $this->assertSame(self::arrayData()[$key]['year_inscribed'], $value['yearInscribed']);
-            $this->assertSame(self::arrayData()[$key]['area_hectares'], $value['areaHectares']);
-            $this->assertSame(self::arrayData()[$key]['buffer_zone_hectares'], $value['bufferZoneHectares']);
-            $this->assertSame(self::arrayData()[$key]['is_endangered'], $value['isEndangered']);
+            $this->assertSame(self::arrayData()[$key]['year_inscribed'], $value['year_inscribed']);
+            $this->assertSame(self::arrayData()[$key]['area_hectares'], $value['area_hectares']);
+            $this->assertSame(self::arrayData()[$key]['buffer_zone_hectares'], $value['buffer_zone_hectares']);
+            $this->assertSame(self::arrayData()[$key]['is_endangered'], $value['is_endangered']);
             $this->assertSame(self::arrayData()[$key]['latitude'], $value['latitude']);
             $this->assertSame(self::arrayData()[$key]['longitude'], $value['longitude']);
-            $this->assertSame(self::arrayData()[$key]['short_description'], $value['shortDescription']);
-            $this->assertSame(self::arrayData()[$key]['unesco_site_url'], $value['unescoSiteUrl']);
-            $this->assertArrayHasKey('statePartyCodes', $value);
-            $this->assertArrayHasKey('statePartiesMeta', $value);
+            $this->assertSame(self::arrayData()[$key]['short_description'], $value['short_description']);
+            $this->assertSame(self::arrayData()[$key]['unesco_site_url'], $value['unesco_site_url']);
+            $this->assertArrayHasKey('state_party_codes', $value);
+            $this->assertArrayHasKey('state_parties_meta', $value);
             $this->assertArrayHasKey('thumbnail', $value);
         }
 
@@ -194,11 +194,11 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
 
         $this->assertSame(
             $expectedFirstCodes,
-            $result->toArray()['data'][0]['statePartyCodes']
+            $result->toArray()['data'][0]['state_party_codes']
         );
         $this->assertSame(
             $orderedExpectedFirst,
-            $result->toArray()['data'][0]['statePartiesMeta']
+            $result->toArray()['data'][0]['state_parties_meta']
         );
 
         $expectedSecondCodes = ['CHN','KAZ','KGZ'];
@@ -214,11 +214,11 @@ class WorldHeritageQueryService_getByIdsTest extends TestCase
 
         $this->assertSame(
             $expectedSecondCodes,
-            $result->toArray()['data'][1]['statePartyCodes']
+            $result->toArray()['data'][1]['state_party_codes']
         );
         $this->assertSame(
             $orderedExpectedSecond,
-            $result->toArray()['data'][1]['statePartiesMeta']
+            $result->toArray()['data'][1]['state_parties_meta']
         );
     }
 }
