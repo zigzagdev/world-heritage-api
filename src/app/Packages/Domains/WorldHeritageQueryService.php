@@ -82,10 +82,10 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             throw new RuntimeException("World Heritage was not found.");
         }
 
-        // 画像（複数）
         $imageCollection = new ImageDtoCollection();
+
         foreach (($heritage->images ?? collect()) as $idx => $img) {
-            $disk = $img->disk ?? 'gcs';
+            $disk = config('world_heritage.images_disk');
             $url  = $this->signedUrl->forGet($disk, ltrim($img->path, '/'), 300);
 
             $imageCollection->add(new ImageDto(
@@ -115,7 +115,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         if ($codes->count() === 1) {
             $onlyCode     = $codes->first();
             $countryModel = $heritage->countries->first(fn ($c) => strtoupper($c->state_party_code) === $onlyCode);
-            $statePartyName  = $countryModel->name ?? null; // 国名プロパティに合わせて
+            $statePartyName  = $countryModel->name ?? null;
             $statePartyCodes = null;
         } elseif ($codes->count() > 1) {
             $statePartyName  = null;
@@ -353,5 +353,14 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     private function buildDtoFromCollection(array $array): WorldHeritageDtoCollection
     {
         return WorldHeritageDtoCollectionFactory::build($array);
+    }
+
+    private function mapImageDisk(?string $disk): string
+    {
+        return match ($disk) {
+            null, '', 'public' => 'gcs_public',
+            'gcs_public', 'gcs' => $disk,
+            default => throw new \RuntimeException("Unsupported image disk: {$disk}"),
+        };
     }
 }

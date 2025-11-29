@@ -47,6 +47,13 @@ return [
             'report' => false,
         ],
 
+        'gcs_public' => [
+            'driver' => 'gcs',
+            'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET'),
+            'path_prefix' => 'public',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -64,8 +71,10 @@ return [
             'project_id' => env('GOOGLE_CLOUD_PROJECT'),
             'key_file'   => env('GOOGLE_CLOUD_KEY_FILE'),
             'bucket'     => env('GCS_BUCKET'),
+            'root'       => env('GCS_ROOT', ''),
             'path_prefix'=> env('GCS_PREFIX', ''),
-            'throw' => true,
+            'visibility' => 'public',
+            'throw'      => true,
         ],
     ],
 
