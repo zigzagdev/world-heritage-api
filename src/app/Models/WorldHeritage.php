@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorldHeritage extends Model
@@ -33,7 +33,8 @@ class WorldHeritage extends Model
         'latitude',
         'longitude',
         'short_description',
-        'unesco_site_url'
+        'unesco_site_url',
+        'thumbnail_image_id',
     ];
 
     protected $casts = [
@@ -63,13 +64,14 @@ class WorldHeritage extends Model
         )->withPivot(['is_primary','inscription_year']);
     }
 
-    public function Images(): HasMany
+    public function images(): HasMany
     {
-        return $this->hasMany(Image::class, 'world_heritage_id', 'id');
+        return $this->hasMany(Image::class, 'world_heritage_id', 'id')
+            ->orderBy('sort_order', 'asc');
     }
 
-    public function thumbnail(): HasOne
+    public function thumbnail(): BelongsTo
     {
-        return $this->hasOne(Image::class, 'world_heritage_id')->ofMany('sort_order', 'min');
+        return $this->belongsTo(Image::class, 'thumbnail_image_id');
     }
 }
