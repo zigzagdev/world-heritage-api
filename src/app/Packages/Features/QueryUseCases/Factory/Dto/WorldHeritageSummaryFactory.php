@@ -10,23 +10,36 @@ class WorldHeritageSummaryFactory
     public static function build(array $data): WorldHeritageDto
     {
         $thumbnail = null;
-        $imageRow  = is_array($data['image'] ?? null) ? $data['image'] : null;
+
+        // ★ 追加：thumbnail リレーションにも対応させる
+        if (is_array($data['image'] ?? null)) {
+            $imageRow = $data['image'];
+        } elseif (is_array($data['thumbnail'] ?? null)) {
+            $imageRow = $data['thumbnail'];
+        } else {
+            $imageRow = null;
+        }
 
         $thumbnailId = $data['image_id']
             ?? $data['thumbnail_id']
             ?? ($imageRow['id'] ?? null);
 
+        // ★ thumbnail_url / image_url が無い場合に path から組み立てる
         $thumbnailUrl = $data['thumbnail_url']
             ?? $data['image_url']
-            ?? ($imageRow['url'] ?? null);
+            ?? ($imageRow ? self::buildThumbnailUrlFromRow($imageRow) : null);
 
         if ($thumbnailUrl) {
             $thumbnail = new ImageDto(
                 id: (int)($thumbnailId ?? 0),
                 url: (string)$thumbnailUrl,
                 sortOrder: (int)($data['image_sort_order'] ?? $imageRow['sort_order'] ?? 0),
-                width: array_key_exists('image_width', $data) ? (int)$data['image_width'] : ($imageRow['width'] ?? null),
-                height: array_key_exists('image_height', $data) ? (int)$data['image_height'] : ($imageRow['height'] ?? null),
+                width: array_key_exists('image_width', $data)
+                    ? (int)$data['image_width']
+                    : ($imageRow['width'] ?? null),
+                height: array_key_exists('image_height', $data)
+                    ? (int)$data['image_height']
+                    : ($imageRow['height'] ?? null),
                 format: $data['image_format'] ?? ($imageRow['format'] ?? null),
                 alt: $data['image_alt'] ?? ($imageRow['alt'] ?? ($data['name'] ?? null)),
                 credit: $data['image_credit'] ?? ($imageRow['credit'] ?? null),
