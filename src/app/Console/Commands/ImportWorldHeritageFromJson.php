@@ -52,7 +52,6 @@ class ImportWorldHeritageFromJson extends Command
 
                 $mapped = $this->mapFromUnescoApiRow($row);
 
-                // NOTE: id is the upsert key
                 if (empty($mapped['id'])) { $skipped++; continue; }
 
                 $now = now();
@@ -84,9 +83,6 @@ class ImportWorldHeritageFromJson extends Command
         return base_path($path);
     }
 
-    /**
-     * @return list<string>
-     */
     private function collectJsonFiles(string $fullPath): array
     {
         if (is_file($fullPath)) {
@@ -99,23 +95,15 @@ class ImportWorldHeritageFromJson extends Command
         );
 
         foreach ($rii as $file) {
-            /** @var \SplFileInfo $file */
             if ($file->isFile() && str_ends_with($file->getFilename(), '.json')) {
                 $files[] = $file->getPathname();
             }
         }
 
-        sort($files); // stable order
+        sort($files);
         return $files;
     }
 
-    /**
-     * JSON shapes supported:
-     * - {"results":[...]} (raw/split payload)
-     * - [...] (array of rows)
-     *
-     * @return array<int, mixed>|null
-     */
     private function loadResultsFromJsonFile(string $filePath): ?array
     {
         $raw = @file_get_contents($filePath);
@@ -163,16 +151,12 @@ class ImportWorldHeritageFromJson extends Command
             'category' => $row['category'] ?? $row['type'] ?? null,
             'criteria' => $this->criteriaFromTxt($criteriaRaw),
             'year_inscribed' => $this->toNullableInt($row['date_inscribed'] ?? $row['year_inscribed'] ?? null),
-
             'area_hectares' => $this->toNullableFloat($row['area_hectares'] ?? null),
             'buffer_zone_hectares' => $this->toNullableFloat($row['buffer_zone_hectares'] ?? null),
             'is_endangered' => $this->toNullableBool($row['danger'] ?? $row['is_endangered'] ?? null),
-
             'latitude' => $this->toNullableFloat($lat),
             'longitude' => $this->toNullableFloat($lon),
-
             'short_description' => $row['short_description'] ?? $row['description'] ?? null,
-
             'image_url' => null,
             'thumbnail_image_id' => null,
             'unesco_site_url' => $row['url'] ?? null,
@@ -201,10 +185,6 @@ class ImportWorldHeritageFromJson extends Command
      */
     private function flushBatch(array $batch): int
     {
-        // IMPORTANT:
-        // Avoid updating `country` even if the column exists in DB.
-        // If `country` is present in the table but not in $batch[0],
-        // it will not be updated by upsert update columns.
         $updateColumns = array_values(array_diff(array_keys($batch[0]), ['id']));
 
         WorldHeritage::query()->upsert(
