@@ -3,12 +3,14 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Support\CountryCodeNormalizer;
+use InvalidArgumentException;
 
 class SplitWorldHeritageJson extends Command
 {
     protected $signature = 'world-heritage:split-json
         {--in= : Input raw JSON file (e.g. storage/app/unesco/raw/whc001-all.json)}
-        {--out=storage/app/unesco/by-states-names : Output directory (relative to project root)}
+        {--out=storage/app/unesco/normalized : Output directory (relative to project root)}
         {--pretty : pretty print JSON}
         {--log-limit=50 : Max number of skipped/invalid log lines}
         {--summary-file= : Optional summary JSON file path (e.g. storage/app/unesco/split-summary.json)}
@@ -16,7 +18,7 @@ class SplitWorldHeritageJson extends Command
         {--clean : Delete existing *.json in output dir before writing}
         {--dry-run : Do not write files (only logs/summary)}';
 
-    protected $description = 'Split raw UNESCO JSON (meta+results) into states_names-based JSON files (no DB)';
+    protected $description = 'Normalize raw UNESCO JSON into DB-import-ready JSON files (sites/state_parties/site_state_parties)';
 
     public function handle(): int
     {
@@ -52,7 +54,7 @@ class SplitWorldHeritageJson extends Command
             return self::FAILURE;
         }
 
-        $meta = $json['meta'] ?? null;
+        $meta    = $json['meta'] ?? null;
         $results = $json['results'] ?? null;
 
         if (!is_array($meta) || !is_array($results)) {
@@ -93,10 +95,16 @@ class SplitWorldHeritageJson extends Command
             $logged++;
         };
 
-        $grouped = [];
+        $sites   = [];
+        $parties = [];
+        $pivot   = [];
 
         $skipped = 0;
         $invalid = 0;
+
+        $rowsMissingId = 0;
+        $rowsMissingCodes = 0;
+
         $transnationalCount = 0;
         $transnationalExamples = [];
         $transnationalExampleLimit = 25;
@@ -111,103 +119,160 @@ class SplitWorldHeritageJson extends Command
                 continue;
             }
 
-            $idNo = $row['id_no'] ?? ($row['id'] ?? null);
-
-            $statesNames = $row['states_names'] ?? null;
-            if (!is_array($statesNames) || $statesNames === []) {
+            $idNo = trim((string)($row['id_no'] ?? ($row['id'] ?? '')));
+            if ($idNo === '') {
+                $rowsMissingId++;
                 $skipped++;
-                $logSkip('states_names_missing_or_empty', $i, $idNo);
+                $logSkip('id_no_missing', $i, null);
                 continue;
             }
 
-            $validNames = $this->normalizeStatesNames($statesNames);
-
-            if ($validNames === []) {
+            $codes = $this->extractIsoCodes($row['iso_codes'] ?? null);
+            if ($codes === []) {
+                $rowsMissingCodes++;
                 $skipped++;
-                $logSkip('states_names_all_blank_or_invalid', $i, $idNo);
+                $logSkip('iso_codes_missing_or_empty', $i, $idNo);
                 continue;
             }
 
-            if (count($validNames) > 1) {
+            $names = $this->normalizeStatesNames($row['states_names'] ?? null);
+            if (count($codes) > 1) {
                 $transnationalCount++;
                 if (count($transnationalExamples) < $transnationalExampleLimit) {
                     $transnationalExamples[] = [
                         'index' => $i,
                         'id_no' => $idNo,
-                        'states_names' => $validNames,
+                        'iso_codes' => $codes,
+                        'states_names' => $names,
                     ];
                 }
             }
 
-            foreach ($validNames as $displayName) {
-                $key = $this->fileKey($displayName);
+            if (!isset($sites[$idNo])) {
+                $sites[$idNo] = $this->normalizeSiteRow($row, $idNo);
+            } else {
+                $sites[$idNo] = $this->mergeSiteRowPreferExisting($sites[$idNo], $row);
+            }
 
-                if (!isset($grouped[$key])) {
-                    $grouped[$key] = [
-                        'display' => $displayName,
-                        'rows' => [],
-                        'stats' => ['records' => 0],
+            foreach ($codes as $idx => $code) {
+                if (!isset($parties[$code])) {
+                    $parties[$code] = [
+                        'state_party_code' => $code,
+                        'name_en' => $names[$idx] ?? $names[0] ?? $code,
+                        'name_jp' => null,
+                        'region' => $row['region'] ?? null,
                     ];
+                } else {
+                    if (($parties[$code]['name_en'] ?? null) === $code) {
+                        $better = $names[$idx] ?? $names[0] ?? null;
+                        if (is_string($better) && trim($better) !== '') {
+                            $parties[$code]['name_en'] = $better;
+                        }
+                    }
+                    if (($parties[$code]['region'] ?? null) === null && isset($row['region'])) {
+                        $parties[$code]['region'] = $row['region'];
+                    }
                 }
 
-                $grouped[$key]['rows'][] = $row;
-                $grouped[$key]['stats']['records']++;
+                $k = "{$idNo}|{$code}";
+                if (!isset($pivot[$k])) {
+                    $pivot[$k] = [
+                        'site_id_no' => $idNo,
+                        'state_party_code' => $code,
+                        'is_primary' => ($idx === 0) ? 1 : 0,
+                        'inscription_year' => isset($row['date_inscribed']) ? (int)$row['date_inscribed'] : null,
+                    ];
+                }
             }
         }
 
-        if ($grouped === []) {
-            $this->error('No rows could be grouped by states_names');
-            return self::FAILURE;
+        if ($strict) {
+            $fail = false;
+            if ($invalid > 0) $fail = true;
+            if ($rowsMissingId > 0) $fail = true;
+            if ($rowsMissingCodes > 0) $fail = true;
+            if ($fail) {
+                $this->error('Strict mode: invalid rows or missing required fields exist.');
+                return self::FAILURE;
+            }
         }
 
-        ksort($grouped, SORT_STRING);
+        ksort($sites, SORT_STRING);
+        ksort($parties, SORT_STRING);
+        ksort($pivot, SORT_STRING);
 
-        $writtenFiles = 0;
-        $writtenDistributedRows = 0;
-        $distinctGroups = count($grouped);
+        $sitesPayload = [
+            'meta' => [
+                'schema' => 'world_heritage_sites.v1',
+                'source_raw' => $in,
+                'generated_at' => now()->toIso8601String(),
+                'rows_scanned' => count($results),
+                'sites' => count($sites),
+            ],
+            'results' => array_values($sites),
+        ];
 
-        foreach ($grouped as $key => $bundle) {
-            $displayName = (string) ($bundle['display'] ?? '');
-            $rows = $bundle['rows'] ?? [];
-            if (!is_array($rows)) $rows = [];
+        $partiesPayload = [
+            'meta' => [
+                'schema' => 'state_parties.v1',
+                'source_raw' => $in,
+                'generated_at' => now()->toIso8601String(),
+                'rows_scanned' => count($results),
+                'state_parties' => count($parties),
+                'country_code_standard' => 'alpha-2',
+            ],
+            'results' => array_values($parties),
+        ];
 
-            $payload = $this->buildPayload(
-                inOptionPath: $in,
-                upstreamMeta: $meta,
-                statesName: $displayName,
-                key: $key,
-                records: count($rows),
-                results: $rows
-            );
+        $pivotPayload = [
+            'meta' => [
+                'schema' => 'site_state_parties.v1',
+                'source_raw' => $in,
+                'generated_at' => now()->toIso8601String(),
+                'rows_scanned' => count($results),
+                'relations' => count($pivot),
+                'country_code_standard' => 'alpha-2',
+                'site_key' => 'id_no',
+            ],
+            'results' => array_values($pivot),
+        ];
 
+        $written = [
+            'world_heritage_sites.json' => $sitesPayload,
+            'state_parties.json' => $partiesPayload,
+            'site_state_parties.json' => $pivotPayload,
+        ];
+
+        foreach ($written as $filename => $payload) {
             $encoded = $this->encodeJson($payload, $pretty);
             if ($encoded === null) {
-                $this->warn("Failed to encode JSON for {$displayName} ({$key}), skipped");
+                $this->error("Failed to encode: {$filename}");
+                return self::FAILURE;
+            }
+
+            $filePath = rtrim($outDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
+
+            if ($dryRun) {
+                $this->info("[dry] would write {$filePath} (" . count($payload['results'] ?? []) . " records)");
                 continue;
             }
 
-            $filePath = rtrim($outDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . "{$key}.json";
-
-            if (!$dryRun) {
-                $ok = @file_put_contents($filePath, $encoded);
-                if ($ok === false) {
-                    $this->warn("Failed to write: {$filePath}");
-                    continue;
-                }
+            $ok = @file_put_contents($filePath, $encoded);
+            if ($ok === false) {
+                $this->error("Failed to write: {$filePath}");
+                return self::FAILURE;
             }
 
-            $writtenFiles++;
-            $writtenDistributedRows += count($rows);
-
-            $this->info(($dryRun ? '[dry] would write ' : 'Wrote ') . "{$filePath} (" . count($rows) . " records)");
+            $this->info("Wrote {$filePath} (" . count($payload['results'] ?? []) . " records)");
         }
 
         $this->line('----');
-        $this->info("Groups (states_names): {$distinctGroups}");
-        $this->info("Written files: {$writtenFiles}");
-        $this->info("Distributed records (sum of group sizes): {$writtenDistributedRows}");
+        $this->info('Sites (unique id_no): ' . count($sites));
+        $this->info('State parties (unique codes): ' . count($parties));
+        $this->info('Site-State relations: ' . count($pivot));
         $this->info("Skipped: {$skipped}, Invalid: {$invalid}");
-        $this->info("Transnational rows detected (states_names>=2): {$transnationalCount}");
+        $this->info("Missing id_no: {$rowsMissingId}, Missing iso_codes: {$rowsMissingCodes}");
+        $this->info("Transnational rows detected (iso_codes>=2): {$transnationalCount}");
 
         if ($logLimit > 0 && $logged >= $logLimit) {
             $this->warn("Skip logs truncated (log-limit={$logLimit})");
@@ -219,18 +284,19 @@ class SplitWorldHeritageJson extends Command
                 'input_path_resolved' => $inPath,
                 'output_dir_resolved' => $outDir,
                 'split_at' => now()->toIso8601String(),
-                'group_by' => 'states_names',
                 'dry_run' => $dryRun,
                 'clean' => $clean,
                 'strict' => $strict,
             ],
             'counts' => [
                 'input_rows' => count($results),
-                'groups' => $distinctGroups,
-                'written_files' => $writtenFiles,
-                'distributed_records' => $writtenDistributedRows,
+                'sites' => count($sites),
+                'state_parties' => count($parties),
+                'site_state_relations' => count($pivot),
                 'skipped' => $skipped,
                 'invalid' => $invalid,
+                'missing_id_no' => $rowsMissingId,
+                'missing_iso_codes' => $rowsMissingCodes,
                 'transnational_rows' => $transnationalCount,
             ],
             'transnational_examples' => $transnationalExamples,
@@ -252,38 +318,37 @@ class SplitWorldHeritageJson extends Command
             }
         }
 
-        if ($strict && ($skipped > 0 || $invalid > 0)) {
-            $this->error('Strict mode: skipped/invalid rows exist, failing.');
-            return self::FAILURE;
-        }
-
         return self::SUCCESS;
     }
 
-    private function buildPayload(
-        string $inOptionPath,
-        array $upstreamMeta,
-        string $statesName,
-        string $key,
-        int $records,
-        array $results
-    ): array {
-        return [
-            'meta' => [
-                'source_raw' => $inOptionPath,
-                'group_by' => 'states_names',
-                'states_name' => $statesName,
-                'file_key' => $key,
-                'records' => $records,
-                'split_at' => now()->toIso8601String(),
-                'upstream_meta' => $upstreamMeta,
-            ],
-            'results' => $results,
-        ];
+    private function extractIsoCodes(mixed $v): array
+    {
+        if (!is_string($v)) return [];
+
+        $s = trim($v);
+        if ($s === '') return [];
+
+        $parts = array_map('trim', explode(',', $s));
+        $out = [];
+        $seen = [];
+
+        foreach ($parts as $p) {
+            $p = strtoupper($p);
+            if ($p === '') continue;
+
+            if (!isset($seen[$p])) {
+                $seen[$p] = true;
+                $out[] = $p;
+            }
+        }
+
+        return $out;
     }
 
-    private function normalizeStatesNames(array $statesNames): array
+    private function normalizeStatesNames(mixed $statesNames): array
     {
+        if (!is_array($statesNames)) return [];
+
         $seen = [];
         $out = [];
 
@@ -300,36 +365,105 @@ class SplitWorldHeritageJson extends Command
         return $out;
     }
 
+    private function normalizeSiteRow(array $row, string $idNo): array
+    {
+        $lat = $row['coordinates']['lat'] ?? null;
+        $lon = $row['coordinates']['lon'] ?? null;
+
+        $region = $this->normalizeRegionCode($row['region_code'] ?? null);
+
+        $criteria = $this->extractCriteriaList($row['criteria_txt'] ?? null);
+
+        $isoCodes = $this->extractIsoCodes($row['iso_codes'] ?? null);
+
+        $stateParty = null;
+        if (count($isoCodes) === 1) {
+            $stateParty = $this->toIso3OrNull($isoCodes[0]);
+        }
+
+        return [
+            'id' => $idNo,
+            'official_name' => $row['official_name'] ?? ($row['name_en'] ?? null),
+            'name' => $row['name_en'] ?? null,
+            'name_jp' => $row['name_jp'] ?? null,
+            'country' => null,
+            'region' => $region,
+
+            'category' => $row['category'] ?? null,
+            'criteria' => $criteria,
+            'year_inscribed' => isset($row['date_inscribed']) ? (int) $row['date_inscribed'] : null,
+            'area_hectares' => isset($row['area_hectares']) ? (float) $row['area_hectares'] : null,
+            'buffer_zone_hectares' => isset($row['buffer_zone_hectares']) ? (float) $row['buffer_zone_hectares'] : null,
+
+            'is_endangered' => (strtolower((string) ($row['danger'] ?? 'false')) === 'true') ? 1 : 0,
+            'latitude' => is_numeric($lat) ? (float) $lat : null,
+            'longitude' => is_numeric($lon) ? (float) $lon : null,
+            'short_description' => $row['short_description_en'] ?? null,
+            'image_url' => $row['main_image_url']['url'] ?? ($row['images_urls'] ?? null),
+            'thumbnail_image_id' => null,
+            'unesco_site_url' => $row['unesco_site_url'] ?? null,
+            'state_party' => $stateParty,
+        ];
+    }
+
+
+    private function mergeSiteRowPreferExisting(array $existing, array $incoming): array
+    {
+        $fill = function (string $key, mixed $value) use (&$existing): void {
+            if (!array_key_exists($key, $existing) || $existing[$key] === null || $existing[$key] === '') {
+                if ($value !== null && $value !== '') $existing[$key] = $value;
+            }
+        };
+
+        $fill('official_name', $incoming['official_name'] ?? ($incoming['name_en'] ?? null));
+        $fill('name', $incoming['name_en'] ?? null);
+        $fill('name_jp', $incoming['name_jp'] ?? null);
+        $fill('region', $incoming['region'] ?? null);
+        $fill('category', $incoming['category'] ?? null);
+
+        if (isset($incoming['coordinates']['lat']) && ($existing['latitude'] ?? null) === null) {
+            $existing['latitude'] = (float)$incoming['coordinates']['lat'];
+        }
+        if (isset($incoming['coordinates']['lon']) && ($existing['longitude'] ?? null) === null) {
+            $existing['longitude'] = (float)$incoming['coordinates']['lon'];
+        }
+
+        if (($existing['short_description'] ?? null) === null && isset($incoming['short_description_en'])) {
+            $existing['short_description'] = $incoming['short_description_en'];
+        }
+
+        if (($existing['image_url'] ?? null) === null) {
+            $img = $incoming['main_image_url']['url'] ?? null;
+            if ($img) $existing['image_url'] = $img;
+        }
+
+        return $existing;
+    }
+    private function normalizeRegionCode(mixed $v): ?string
+    {
+        if (!is_string($v)) return null;
+
+        $code = strtoupper(trim($v));
+        if ($code === '') return null;
+
+        $allowed = ['EUR', 'AFR', 'APA', 'ARB', 'LAC'];
+        if (!in_array($code, $allowed, true)) {
+            return null;
+        }
+
+        return $code;
+    }
+
+
     private function resolvePath(string $path): string
     {
         $path = trim($path);
         if ($path === '') return $path;
 
-        if (str_starts_with($path, '/')) {
-            return $path;
-        }
-
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
-            return $path;
-        }
+        if (str_starts_with($path, '/')) return $path;
+        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
 
         return base_path($path);
-    }
-
-    private function fileKey(string $displayName): string
-    {
-        $slug = $this->slugify($displayName);
-        $hash = substr(sha1($displayName), 0, 8);
-        return "{$slug}__{$hash}";
-    }
-
-    private function slugify(string $name): string
-    {
-        $s = mb_strtolower(trim($name), 'UTF-8');
-        $s = preg_replace('/\s+/u', '_', $s) ?? $s;
-        $s = preg_replace('/[^a-z0-9_\-]/', '', $s) ?? $s;
-
-        return $s !== '' ? $s : 'unknown';
     }
 
     private function encodeJson(mixed $payload, bool $pretty): ?string
@@ -353,5 +487,57 @@ class SplitWorldHeritageJson extends Command
         }
 
         $this->warn("Cleaned output dir: deleted {$deleted} json files");
+    }
+
+    private function extractCriteriaList(?string $criteriaTxt): array
+    {
+        if (!is_string($criteriaTxt)) return [];
+
+        $s = trim($criteriaTxt);
+        if ($s === '') return [];
+
+        preg_match_all('/\(([ivx]+)\)/i', $s, $m);
+        if (!isset($m[1]) || !is_array($m[1])) return [];
+
+        $out = [];
+        $seen = [];
+        foreach ($m[1] as $v) {
+            $v = strtolower(trim((string)$v));
+            if ($v === '') continue;
+            if (!isset($seen[$v])) {
+                $seen[$v] = true;
+                $out[] = $v;
+            }
+        }
+        return $out;
+    }
+
+    private function toIso3OrNull(string $code): ?string
+    {
+        $code = strtoupper(trim($code));
+        if ($code === '') return null;
+
+        if (strlen($code) === 3 && ctype_alpha($code)) {
+            return $code;
+        }
+
+        if (!(strlen($code) === 2 && ctype_alpha($code))) {
+            if ((bool)$this->option('strict')) {
+                throw new InvalidArgumentException("Unknown country code format: {$code}");
+            }
+            return null;
+        }
+
+        $normalizer = app(CountryCodeNormalizer::class);
+
+        try {
+            $list = $normalizer->toIso3List([$code]);
+            return $list[0] ?? null;
+        } catch (InvalidArgumentException $e) {
+            if ((bool)$this->option('strict')) {
+                throw $e;
+            }
+            return null;
+        }
     }
 }
