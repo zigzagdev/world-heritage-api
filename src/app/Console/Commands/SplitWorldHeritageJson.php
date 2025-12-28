@@ -22,14 +22,14 @@ class SplitWorldHeritageJson extends Command
 
     public function handle(): int
     {
-        $in          = (string) $this->option('in');
-        $out         = (string) $this->option('out');
-        $pretty      = (bool) $this->option('pretty');
-        $logLimit    = max(0, (int) $this->option('log-limit'));
+        $in = (string) $this->option('in');
+        $out = (string) $this->option('out');
+        $pretty = (bool) $this->option('pretty');
+        $logLimit = max(0, (int) $this->option('log-limit'));
         $summaryFile = trim((string) $this->option('summary-file'));
-        $strict      = (bool) $this->option('strict');
-        $clean       = (bool) $this->option('clean');
-        $dryRun      = (bool) $this->option('dry-run');
+        $strict = (bool) $this->option('strict');
+        $clean = (bool) $this->option('clean');
+        $dryRun = (bool) $this->option('dry-run');
 
         if ($in === '') {
             $this->error('Missing required option: --in');
@@ -84,6 +84,8 @@ class SplitWorldHeritageJson extends Command
         $this->info("Output dir: {$outDir}");
         if ($dryRun) $this->warn('Dry-run enabled: will NOT write any files.');
 
+        $normalizer = app(CountryCodeNormalizer::class);
+
         $logged = 0;
         $logSkip = function (string $reason, int $index, mixed $idNo = null, array $extra = []) use ($logLimit, &$logged): void {
             if ($logLimit <= 0) return;
@@ -95,15 +97,17 @@ class SplitWorldHeritageJson extends Command
             $logged++;
         };
 
-        $sites   = [];
+        $sites = [];
         $parties = [];
-        $pivot   = [];
+        $pivot = [];
 
         $skipped = 0;
         $invalid = 0;
 
         $rowsMissingId = 0;
         $rowsMissingCodes = 0;
+        $rowsNonNumericId = 0;
+        $rowsUnknownCodes = 0;
 
         $transnationalCount = 0;
         $transnationalExamples = [];
@@ -119,68 +123,97 @@ class SplitWorldHeritageJson extends Command
                 continue;
             }
 
-            $idNo = trim((string)($row['id_no'] ?? ($row['id'] ?? '')));
-            if ($idNo === '') {
+            $idNoRaw = trim((string)($row['id_no'] ?? ($row['id'] ?? '')));
+            if ($idNoRaw === '') {
                 $rowsMissingId++;
                 $skipped++;
                 $logSkip('id_no_missing', $i, null);
                 continue;
             }
 
-            $codes = $this->extractIsoCodes($row['iso_codes'] ?? null);
-            if ($codes === []) {
+            if (!is_numeric($idNoRaw)) {
+                $rowsNonNumericId++;
+                $skipped++;
+                $logSkip('id_no_not_numeric', $i, $idNoRaw);
+                continue;
+            }
+
+            $siteId = (int) $idNoRaw;
+
+            $codes2 = $this->extractIsoCodes($row['iso_codes'] ?? null);
+            if ($codes2 === []) {
                 $rowsMissingCodes++;
                 $skipped++;
-                $logSkip('iso_codes_missing_or_empty', $i, $idNo);
+                $logSkip('iso_codes_missing_or_empty', $i, $siteId);
+                continue;
+            }
+
+            try {
+                $codes3 = $normalizer->toIso3List($codes2);
+            } catch (InvalidArgumentException $e) {
+                $rowsUnknownCodes++;
+                $invalid++;
+                $skipped++;
+                $logSkip('iso_codes_unknown', $i, $siteId, ['codes' => $codes2, 'msg' => $e->getMessage()]);
+                if ($strict) throw $e;
+                continue;
+            }
+
+            if ($codes3 === []) {
+                $rowsMissingCodes++;
+                $skipped++;
+                $logSkip('iso3_empty_after_normalize', $i, $siteId, ['codes' => $codes2]);
                 continue;
             }
 
             $names = $this->normalizeStatesNames($row['states_names'] ?? null);
-            if (count($codes) > 1) {
+            if (count($codes3) > 1) {
                 $transnationalCount++;
                 if (count($transnationalExamples) < $transnationalExampleLimit) {
                     $transnationalExamples[] = [
                         'index' => $i,
-                        'id_no' => $idNo,
-                        'iso_codes' => $codes,
+                        'site_id' => $siteId,
+                        'iso3' => $codes3,
                         'states_names' => $names,
                     ];
                 }
             }
 
-            if (!isset($sites[$idNo])) {
-                $sites[$idNo] = $this->normalizeSiteRow($row, $idNo);
+            if (!isset($sites[$siteId])) {
+                $sites[$siteId] = $this->normalizeSiteRow($row, $siteId);
             } else {
-                $sites[$idNo] = $this->mergeSiteRowPreferExisting($sites[$idNo], $row);
+                $sites[$siteId] = $this->mergeSiteRowPreferExisting($sites[$siteId], $row);
             }
 
-            foreach ($codes as $idx => $code) {
-                if (!isset($parties[$code])) {
-                    $parties[$code] = [
-                        'state_party_code' => $code,
-                        'name_en' => $names[$idx] ?? $names[0] ?? $code,
+            $region = $this->normalizeRegionCode($row['region_code'] ?? null);
+
+            foreach ($codes3 as $idx => $code3) {
+                if (!isset($parties[$code3])) {
+                    $parties[$code3] = [
+                        'state_party_code' => $code3,
+                        'name_en' => $names[$idx] ?? $names[0] ?? $code3,
                         'name_jp' => null,
-                        'region' => $row['region'] ?? null,
+                        'region' => $region,
                     ];
                 } else {
-                    if (($parties[$code]['name_en'] ?? null) === $code) {
+                    if (($parties[$code3]['name_en'] ?? null) === $code3) {
                         $better = $names[$idx] ?? $names[0] ?? null;
                         if (is_string($better) && trim($better) !== '') {
-                            $parties[$code]['name_en'] = $better;
+                            $parties[$code3]['name_en'] = trim($better);
                         }
                     }
-                    if (($parties[$code]['region'] ?? null) === null && isset($row['region'])) {
-                        $parties[$code]['region'] = $row['region'];
+                    if (($parties[$code3]['region'] ?? null) === null && $region !== null) {
+                        $parties[$code3]['region'] = $region;
                     }
                 }
 
-                $k = "{$idNo}|{$code}";
+                $k = "{$siteId}|{$code3}";
                 if (!isset($pivot[$k])) {
                     $pivot[$k] = [
-                        'site_id_no' => $idNo,
-                        'state_party_code' => $code,
+                        'world_heritage_site_id' => $siteId,
+                        'state_party_code' => $code3,
                         'is_primary' => ($idx === 0) ? 1 : 0,
-                        'inscription_year' => isset($row['date_inscribed']) ? (int)$row['date_inscribed'] : null,
+                        'inscription_year' => isset($row['date_inscribed']) ? (int) $row['date_inscribed'] : null,
                     ];
                 }
             }
@@ -190,14 +223,17 @@ class SplitWorldHeritageJson extends Command
             $fail = false;
             if ($invalid > 0) $fail = true;
             if ($rowsMissingId > 0) $fail = true;
+            if ($rowsNonNumericId > 0) $fail = true;
             if ($rowsMissingCodes > 0) $fail = true;
+            if ($rowsUnknownCodes > 0) $fail = true;
+
             if ($fail) {
                 $this->error('Strict mode: invalid rows or missing required fields exist.');
                 return self::FAILURE;
             }
         }
 
-        ksort($sites, SORT_STRING);
+        ksort($sites, SORT_NUMERIC);
         ksort($parties, SORT_STRING);
         ksort($pivot, SORT_STRING);
 
@@ -208,6 +244,9 @@ class SplitWorldHeritageJson extends Command
                 'generated_at' => now()->toIso8601String(),
                 'rows_scanned' => count($results),
                 'sites' => count($sites),
+                'id_standard' => 'id_no(int)',
+                'region_standard' => 'region_code(EUR/AFR/APA/ARB/LAC)',
+                'country_code_standard' => 'alpha-3',
             ],
             'results' => array_values($sites),
         ];
@@ -219,7 +258,8 @@ class SplitWorldHeritageJson extends Command
                 'generated_at' => now()->toIso8601String(),
                 'rows_scanned' => count($results),
                 'state_parties' => count($parties),
-                'country_code_standard' => 'alpha-2',
+                'country_code_standard' => 'alpha-3',
+                'region_standard' => 'region_code(EUR/AFR/APA/ARB/LAC)',
             ],
             'results' => array_values($parties),
         ];
@@ -231,8 +271,9 @@ class SplitWorldHeritageJson extends Command
                 'generated_at' => now()->toIso8601String(),
                 'rows_scanned' => count($results),
                 'relations' => count($pivot),
-                'country_code_standard' => 'alpha-2',
-                'site_key' => 'id_no',
+                'country_code_standard' => 'alpha-3',
+                'site_key' => 'world_heritage_site_id',
+                'site_key_standard' => 'id_no(int)',
             ],
             'results' => array_values($pivot),
         ];
@@ -268,11 +309,12 @@ class SplitWorldHeritageJson extends Command
 
         $this->line('----');
         $this->info('Sites (unique id_no): ' . count($sites));
-        $this->info('State parties (unique codes): ' . count($parties));
+        $this->info('State parties (unique ISO3): ' . count($parties));
         $this->info('Site-State relations: ' . count($pivot));
         $this->info("Skipped: {$skipped}, Invalid: {$invalid}");
-        $this->info("Missing id_no: {$rowsMissingId}, Missing iso_codes: {$rowsMissingCodes}");
-        $this->info("Transnational rows detected (iso_codes>=2): {$transnationalCount}");
+        $this->info("Missing id_no: {$rowsMissingId}, Non-numeric id_no: {$rowsNonNumericId}");
+        $this->info("Missing iso_codes: {$rowsMissingCodes}, Unknown iso_codes: {$rowsUnknownCodes}");
+        $this->info("Transnational rows detected (countries>=2): {$transnationalCount}");
 
         if ($logLimit > 0 && $logged >= $logLimit) {
             $this->warn("Skip logs truncated (log-limit={$logLimit})");
@@ -296,7 +338,9 @@ class SplitWorldHeritageJson extends Command
                 'skipped' => $skipped,
                 'invalid' => $invalid,
                 'missing_id_no' => $rowsMissingId,
+                'non_numeric_id_no' => $rowsNonNumericId,
                 'missing_iso_codes' => $rowsMissingCodes,
+                'unknown_iso_codes' => $rowsUnknownCodes,
                 'transnational_rows' => $transnationalCount,
             ],
             'transnational_examples' => $transnationalExamples,
@@ -365,30 +409,27 @@ class SplitWorldHeritageJson extends Command
         return $out;
     }
 
-    private function normalizeSiteRow(array $row, string $idNo): array
+    private function normalizeSiteRow(array $row, int $siteId): array
     {
         $lat = $row['coordinates']['lat'] ?? null;
         $lon = $row['coordinates']['lon'] ?? null;
 
         $region = $this->normalizeRegionCode($row['region_code'] ?? null);
-
         $criteria = $this->extractCriteriaList($row['criteria_txt'] ?? null);
 
-        $isoCodes = $this->extractIsoCodes($row['iso_codes'] ?? null);
-
         $stateParty = null;
-        if (count($isoCodes) === 1) {
-            $stateParty = $this->toIso3OrNull($isoCodes[0]);
+        $iso2List = $this->extractIsoCodes($row['iso_codes'] ?? null);
+        if (count($iso2List) === 1) {
+            $stateParty = $this->toIso3OrNull($iso2List[0]);
         }
 
         return [
-            'id' => $idNo,
+            'id' => $siteId,
             'official_name' => $row['official_name'] ?? ($row['name_en'] ?? null),
             'name' => $row['name_en'] ?? null,
             'name_jp' => $row['name_jp'] ?? null,
             'country' => null,
             'region' => $region,
-
             'category' => $row['category'] ?? null,
             'criteria' => $criteria,
             'year_inscribed' => isset($row['date_inscribed']) ? (int) $row['date_inscribed'] : null,
@@ -401,11 +442,10 @@ class SplitWorldHeritageJson extends Command
             'short_description' => $row['short_description_en'] ?? null,
             'image_url' => $row['main_image_url']['url'] ?? ($row['images_urls'] ?? null),
             'thumbnail_image_id' => null,
-            'unesco_site_url' => $row['unesco_site_url'] ?? null,
+            'unesco_site_url' => $row['unesco_site_url'] ?? ($row['url'] ?? null),
             'state_party' => $stateParty,
         ];
     }
-
 
     private function mergeSiteRowPreferExisting(array $existing, array $incoming): array
     {
@@ -418,7 +458,12 @@ class SplitWorldHeritageJson extends Command
         $fill('official_name', $incoming['official_name'] ?? ($incoming['name_en'] ?? null));
         $fill('name', $incoming['name_en'] ?? null);
         $fill('name_jp', $incoming['name_jp'] ?? null);
-        $fill('region', $incoming['region'] ?? null);
+
+        if (($existing['region'] ?? null) === null) {
+            $region = $this->normalizeRegionCode($incoming['region_code'] ?? null);
+            if ($region !== null) $existing['region'] = $region;
+        }
+
         $fill('category', $incoming['category'] ?? null);
 
         if (isset($incoming['coordinates']['lat']) && ($existing['latitude'] ?? null) === null) {
@@ -437,8 +482,14 @@ class SplitWorldHeritageJson extends Command
             if ($img) $existing['image_url'] = $img;
         }
 
+        if (($existing['unesco_site_url'] ?? null) === null) {
+            $u = $incoming['unesco_site_url'] ?? ($incoming['url'] ?? null);
+            if ($u) $existing['unesco_site_url'] = $u;
+        }
+
         return $existing;
     }
+
     private function normalizeRegionCode(mixed $v): ?string
     {
         if (!is_string($v)) return null;
@@ -453,7 +504,6 @@ class SplitWorldHeritageJson extends Command
 
         return $code;
     }
-
 
     private function resolvePath(string $path): string
     {
