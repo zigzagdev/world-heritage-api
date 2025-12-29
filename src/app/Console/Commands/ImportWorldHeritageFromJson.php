@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\WorldHeritage;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class ImportWorldHeritageFromJson extends Command
@@ -36,6 +37,7 @@ class ImportWorldHeritageFromJson extends Command
         $imported = 0;
         $skipped  = 0;
         $batch = [];
+        $now = Carbon::now();
 
         foreach ($files as $filePath) {
             if ($max > 0 && $imported >= $max) break;
@@ -54,7 +56,6 @@ class ImportWorldHeritageFromJson extends Command
 
                 if (empty($mapped['id'])) { $skipped++; continue; }
 
-                $now = now();
                 $mapped['updated_at'] = $now;
                 $mapped['created_at'] ??= $now;
 

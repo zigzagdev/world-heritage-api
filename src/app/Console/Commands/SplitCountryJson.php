@@ -11,7 +11,7 @@ class SplitCountryJson extends Command
 {
     protected $signature = 'world-heritage:split-countries
         {--in= : Input UNESCO JSON file or directory (raw dump). Supports {"results":[...]} or [...] }
-        {--out=unesco/normalized/countries.json : Output path in storage/app/... }
+        {--out=private/country/normalized : Output path in storage/app/... }
         {--pretty : Pretty print JSON}
         {--dry-run : Do not write output, only show counts}
         {--strict : Fail if any row cannot be mapped to at least one country code}
@@ -113,7 +113,6 @@ class SplitCountryJson extends Command
                 }
 
                 try {
-                    // ✅ ISO3 に正規化（Normalizerは変更しない）
                     $codes = $normalizer->toIso3List($codesRaw);
                 } catch (InvalidArgumentException $e) {
                     $rowsUnknownCodes++;
