@@ -10,7 +10,7 @@ class SplitWorldHeritageJson extends Command
 {
     protected $signature = 'world-heritage:split-json
         {--in= : Input raw JSON file (e.g. storage/app/unesco/raw/whc001-all.json)}
-        {--out=storage/app/unesco/normalized : Output directory (relative to project root)}
+        {--out=private/unesco/normalized : Output path in storage/app/... }
         {--pretty : pretty print JSON}
         {--log-limit=50 : Max number of skipped/invalid log lines}
         {--summary-file= : Optional summary JSON file path (e.g. storage/app/unesco/split-summary.json)}
