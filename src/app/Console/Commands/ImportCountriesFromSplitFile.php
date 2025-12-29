@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ImportCountriesFromSplitFile extends Command
 {
@@ -23,7 +24,7 @@ class ImportCountriesFromSplitFile extends Command
      *
      * @var string
      */
-    protected $description = 'Import countries from split countries.json into countries table ';
+    protected $description = 'Import countries from split countries.json into countries table';
 
     /**
      * Execute the console command.

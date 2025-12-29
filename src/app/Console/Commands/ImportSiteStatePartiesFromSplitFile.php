@@ -5,9 +5,12 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Console\Concerns\LoadsJsonRows;
 
 class ImportSiteStatePartiesFromSplitFile extends Command
 {
+    use LoadsJsonRows;
+
     /**
      * The name and signature of the console command.
      *
@@ -53,6 +56,7 @@ class ImportSiteStatePartiesFromSplitFile extends Command
         $imported = 0;
         $skipped = 0;
         $batch = [];
+        $now = Carbon::now();
 
         foreach ($rows as $row) {
             if ($max > 0 && $imported >= $max) break;
@@ -97,8 +101,8 @@ class ImportSiteStatePartiesFromSplitFile extends Command
                 'world_heritage_site_id' => $siteId,
                 'is_primary' => $isPrimary,
                 'inscription_year' => $year,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ];
 
             if (count($batch) >= $batchSize) {
@@ -126,28 +130,6 @@ class ImportSiteStatePartiesFromSplitFile extends Command
         );
 
         return count($rows);
-    }
-
-    private function loadRows(string $path): ?array
-    {
-        $raw = @file_get_contents($path);
-        if ($raw === false) return null;
-
-        $json = json_decode($raw, true);
-        if (!is_array($json)) return null;
-
-        if (array_key_exists('results', $json)) {
-            return is_array($json['results']) ? $json['results'] : null;
-        }
-        return array_is_list($json) ? $json : null;
-    }
-
-    private function resolvePath(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '') return $path;
-        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
-        return base_path($path);
     }
 
     private function toNullableInt(mixed $v): ?int

@@ -53,6 +53,7 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
         $imported = 0;
         $skipped = 0;
         $batch = [];
+        $now = Carbon::now();
 
         foreach ($rows as $row) {
             if ($max > 0 && $imported >= $max) break;
@@ -69,7 +70,6 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
             }
             $id = (int) $id;
 
-            $now = Carbon::now();
             $mapped = [
                 'id' => $id,
                 'official_name' => $this->toNullableString($row['official_name'] ?? null),
