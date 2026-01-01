@@ -25,8 +25,8 @@ class SplitCountryJson extends Command
 
     public function handle(): int
     {
-        $in     = trim((string) $this->option('in'));
-        $out    = trim((string) $this->option('out'));
+        $in = trim((string) $this->option('in'));
+        $out = trim((string) $this->option('out'));
         $sitesOut = trim((string) $this->option('sites-out'));
         $exceptionsOut = trim((string) $this->option('exceptions-out'));
 
@@ -34,7 +34,7 @@ class SplitCountryJson extends Command
         $dryRun = (bool) $this->option('dry-run');
         $strict = (bool) $this->option('strict');
         $mergeExisting = (bool) $this->option('merge-existing');
-        $clean  = (bool) $this->option('clean');
+        $clean = (bool) $this->option('clean');
         $exceptionsLimit = max(0, (int)$this->option('exceptions-limit'));
 
         if ($in === '') {
@@ -67,7 +67,6 @@ class SplitCountryJson extends Command
             }
         }
 
-        // merge existing JP names
         $existingJp = [];
         if ($mergeExisting && !$clean) {
             $existingJp = $this->readExistingCountriesJpMap($outStoragePath);
@@ -76,24 +75,18 @@ class SplitCountryJson extends Command
             }
         }
 
-        /** @var CountryCodeNormalizer $normalizer */
         $normalizer = app(CountryCodeNormalizer::class);
 
-        // 国マスタ
-        $countryMap = []; // key: ISO3
-
-        // ★追加：全行について country 判定結果を必ず持つ
-        $siteJudgements = []; // list
-        $exceptions = []; // list (missing/invalid)
+        $countryMap = [];
+        $siteJudgements = [];
+        $exceptions = [];
         $exceptionsCount = 0;
-
         $inputRows = 0;
         $invalidJsonFiles = 0;
         $rowsNotObject = 0;
         $rowsMissingCodes = 0;
         $rowsUnknownCodes = 0;
-
-        $unknownSamples = []; // up to 10
+        $unknownSamples = [];
 
         foreach ($files as $file) {
             $raw = @file_get_contents($file);

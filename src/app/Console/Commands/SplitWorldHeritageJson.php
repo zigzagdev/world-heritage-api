@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Support\CountryCodeNormalizer;
+use Illuminate\Console\Command;
 use InvalidArgumentException;
 
 class SplitWorldHeritageJson extends Command
@@ -91,7 +91,6 @@ class SplitWorldHeritageJson extends Command
         $this->info("Output dir: {$outDir}");
         if ($dryRun) $this->warn('Dry-run enabled: will NOT write any files.');
 
-        /** @var CountryCodeNormalizer $normalizer */
         $normalizer = app(CountryCodeNormalizer::class);
 
         $logged = 0;
@@ -108,7 +107,7 @@ class SplitWorldHeritageJson extends Command
         $sites = [];
         $parties = [];
         $pivot = [];
-        $images = []; // ★追加：画像JSON用
+        $images = [];
 
         $siteJudgements = [];
         $exceptions = [];
@@ -376,7 +375,7 @@ class SplitWorldHeritageJson extends Command
 
         $sitesPayload = [
             'meta' => [
-                'schema' => 'world_heritage_sites.v2',
+                'schema' => 'world_heritage_sites.v3',
                 'source_raw' => $in,
                 'generated_at' => now()->toIso8601String(),
                 'rows_scanned' => count($results),
@@ -384,6 +383,7 @@ class SplitWorldHeritageJson extends Command
                 'id_standard' => 'id_no(int)',
                 'region_standard' => 'region_code(EUR/AFR/APA/ARB/LAC)',
                 'country_code_standard' => 'alpha-3',
+                'state_party_rule' => 'ISO3 only if single-country else null',
                 'image_rule' => 'primary_image_url only',
             ],
             'results' => array_values($sites),
@@ -616,7 +616,6 @@ class SplitWorldHeritageJson extends Command
         return $out;
     }
 
-    // ★追加：画像URLの抽出（順序維持＆重複除去）
     private function extractImageUrls(array $row): array
     {
         $urls = [];
@@ -662,11 +661,15 @@ class SplitWorldHeritageJson extends Command
 
         $region = $this->normalizeRegionCode($row['region_code'] ?? null);
         $criteria = $this->extractCriteriaList($row['criteria_txt'] ?? null);
-        $iso2List = $this->extractIsoCodes($row['iso_codes'] ?? null);
-        $country = null;
 
+        $iso2List = $this->extractIsoCodes($row['iso_codes'] ?? null);
+
+        $stateParty = null;
+        $country = null;
         if (count($iso2List) === 1) {
-            $country = $this->toIso3OrNull($iso2List[0]);
+            $iso3 = $this->toIso3OrNull($iso2List[0]);
+            $stateParty = $iso3;
+            $country = $iso3;
         }
 
         $imageUrls = $this->extractImageUrls($row);
@@ -679,6 +682,7 @@ class SplitWorldHeritageJson extends Command
             'name_jp' => $row['name_jp'] ?? null,
             'country' => $country,
             'region' => $region,
+            'state_party' => $stateParty,
             'category' => $row['category'] ?? null,
             'criteria' => $criteria,
             'year_inscribed' => isset($row['date_inscribed']) ? (int) $row['date_inscribed'] : null,
@@ -705,13 +709,15 @@ class SplitWorldHeritageJson extends Command
         $fill('official_name', $incoming['official_name'] ?? ($incoming['name_en'] ?? null));
         $fill('name', $incoming['name_en'] ?? null);
         $fill('name_jp', $incoming['name_jp'] ?? null);
-
-        if (($existing['country'] ?? null) === null) {
+        if (($existing['state_party'] ?? null) === null) {
             $iso2List = $this->extractIsoCodes($incoming['iso_codes'] ?? null);
             if (count($iso2List) === 1) {
-                $c = $this->toIso3OrNull($iso2List[0]);
-                if ($c !== null) $existing['country'] = $c;
-                if (($existing['state_party'] ?? null) === null) $existing['state_party'] = $c;
+                $sp = $this->toIso3OrNull($iso2List[0]);
+                if ($sp !== null) $existing['state_party'] = $sp;
+
+                if (($existing['country'] ?? null) === null) {
+                    $existing['country'] = $sp;
+                }
             }
         }
 
@@ -723,10 +729,10 @@ class SplitWorldHeritageJson extends Command
         $fill('category', $incoming['category'] ?? null);
 
         if (isset($incoming['coordinates']['lat']) && ($existing['latitude'] ?? null) === null) {
-            $existing['latitude'] = (float)$incoming['coordinates']['lat'];
+            $existing['latitude'] = is_numeric($incoming['coordinates']['lat']) ? (float) $incoming['coordinates']['lat'] : null;
         }
         if (isset($incoming['coordinates']['lon']) && ($existing['longitude'] ?? null) === null) {
-            $existing['longitude'] = (float)$incoming['coordinates']['lon'];
+            $existing['longitude'] = is_numeric($incoming['coordinates']['lon']) ? (float) $incoming['coordinates']['lon'] : null;
         }
 
         if (($existing['short_description'] ?? null) === null && isset($incoming['short_description_en'])) {
