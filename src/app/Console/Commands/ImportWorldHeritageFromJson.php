@@ -181,9 +181,6 @@ class ImportWorldHeritageFromJson extends Command
         return [$s];
     }
 
-    /**
-     * @param array<int, array<string, mixed>> $batch
-     */
     private function flushBatch(array $batch): int
     {
         $updateColumns = array_values(array_diff(array_keys($batch[0]), ['id']));
@@ -195,6 +192,37 @@ class ImportWorldHeritageFromJson extends Command
         );
 
         return count($batch);
+    }
+
+    private function extractIso3StateParty(array $row): ?string
+    {
+        $candidates = [];
+
+        foreach (['primary_state_party_code', 'state_party_code', 'iso3', 'iso_code'] as $k) {
+            if (!empty($row[$k]) && is_string($row[$k])) {
+                $candidates[] = $row[$k];
+            }
+        }
+
+        foreach (['state_party_codes', 'states_codes'] as $k) {
+            if (!empty($row[$k]) && is_array($row[$k])) {
+                $candidates[] = $row[$k][0] ?? null;
+            }
+        }
+
+        $states = $row['states'] ?? $row['state_party'] ?? null;
+        if (is_string($states)) $candidates[] = $states;
+        if (is_array($states))  $candidates[] = $states[0] ?? null;
+
+        foreach ($candidates as $c) {
+            if (!is_string($c)) continue;
+            $c = strtoupper(trim($c));
+            if ($c !== '' && preg_match('/^[A-Z]{3}$/', $c)) {
+                return $c;
+            }
+        }
+
+        return null;
     }
 
     private function toNullableInt(mixed $v): ?int

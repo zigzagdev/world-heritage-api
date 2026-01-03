@@ -90,8 +90,8 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
                 'image_url' => $this->toNullableString($row['image_url'] ?? null),
                 'thumbnail_image_id' => $this->toNullableInt($row['thumbnail_image_id'] ?? null),
                 'unesco_site_url' => $this->toNullableString($row['unesco_site_url'] ?? null),
-                'updated_at' => $now,
                 'created_at' => $now,
+                'updated_at' => $now,
             ];
 
             $batch[] = $mapped;

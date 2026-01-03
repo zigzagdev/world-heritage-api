@@ -16,7 +16,7 @@ class DumpUnescoWorldHeritageJson extends Command
         {--generate-countries-file= : generate country list file (e.g. unesco/state_names.txt) from fetched results}
         {--limit=100}
         {--max=0 : 0 means no limit (per country / all)}
-        {--out=unesco/whc001.json : output file for single country mode or --all}
+        {--out=unesco/world-heritage-sites.json : output file for single country mode or --all}
         {--out-dir=unesco/by-country : output dir for multi country mode}
         {--pretty : pretty print JSON}
         {--dry-run : do not write files, only show counts and validation}';
@@ -86,7 +86,6 @@ class DumpUnescoWorldHeritageJson extends Command
             return $res;
         }
 
-        // Multi country
         $outDir = (string) $this->option('out-dir');
         $ok = 0;
         $ng = 0;

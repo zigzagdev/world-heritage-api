@@ -11,24 +11,31 @@ class SplitCountryJson extends Command
 {
     protected $signature = 'world-heritage:split-countries
         {--in= : Input UNESCO JSON file or directory (raw dump). Supports {"results":[...]} or [...] }
-        {--out=private/country/normalized : Output path in storage/app/... }
+        {--out=private/country/normalized/countries.json : Output path in storage/app/... }
+        {--sites-out=private/country/normalized/site-country-codes.json : Output path for per-site country judgement}
+        {--exceptions-out=private/country/normalized/exceptions-missing-codes.json : Output path for rows missing/invalid country codes}
         {--pretty : Pretty print JSON}
         {--dry-run : Do not write output, only show counts}
         {--strict : Fail if any row cannot be mapped to at least one country code}
         {--merge-existing : Keep existing name_jp when countries.json already exists (recommended)}
-        {--clean : If output exists, delete it before writing (name_jp merge will be skipped)}';
+        {--clean : If output exists, delete it before writing (name_jp merge will be skipped)}
+        {--exceptions-limit=200 : Max number of missing/invalid-code rows to store in exceptions file}';
 
-    protected $description = 'Split/normalize UNESCO JSON into countries.json for import (upsert-ready)';
+    protected $description = 'Extract/normalize country list from UNESCO JSON and also judge country per each world heritage row (iso3 or null)';
 
     public function handle(): int
     {
-        $in     = trim((string) $this->option('in'));
-        $out    = trim((string) $this->option('out'));
+        $in = trim((string) $this->option('in'));
+        $out = trim((string) $this->option('out'));
+        $sitesOut = trim((string) $this->option('sites-out'));
+        $exceptionsOut = trim((string) $this->option('exceptions-out'));
+
         $pretty = (bool) $this->option('pretty');
         $dryRun = (bool) $this->option('dry-run');
         $strict = (bool) $this->option('strict');
         $mergeExisting = (bool) $this->option('merge-existing');
-        $clean  = (bool) $this->option('clean');
+        $clean = (bool) $this->option('clean');
+        $exceptionsLimit = max(0, (int)$this->option('exceptions-limit'));
 
         if ($in === '') {
             $this->error('Missing required option: --in');
@@ -48,12 +55,18 @@ class SplitCountryJson extends Command
         }
 
         $outStoragePath = ltrim($out, '/');
-        if ($clean && Storage::disk('local')->exists($outStoragePath) && !$dryRun) {
-            Storage::disk('local')->delete($outStoragePath);
-            $this->warn("Deleted existing output: storage/app/{$outStoragePath}");
+        $sitesOutStoragePath = ltrim($sitesOut, '/');
+        $exceptionsOutStoragePath = ltrim($exceptionsOut, '/');
+
+        if ($clean && !$dryRun) {
+            foreach ([$outStoragePath, $sitesOutStoragePath, $exceptionsOutStoragePath] as $p) {
+                if (Storage::disk('local')->exists($p)) {
+                    Storage::disk('local')->delete($p);
+                    $this->warn("Deleted existing output: storage/app/{$p}");
+                }
+            }
         }
 
-        // 既存countries.jsonのstate_party_code(=ISO3想定) をキーに name_jp を引く
         $existingJp = [];
         if ($mergeExisting && !$clean) {
             $existingJp = $this->readExistingCountriesJpMap($outStoragePath);
@@ -62,18 +75,18 @@ class SplitCountryJson extends Command
             }
         }
 
-        /** @var CountryCodeNormalizer $normalizer */
         $normalizer = app(CountryCodeNormalizer::class);
 
-        $countryMap = []; // key: ISO3
+        $countryMap = [];
+        $siteJudgements = [];
+        $exceptions = [];
+        $exceptionsCount = 0;
         $inputRows = 0;
-
         $invalidJsonFiles = 0;
         $rowsNotObject = 0;
         $rowsMissingCodes = 0;
-
         $rowsUnknownCodes = 0;
-        $unknownSamples = []; // up to 10
+        $unknownSamples = [];
 
         foreach ($files as $file) {
             $raw = @file_get_contents($file);
@@ -105,17 +118,60 @@ class SplitCountryJson extends Command
                     continue;
                 }
 
-                // ✅ states / iso_codes 両対応（どっちか入ってれば拾う）
+                $idNo = $row['id_no'] ?? null;
+                $nameEn = $row['name_en'] ?? null;
+                $statesNames = $row['states_names'] ?? null;
+                $regionCode = $row['region_code'] ?? null;
                 $codesRaw = $this->normalizeCodeList($row['states'] ?? $row['iso_codes'] ?? null);
+                $judgement = [
+                    'id_no' => is_scalar($idNo) ? (string)$idNo : null,
+                    'name_en' => is_scalar($nameEn) ? (string)$nameEn : null,
+                    'region_code' => is_scalar($regionCode) ? (string)$regionCode : null,
+                    'states_names' => is_array($statesNames) ? $statesNames : null,
+                    'raw_codes' => $codesRaw !== [] ? $codesRaw : null,
+                    'iso3_codes' => null,
+                    'status' => null,
+                    'message' => null,
+                ];
+
                 if ($codesRaw === []) {
                     $rowsMissingCodes++;
+
+                    $judgement['status'] = 'missing';
+                    $judgement['message'] = 'iso_codes/states missing or empty';
+                    $siteJudgements[] = $judgement;
+
+                    if ($exceptionsLimit > 0 && $exceptionsCount < $exceptionsLimit) {
+                        $exceptions[] = [
+                            'file' => $file,
+                            'exception_type' => 'missing_country_code',
+                            'id_no' => $judgement['id_no'],
+                            'name_en' => $judgement['name_en'],
+                            'region_code' => $judgement['region_code'],
+                            'states_names' => $judgement['states_names'],
+                            'iso_codes' => $row['iso_codes'] ?? null,
+                            'states' => $row['states'] ?? null,
+                        ];
+                        $exceptionsCount++;
+                    }
+
+                    if ($strict) {
+                        $this->error('Strict mode: missing country code row detected.');
+                        $this->line(json_encode($judgement, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+                        return self::FAILURE;
+                    }
+
                     continue;
                 }
 
                 try {
-                    $codes = $normalizer->toIso3List($codesRaw);
+                    $codes3 = $normalizer->toIso3List($codesRaw);
                 } catch (InvalidArgumentException $e) {
                     $rowsUnknownCodes++;
+
+                    $judgement['status'] = 'unknown';
+                    $judgement['message'] = $e->getMessage();
+                    $siteJudgements[] = $judgement;
 
                     if (count($unknownSamples) < 10) {
                         $unknownSamples[] = [
@@ -123,6 +179,20 @@ class SplitCountryJson extends Command
                             'input_codes' => $codesRaw,
                             'message' => $e->getMessage(),
                         ];
+                    }
+
+                    if ($exceptionsLimit > 0 && $exceptionsCount < $exceptionsLimit) {
+                        $exceptions[] = [
+                            'file' => $file,
+                            'exception_type' => 'unknown_country_code',
+                            'id_no' => $judgement['id_no'],
+                            'name_en' => $judgement['name_en'],
+                            'region_code' => $judgement['region_code'],
+                            'states_names' => $judgement['states_names'],
+                            'raw_codes' => $codesRaw,
+                            'message' => $e->getMessage(),
+                        ];
+                        $exceptionsCount++;
                     }
 
                     if ($strict) {
@@ -134,19 +204,30 @@ class SplitCountryJson extends Command
                     continue;
                 }
 
-                if ($codes === []) {
+                if ($codes3 === []) {
                     $rowsMissingCodes++;
+
+                    $judgement['status'] = 'missing';
+                    $judgement['message'] = 'empty after normalize';
+                    $siteJudgements[] = $judgement;
+
+                    if ($strict) {
+                        $this->error('Strict mode: empty iso3 after normalize.');
+                        $this->line(json_encode($judgement, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+                        return self::FAILURE;
+                    }
+
                     continue;
                 }
 
+                $judgement['status'] = 'ok';
+                $judgement['iso3_codes'] = $codes3;
+                $siteJudgements[] = $judgement;
                 $names = $this->normalizeStringList($row['states_names'] ?? null);
-
-                // ✅ region は region_code の 5値に寄せる（EUR/AFR/APA/ARB/LAC）
                 $region = $this->normalizeRegionCode($row['region_code'] ?? null);
 
-                // ✅ name_en は codes と names が同数の時だけ 1:1 で入れる（事故防止）
-                if ($names !== [] && count($names) === count($codes)) {
-                    foreach ($codes as $idx => $code) {
+                if ($names !== [] && count($names) === count($codes3)) {
+                    foreach ($codes3 as $idx => $code) {
                         $en = trim((string)($names[$idx] ?? ''));
                         if ($en === '') $en = $code;
 
@@ -161,8 +242,7 @@ class SplitCountryJson extends Command
                     continue;
                 }
 
-                // ✅ それ以外は安全側：name_en = code、region だけ埋める
-                foreach ($codes as $code) {
+                foreach ($codes3 as $code) {
                     $this->upsertCountryRow(
                         countryMap: $countryMap,
                         code: $code,
@@ -175,16 +255,18 @@ class SplitCountryJson extends Command
         }
 
         ksort($countryMap, SORT_STRING);
-        $results = array_values($countryMap);
+        $countries = array_values($countryMap);
 
         $this->line('----');
         $this->info('Input files: ' . count($files));
         $this->info("Input rows scanned: {$inputRows}");
-        $this->info('Countries extracted (unique state_party_code): ' . count($results));
+        $this->info('Countries extracted (unique state_party_code): ' . count($countries));
+        $this->info("Site judgements (rows): " . count($siteJudgements));
         $this->info("Invalid JSON files: {$invalidJsonFiles}");
         $this->info("Rows not object: {$rowsNotObject}");
         $this->info("Rows missing country codes: {$rowsMissingCodes}");
         $this->info("Rows unknown country codes: {$rowsUnknownCodes}");
+        $this->info("Exceptions collected: " . count($exceptions));
 
         if ($unknownSamples !== []) {
             $this->warn('Unknown samples (up to 10):');
@@ -193,19 +275,7 @@ class SplitCountryJson extends Command
             }
         }
 
-        if ($strict) {
-            $fail = false;
-            if ($invalidJsonFiles > 0) $fail = true;
-            if ($rowsMissingCodes > 0) $fail = true;
-            if ($rowsUnknownCodes > 0) $fail = true;
-
-            if ($fail) {
-                $this->error('Strict mode: invalid JSON files, rows missing codes, or unknown codes exist.');
-                return self::FAILURE;
-            }
-        }
-
-        $payload = [
+        $countriesPayload = [
             'meta' => [
                 'schema' => 'countries.v1',
                 'source' => 'unesco whc001',
@@ -214,36 +284,68 @@ class SplitCountryJson extends Command
                 'input' => $in,
                 'input_files' => count($files),
                 'input_rows_scanned' => $inputRows,
-                'countries' => count($results),
+                'countries' => count($countries),
                 'merge_existing_name_jp' => $mergeExisting && !$clean,
                 'region_standard' => 'region_code(EUR/AFR/APA/ARB/LAC)',
             ],
-            'results' => $results,
+            'results' => $countries,
         ];
 
-        $jsonOut = $this->encodeJson($payload, $pretty);
-        if ($jsonOut === null) {
+        $sitesPayload = [
+            'meta' => [
+                'schema' => 'country_codes.v1',
+                'source' => 'world-heritage-sites.json',
+                'generated_at' => now()->toIso8601String(),
+                'input' => $in,
+                'input_files' => count($files),
+                'input_rows_scanned' => $inputRows,
+                'rows' => count($siteJudgements),
+                'country_code_standard' => 'alpha-3',
+                'null_means' => 'could_not_determine_country',
+            ],
+            'results' => $siteJudgements,
+        ];
+
+        $exceptionsPayload = [
+            'meta' => [
+                'schema' => 'exceptions_country_codes.v1',
+                'generated_at' => now()->toIso8601String(),
+                'input' => $in,
+                'input_files' => count($files),
+                'input_rows_scanned' => $inputRows,
+                'exceptions' => count($exceptions),
+                'limit' => $exceptionsLimit,
+            ],
+            'results' => $exceptions,
+        ];
+
+        $countriesJson = $this->encodeJson($countriesPayload, $pretty);
+        $sitesJson = $this->encodeJson($sitesPayload, $pretty);
+        $exceptionsJson = $this->encodeJson($exceptionsPayload, $pretty);
+
+        if ($countriesJson === null || $sitesJson === null || $exceptionsJson === null) {
             $this->error('Failed to encode output JSON');
             return self::FAILURE;
         }
 
         if ($dryRun) {
             $this->warn("[dry] would write: storage/app/{$outStoragePath}");
+            $this->warn("[dry] would write: storage/app/{$sitesOutStoragePath}");
+            $this->warn("[dry] would write: storage/app/{$exceptionsOutStoragePath}");
             return self::SUCCESS;
         }
 
-        Storage::disk('local')->put($outStoragePath, $jsonOut);
+        Storage::disk('local')->put($outStoragePath, $countriesJson);
+        Storage::disk('local')->put($sitesOutStoragePath, $sitesJson);
+        Storage::disk('local')->put($exceptionsOutStoragePath, $exceptionsJson);
+
         $this->info("Wrote: storage/app/{$outStoragePath}");
+        $this->info("Wrote: storage/app/{$sitesOutStoragePath}");
+        $this->info("Wrote: storage/app/{$exceptionsOutStoragePath}");
 
         return self::SUCCESS;
     }
 
-    /**
-     * Upsert-like merge:
-     * - name_en: 既に code のままなら、より良い nameEn が来た時だけ上書き
-     * - name_jp: 既存countries.jsonの値を優先（merge-existing）
-     * - region : null の時だけ埋める
-     */
     private function upsertCountryRow(array &$countryMap, string $code, ?string $nameEn, array $existingJp, ?string $region): void
     {
         $code = strtoupper(trim($code));
@@ -259,7 +361,6 @@ class SplitCountryJson extends Command
             return;
         }
 
-        // name_en を改善できる場合だけ更新
         if ($nameEn !== null) {
             $nameEn = trim($nameEn);
             if ($nameEn !== '') {
@@ -270,12 +371,10 @@ class SplitCountryJson extends Command
             }
         }
 
-        // region は欠損だけ埋める
         if (($countryMap[$code]['region'] ?? null) === null && $region !== null) {
             $countryMap[$code]['region'] = $region;
         }
 
-        // name_jp は existing を優先（countryMap作成時に設定済み）
         if (($countryMap[$code]['name_jp'] ?? null) === null && isset($existingJp[$code])) {
             $countryMap[$code]['name_jp'] = $existingJp[$code];
         }
@@ -289,12 +388,8 @@ class SplitCountryJson extends Command
         if ($code === '') return null;
 
         $allowed = ['EUR', 'AFR', 'APA', 'ARB', 'LAC'];
-        if (!in_array($code, $allowed, true)) return null;
-
-        return $code;
+        return in_array($code, $allowed, true) ? $code : null;
     }
-
-    // ---- existing helpers (unchanged) ----
 
     private function collectJsonFiles(string $path): array
     {
@@ -326,6 +421,9 @@ class SplitCountryJson extends Command
 
         if (str_starts_with($path, '/')) return $path;
         if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
+
+        $storageCandidate = storage_path('app/' . ltrim($path, '/'));
+        if (file_exists($storageCandidate)) return $storageCandidate;
 
         return base_path($path);
     }
@@ -378,7 +476,6 @@ class SplitCountryJson extends Command
             if ($x === '') continue;
             $out[] = $x;
         }
-
         return $this->uniqueList($out);
     }
 
