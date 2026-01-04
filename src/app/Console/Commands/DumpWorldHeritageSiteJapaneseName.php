@@ -254,6 +254,10 @@ class DumpWorldHeritageSiteJapaneseName extends Command
         }
 
         $h1 = $xp->query('//h1');
+        if ($h1 && $h1->length > 0) {
+            $t = trim((string) $h1->item(0)?->textContent);
+            if ($t !== '') return $t;
+        }
 
         $og = $xp->query('//meta[@property="og:title"]/@content');
         if ($og && $og->length > 0) {
