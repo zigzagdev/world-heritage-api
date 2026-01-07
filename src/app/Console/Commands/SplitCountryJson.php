@@ -11,9 +11,9 @@ class SplitCountryJson extends Command
 {
     protected $signature = 'world-heritage:split-countries
         {--in= : Input UNESCO JSON file or directory (raw dump). Supports {"results":[...]} or [...] }
-        {--out=private/country/normalized/countries.json : Output path in storage/app/... }
-        {--sites-out=private/country/normalized/site-country-codes.json : Output path for per-site country judgement}
-        {--exceptions-out=private/country/normalized/exceptions-missing-codes.json : Output path for rows missing/invalid country codes}
+        {--out=country/normalized/countries.json : Output path in storage/app/... }
+        {--sites-out=country/normalized/site-country-codes.json : Output path for per-site country judgement}
+        {--exceptions-out=country/normalized/exceptions-missing-codes.json : Output path for rows missing/invalid country codes}
         {--pretty : Pretty print JSON}
         {--dry-run : Do not write output, only show counts}
         {--strict : Fail if any row cannot be mapped to at least one country code}
