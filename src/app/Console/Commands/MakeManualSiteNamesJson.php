@@ -37,15 +37,13 @@ class MakeHeritageJapaneseName extends Command
         }
 
         $result = $this->convert($text);
-
-        // verbose のときだけ、country採用ログを出す（通常は静か）
+        
         if ($this->getOutput()->isVerbose() && !empty($result['country_logs'])) {
             foreach ($result['country_logs'] as $msg) {
                 $this->line($msg);
             }
         }
 
-        // warnings を表示（必ずサマリ）
         $warnings = $result['warnings'] ?? [];
         foreach ($warnings as $w) {
             $this->warn($w);
@@ -82,16 +80,6 @@ class MakeHeritageJapaneseName extends Command
         return !empty($warnings) ? self::SUCCESS : self::SUCCESS;
     }
 
-    /**
-     * 変換ロジックは「純粋寄り」にする：I/Oや$this->warn()はやらない
-     *
-     * @return array{
-     *   rows: array<int, array<string, mixed>>,
-     *   warnings: array<int, string>,
-     *   country_logs: array<int, string>,
-     *   stats: array{rows:int,warnings:int,countries_set:int,site_without_country:int}
-     * }
-     */
     private function convert(string $text): array
     {
         $lines = preg_split("/\r\n|\r|\n/", $text) ?: [];
@@ -111,14 +99,12 @@ class MakeHeritageJapaneseName extends Command
 
             if (!$this->isSiteLine($line)) {
                 if (!$this->isCountryLikeLine($line)) {
-                    // ノイズ行は無視（必要ならここで warnings にしてもOK）
                     continue;
                 }
 
                 $currentCountry = $line;
                 $countriesSet++;
 
-                // verbose向けログ（handle側で -v のときのみ出す）
                 $countryLogs[] = "Country context set (line {$lineNo}): {$currentCountry}";
                 continue;
             }
@@ -135,7 +121,7 @@ class MakeHeritageJapaneseName extends Command
                 'id_no' => null,
                 'name_ja' => $isJa ? $name : '',
                 'name_en' => $isJa ? '' : $name,
-                'country' => $currentCountry, // null許容（後段で補完する設計ならOK）
+                'country' => $currentCountry,
                 'years' => $years,
             ];
         }
