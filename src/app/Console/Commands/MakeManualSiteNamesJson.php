@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
-class MakeHeritageJapaneseName extends Command
+class MakeManualSiteNamesJson extends Command
 {
     protected $signature = 'world-heritage:make-manual-names-json
         {--in=storage/app/private/unesco/manual_input.txt : Input text file}
@@ -37,7 +37,7 @@ class MakeHeritageJapaneseName extends Command
         }
 
         $result = $this->convert($text);
-        
+
         if ($this->getOutput()->isVerbose() && !empty($result['country_logs'])) {
             foreach ($result['country_logs'] as $msg) {
                 $this->line($msg);
