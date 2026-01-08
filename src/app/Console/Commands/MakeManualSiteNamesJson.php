@@ -17,10 +17,10 @@ class MakeManualSiteNamesJson extends Command
 
     public function handle(): int
     {
-        $in     = (string)$this->option('in');
-        $out    = (string)$this->option('out');
-        $pretty = (bool)$this->option('pretty');
-        $strict = (bool)$this->option('strict');
+        $in = (string) $this->option('in');
+        $out = (string) $this->option('out');
+        $pretty = (bool) $this->option('pretty');
+        $strict = (bool) $this->option('strict');
 
         $inPath = $this->resolvePath($in);
         if (!is_file($inPath)) {
@@ -28,7 +28,7 @@ class MakeManualSiteNamesJson extends Command
             return self::FAILURE;
         }
 
-        $text = file_get_contents($inPath);
+        $text = @file_get_contents($inPath);
         if ($text === false || $text === '') {
             $detail = error_get_last();
             $reason = $detail['message'] ?? 'unknown reason';
@@ -44,6 +44,11 @@ class MakeManualSiteNamesJson extends Command
             }
         }
 
+        $errors = $result['errors'] ?? [];
+        foreach ($errors as $e) {
+            $this->error($e);
+        }
+
         $warnings = $result['warnings'] ?? [];
         foreach ($warnings as $w) {
             $this->warn($w);
@@ -51,12 +56,18 @@ class MakeManualSiteNamesJson extends Command
 
         $stats = $result['stats'] ?? [];
         $this->info(sprintf(
-            "Parsed: rows=%d, warnings=%d, countries_set=%d, site_without_country=%d",
+            "Parsed: rows=%d, errors=%d, warnings=%d, countries_set=%d, site_without_country=%d",
             $stats['rows'] ?? 0,
+            $stats['errors'] ?? 0,
             $stats['warnings'] ?? 0,
             $stats['countries_set'] ?? 0,
             $stats['site_without_country'] ?? 0
         ));
+
+        if (!empty($errors)) {
+            $this->error("Completed with errors. Output was not written.");
+            return self::FAILURE;
+        }
 
         if ($strict && !empty($warnings)) {
             $this->error("Completed with warnings under --strict. Output was not written.");
@@ -74,10 +85,16 @@ class MakeManualSiteNamesJson extends Command
             return self::FAILURE;
         }
 
-        Storage::disk('local')->put($this->toLocalDiskPath($out), $json);
+        $outDiskPath = $this->toLocalDiskPath($out);
+        if ($outDiskPath === '') {
+            $this->error("Output path is empty.");
+            return self::FAILURE;
+        }
 
-        $this->info("Wrote: storage/app/" . $this->toLocalDiskPath($out) . " (count=" . count($rows) . ")");
-        return !empty($warnings) ? self::SUCCESS : self::SUCCESS;
+        Storage::disk('local')->put($outDiskPath, $json);
+        $this->info("Wrote: storage/app/{$outDiskPath} (count=" . count($rows) . ")");
+
+        return self::SUCCESS;
     }
 
     private function convert(string $text): array
@@ -86,6 +103,7 @@ class MakeManualSiteNamesJson extends Command
         $currentCountry = null;
 
         $rows = [];
+        $errors = [];
         $warnings = [];
         $countryLogs = [];
 
@@ -94,7 +112,7 @@ class MakeManualSiteNamesJson extends Command
 
         foreach ($lines as $i => $raw) {
             $lineNo = $i + 1;
-            $line = trim((string)$raw);
+            $line = trim((string) $raw);
             if ($line === '') continue;
 
             if (!$this->isSiteLine($line)) {
@@ -104,18 +122,23 @@ class MakeManualSiteNamesJson extends Command
 
                 $currentCountry = $line;
                 $countriesSet++;
-
                 $countryLogs[] = "Country context set (line {$lineNo}): {$currentCountry}";
                 continue;
             }
 
             if ($currentCountry === null) {
                 $siteWithoutCountry++;
-                $warnings[] = "Site line found before any country context (line {$lineNo}): {$line}";
+                $errors[] = "Site line found before any country context (line {$lineNo}): {$line}";
+                continue;
             }
 
             [$name, $years] = $this->splitNameAndYears($line);
             $isJa = $this->containsJapanese($name);
+
+            if ($name === '') {
+                $warnings[] = "Empty site name after normalization (line {$lineNo})";
+                continue;
+            }
 
             $rows[] = [
                 'id_no' => null,
@@ -128,10 +151,12 @@ class MakeManualSiteNamesJson extends Command
 
         return [
             'rows' => $rows,
+            'errors' => $errors,
             'warnings' => $warnings,
             'country_logs' => $countryLogs,
             'stats' => [
                 'rows' => count($rows),
+                'errors' => count($errors),
                 'warnings' => count($warnings),
                 'countries_set' => $countriesSet,
                 'site_without_country' => $siteWithoutCountry,
@@ -164,7 +189,7 @@ class MakeManualSiteNamesJson extends Command
         $years = '';
 
         if (preg_match('/\s*[\(（]([^()（）]+)[\)）]\s*$/u', $line, $m) === 1) {
-            $years = trim((string)$m[1]);
+            $years = trim((string) $m[1]);
             $line = preg_replace('/\s*[\(（][^()（）]+[\)）]\s*$/u', '', $line) ?? $line;
             $line = trim($line);
         }
@@ -176,6 +201,7 @@ class MakeManualSiteNamesJson extends Command
     {
         $line = trim($line);
         if ($line === '') return false;
+
         return preg_match('/[\(（]\s*\d{4}.*[\)）]\s*$/u', $line) === 1;
     }
 
@@ -185,6 +211,7 @@ class MakeManualSiteNamesJson extends Command
         if ($path === '') return $path;
         if (str_starts_with($path, '/')) return $path;
         if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
+
         return base_path($path);
     }
 
