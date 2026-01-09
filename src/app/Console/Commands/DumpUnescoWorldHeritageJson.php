@@ -387,7 +387,7 @@ class DumpUnescoWorldHeritageJson extends Command
 
     private function normalizeRow(array $row): array
     {
-        $toBool = fn ($v) => is_bool($v) ? $v : (strtolower((string) $v) === 'true');
+        $toBool = fn ($v) => is_bool($v) ? $v : (strtolower(trim((string) $v)) === 'true');
         $toFloat = fn ($v) => $v === null || $v === '' ? null : (float) $v;
         $toInt = fn ($v) => $v === null || $v === '' ? null : (int) $v;
 
@@ -413,11 +413,7 @@ class DumpUnescoWorldHeritageJson extends Command
 
             'description_en' => $row['description_en'] ?? null,
             'justification_en' => $row['justification_en'] ?? null,
-
-            'criteria' => $this->buildCriteriaFromDumpRow($row),
-
-            'criteria_txt' => $row['criteria_txt'] ?? null,
-
+            'criteria' => $row['criteria_txt'] ?? null,
             'date_inscribed' => $row['date_inscribed'] ?? null,
             'secondary_dates' => $row['secondary_dates'] ?? null,
             'danger' => $toBool($row['danger'] ?? null),
@@ -447,53 +443,43 @@ class DumpUnescoWorldHeritageJson extends Command
 
     private function buildCriteriaFromDumpRow(array $row): array
     {
-        if (!empty($row['criteria_txt']) && is_string($row['criteria_txt'])) {
-            preg_match_all('/\(\s*([ivxlcdm]+)\s*\)/i', $row['criteria_txt'], $m);
-            return array_values(array_unique(array_map('strtolower', $m[1] ?? [])));
+        $raw = $row['criteria_txt'] ?? null;
+
+        // null / 非文字列 / 空は []（要件通り）
+        if (!is_string($raw)) return [];
+        $raw = trim($raw);
+        if ($raw === '') return [];
+
+        // 1) "(ii) (vi)" のような括弧形式
+        preg_match_all('/\(\s*([ivxlcdm]+)\s*\)/i', $raw, $m1);
+        $vals = $m1[1] ?? [];
+
+        // 2) 括弧が無い "ii, vi" "ii;vi" みたいな形式にも一応対応
+        //    （UNESCO 側が揺れても死なないように）
+        if (!is_array($vals) || $vals === []) {
+            preg_match_all('/\b([ivxlcdm]{1,6})\b/i', $raw, $m2);
+            $vals = $m2[1] ?? [];
         }
 
-        if (!empty($row['justification_en']) && is_string($row['justification_en'])) {
-            return $this->extractCriteriaFromJustification($row['justification_en']);
+        if (!is_array($vals) || $vals === []) return [];
+
+        // 正規化 + 重複排除（順序維持）
+        $out = [];
+        $seen = [];
+
+        foreach ($vals as $v) {
+            $v = strtolower(trim((string) $v));
+            if ($v === '') continue;
+
+            // ローマ数字として妥当なものだけに限定
+            if (!preg_match('/^[ivxlcdm]+$/', $v)) continue;
+
+            if (!isset($seen[$v])) {
+                $seen[$v] = true;
+                $out[] = $v;
+            }
         }
 
-        return [];
+        return $out;
     }
-
-    private function extractCriteriaFromJustification(?string $text): array
-    {
-        if (!$text) return [];
-
-        $text = strip_tags($text);
-        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        preg_match_all(
-            '/\bcriteri(?:on|a)\s*\(\s*([ivxlcdm]+)\s*\)/i',
-            $text,
-            $m
-        );
-
-        return array_values(
-            array_unique(
-                array_map('strtolower', $m[1] ?? [])
-            )
-        );
-    }
-
-    private function convertCulturalCriteria(mixed $v): array
-    {
-        if (!is_string($v) || trim($v) === '') return [];
-        preg_match_all('/c\s*([0-9]+)/i', $v, $m);
-        $nums = array_map('intval', $m[1] ?? []);
-        return array_values(array_unique(array_map([$this, 'toRoman'], $nums)));
-    }
-
-    private function convertNaturalCriteria(mixed $v): array
-    {
-        if (!is_string($v) || trim($v) === '') return [];
-        preg_match_all('/n\s*([0-9]+)/i', $v, $m);
-        $nums = array_map('intval', $m[1] ?? []);
-        return array_values(array_unique(array_map([$this, 'toRoman'], $nums)));
-    }
-
-
 }
