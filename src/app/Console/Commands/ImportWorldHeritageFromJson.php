@@ -143,14 +143,12 @@ class ImportWorldHeritageFromJson extends Command
 
         return [
             'id' => $this->toNullableInt($id),
-
             'official_name' => $row['official_name'] ?? null,
             'name' => $row['name_en'] ?? $row['name'] ?? null,
-            'name_jp' => $row['name_jp'] ?? $row['name_ja'] ?? null,
             'region' => $row['region_en'] ?? $row['region'] ?? null,
             'state_party' => $stateParty,
             'category' => $row['category'] ?? $row['type'] ?? null,
-            'criteria' => $this->criteriaFromTxt($criteriaRaw),
+            'criteria' => $row['criteria'] ?? null,
             'year_inscribed' => $this->toNullableInt($row['date_inscribed'] ?? $row['year_inscribed'] ?? null),
             'area_hectares' => $this->toNullableFloat($row['area_hectares'] ?? null),
             'buffer_zone_hectares' => $this->toNullableFloat($row['buffer_zone_hectares'] ?? null),
