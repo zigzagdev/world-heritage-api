@@ -683,6 +683,15 @@ class SplitWorldHeritageJson extends Command
         $category = $this->normalizeCategoryOrFallback($row['category'] ?? null);
         $criteria = $this->resolveCriteriaList($row);
 
+        $toBool = function ($v): bool {
+            if (is_bool($v)) return $v;
+            if (is_int($v) || is_float($v)) return ((int)$v) === 1;
+
+            $s = strtolower(trim((string)$v));
+            return in_array($s, ['1', 'true', 't', 'yes', 'y', 'on'], true);
+        };
+        $toTinyInt = fn($v) => $toBool($v) ? 1 : 0;
+
         $iso2List = $this->extractIsoCodes($row['iso_codes'] ?? null);
 
         $stateParty = null;
@@ -713,7 +722,9 @@ class SplitWorldHeritageJson extends Command
             'year_inscribed' => $year,
             'area_hectares' => isset($row['area_hectares']) && is_numeric($row['area_hectares']) ? (float)$row['area_hectares'] : null,
             'buffer_zone_hectares' => isset($row['buffer_zone_hectares']) && is_numeric($row['buffer_zone_hectares']) ? (float)$row['buffer_zone_hectares'] : null,
-            'is_endangered' => (strtolower((string)($row['danger'] ?? 'false')) === 'true') ? 1 : 0,
+            'is_endangered' => $toTinyInt(
+                $row['danger'] ?? $row['is_endangered'] ?? false
+            ),
             'latitude' => is_numeric($lat) ? (float)$lat : null,
             'longitude' => is_numeric($lon) ? (float)$lon : null,
             'short_description' => $this->stringOrNull($row['short_description_en'] ?? null),
