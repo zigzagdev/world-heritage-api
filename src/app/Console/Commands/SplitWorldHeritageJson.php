@@ -703,8 +703,17 @@ class SplitWorldHeritageJson extends Command
         }
 
         $imageUrls = $this->extractImageUrls($row);
-        $primaryImageUrl = $imageUrls[0] ?? null;
-        $imageUrl = $primaryImageUrl !== null ? mb_substr($primaryImageUrl, 0, 255) : null;
+        $imageUrl = null;
+        $primaryImageUrl = null;
+
+        if (count($imageUrls) === 1) {
+            $imageUrl = mb_substr($imageUrls[0], 0, 255);
+            $primaryImageUrl = null;
+        } elseif (count($imageUrls) >= 2) {
+            $primaryImageUrl = $imageUrls[0];
+            $imageUrl = null;
+        }
+
         $year = isset($row['date_inscribed']) && is_numeric($row['date_inscribed'])
             ? (int)$row['date_inscribed']
             : 0;
@@ -794,12 +803,14 @@ class SplitWorldHeritageJson extends Command
 
         $fill('short_description', $incoming['short_description_en'] ?? null);
 
-        if (($existing['primary_image_url'] ?? null) === null) {
-            $urls = $this->extractImageUrls($incoming);
+        $urls = $this->extractImageUrls($incoming);
+
+        if (($existing['primary_image_url'] ?? null) === null && count($urls) >= 2) {
             $existing['primary_image_url'] = $urls[0] ?? null;
         }
-        if (($existing['image_url'] ?? null) === null && ($existing['primary_image_url'] ?? null) !== null) {
-            $existing['image_url'] = mb_substr((string)$existing['primary_image_url'], 0, 255);
+
+        if (($existing['image_url'] ?? null) === null && count($urls) === 1) {
+            $existing['image_url'] = mb_substr((string)($urls[0] ?? ''), 0, 255) ?: null;
         }
 
         if (($existing['unesco_site_url'] ?? null) === null) {
