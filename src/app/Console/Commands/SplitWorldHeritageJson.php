@@ -74,7 +74,6 @@ class SplitWorldHeritageJson extends Command
             return self::FAILURE;
         }
 
-        // out is a directory under storage/app
         $outDir = $this->resolvePathToDir($out);
         if (!is_dir($outDir)) {
             if (!@mkdir($outDir, 0777, true) && !is_dir($outDir)) {
@@ -92,7 +91,6 @@ class SplitWorldHeritageJson extends Command
         $this->info("Output dir: {$outDir}");
         if ($dryRun) $this->warn('Dry-run enabled: will NOT write any files.');
 
-        /** @var CountryCodeNormalizer $normalizer */
         $normalizer = app(CountryCodeNormalizer::class);
 
         $logged = 0;
@@ -106,13 +104,10 @@ class SplitWorldHeritageJson extends Command
             $logged++;
         };
 
-        // Output arrays (DB-import-ready)
-        $sites = [];   // world_heritage_sites
-        $countries = []; // countries (state parties)
-        $pivot = [];   // site_state_parties
-        $images = [];  // world_heritage_site_images
-
-        // Diagnostics
+        $sites = [];
+        $countries = [];
+        $pivot = [];
+        $images = [];
         $siteJudgements = [];
         $exceptions = [];
 
@@ -288,7 +283,6 @@ class SplitWorldHeritageJson extends Command
                 continue;
             }
 
-            // Images table rows (only if multiple images)
             $imageUrls = $this->extractImageUrls($row);
             if (count($imageUrls) >= 2) {
                 foreach ($imageUrls as $idx => $url) {
@@ -702,9 +696,18 @@ class SplitWorldHeritageJson extends Command
             $country = $iso3;
         }
 
-        $imageUrls = $this->extractImageUrls($row);
-        $primaryImageUrl = $imageUrls[0] ?? null;
-        $imageUrl = $primaryImageUrl !== null ? mb_substr($primaryImageUrl, 0, 255) : null;
+        $main = $row['main_image_url']['url'] ?? null;
+        $imageUrl = null;
+
+        if (is_string($main)) {
+            $main = trim($main);
+            if ($main !== '') {
+                $imageUrl = mb_substr($main, 0, 255);
+            }
+        }
+
+        $primaryImageUrl = null;
+
         $year = isset($row['date_inscribed']) && is_numeric($row['date_inscribed'])
             ? (int)$row['date_inscribed']
             : 0;
@@ -794,12 +797,18 @@ class SplitWorldHeritageJson extends Command
 
         $fill('short_description', $incoming['short_description_en'] ?? null);
 
-        if (($existing['primary_image_url'] ?? null) === null) {
-            $urls = $this->extractImageUrls($incoming);
-            $existing['primary_image_url'] = $urls[0] ?? null;
+        if (($existing['image_url'] ?? null) === null || $existing['image_url'] === '') {
+            $main = $incoming['main_image_url']['url'] ?? null;
+            if (is_string($main)) {
+                $main = trim($main);
+                if ($main !== '') {
+                    $existing['image_url'] = mb_substr($main, 0, 255);
+                }
+            }
         }
-        if (($existing['image_url'] ?? null) === null && ($existing['primary_image_url'] ?? null) !== null) {
-            $existing['image_url'] = mb_substr((string)$existing['primary_image_url'], 0, 255);
+
+        if (($existing['primary_image_url'] ?? null) !== null) {
+            $existing['primary_image_url'] = null;
         }
 
         if (($existing['unesco_site_url'] ?? null) === null) {
@@ -941,7 +950,6 @@ class SplitWorldHeritageJson extends Command
         if ($pos === false) $pos = stripos($s, 'criteria');
         if ($pos === false) return [];
 
-        // ✅ FIX: stripos returns byte offset => use substr (NOT mb_substr)
         $slice = substr($s, $pos, 600);
 
         preg_match_all('/\(([ivx]+)\)/i', $slice, $m);
