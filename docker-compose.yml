@@ -3,7 +3,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: environment/docker/Dockerfile
+      dockerfile: ./environment/local/docker/Dockerfile
     image: wha-api:local
     ports:
       - "8700:8080"
