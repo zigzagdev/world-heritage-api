@@ -43,25 +43,19 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'latitude',
                 'longitude',
                 'short_description',
-                'unesco_site_url',
                 'thumbnail_image_id',
+                'image_url'
             ])
             ->with([
                 'countries' => function ($countriesQuery) {
                     $countriesQuery
-                        ->withPivot(['is_primary', 'inscription_year'])
+                        ->withPivot(['is_primary'])
                         ->orderBy('countries.state_party_code', 'asc');
                 },
                 'thumbnail' => function ($thumbnailQuery) {
                     $thumbnailQuery->select([
                         'images.id',
                         'images.world_heritage_id',
-                        'images.disk',
-                        'images.path',
-                        'images.width',
-                        'images.height',
-                        'images.format',
-                        'images.checksum',
                         'images.sort_order',
                     ]);
                 },
@@ -93,15 +87,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                     $thumbnailQuery->select([
                         'images.id',
                         'images.world_heritage_id',
-                        'images.disk',
-                        'images.path',
-                        'images.width',
-                        'images.height',
-                        'images.format',
-                        'images.checksum',
                         'images.sort_order',
-                        'images.alt',
-                        'images.credit',
                     ]);
                 },
             ])
@@ -383,6 +369,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'unesco_site_url'      => $heritage->unesco_site_url,
             'state_parties'        => $statePartyCodeList,
             'state_parties_meta'   => $statePartiesMeta,
+            'image_url'            => $heritage->image_url
         ];
     }
 
