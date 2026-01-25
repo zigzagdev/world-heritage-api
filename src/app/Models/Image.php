@@ -32,6 +32,6 @@ class Image extends Model
 
     public function worldHeritage()
     {
-        return $this->belongsTo(WorldHeritage::class, 'world_heritage_site_id', 'id');
+        return $this->belongsTo(WorldHeritage::class, 'world_heritage_id', 'id');
     }
 }
