@@ -1,0 +1,133 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+use RuntimeException;
+
+class WorldHeritageBuild extends Command
+{
+    protected $signature = 'app:world-heritage-build
+        {--force : Allow running outside local/testing}
+        {--clear : Run optimize:clear before build}
+        {--fresh : Run migrate:fresh before import}
+        {--pretty : Pretty print split JSON}
+
+        {--dump : Run UNESCO dump before split (default: on)}
+        {--dump-limit=100 : Dump pagination limit per request}
+        {--dump-max=0 : 0 means no limit}
+        {--dump-out=private/unesco/world-heritage-sites.json : Output path in storage/app/... (local disk relative)}
+        {--dump-dry-run : Do not write dump file}
+
+        {--jp : Also import Japanese names}
+        {--jp-path=storage/app/private/unesco/world-heritage-japanese-name-sorted.json : Japanese name JSON path}
+        {--jp-only-empty : Update only when DB name_jp is NULL/empty}
+        {--jp-strict : Fail if any id_no does not exist in DB}
+        {--jp-dry-run : No DB writes for Japanese name import}
+        {--jp-batch=500 : Chunk size for Japanese name import}
+        {--jp-missing-out= : Write missing id_no list to this path}
+        {--jp-missing-limit=200 : Max missing ids to print to console}';
+
+    protected $description = 'Rebuild local DB and import UNESCO World Heritage data (dump -> split -> import)';
+
+    public function handle(): int
+    {
+        if (!app()->environment(['local', 'testing']) && !(bool) $this->option('force')) {
+            $this->error('Refusing to run outside local/testing without --force.');
+            return self::FAILURE;
+        }
+
+        if ((bool) $this->option('clear')) {
+            $this->callOrFail('optimize:clear');
+        }
+
+        if ((bool) $this->option('fresh')) {
+            $this->callOrFail('migrate:fresh');
+        }
+
+        $pretty = (bool) $this->option('pretty');
+
+        // 0) Dump UNESCO raw JSON (ALL) -> storage/app/{dump-out}
+        // NOTE: dump command writes to Storage::disk("local"), so --dump-out must be "storage/app relative" (e.g. private/...)
+        if ((bool) ($this->option('dump') ?? true)) {
+            $this->callOrFail('world-heritage:dump-unesco', array_filter([
+                '--all' => true,
+                '--limit' => (int) $this->option('dump-limit'),
+                '--max' => (int) $this->option('dump-max'),
+                '--out' => (string) $this->option('dump-out'),
+                '--pretty' => $pretty ? true : null,
+                '--dry-run' => (bool) $this->option('dump-dry-run') ? true : null,
+            ], fn ($v) => $v !== null));
+        }
+
+        // 1) Split raw UNESCO JSON -> normalized JSON files
+        // Split command resolves paths under storage/app/, so either "private/..." or "storage/app/private/..." works.
+        $this->callOrFail('world-heritage:split-json', array_filter([
+            '--in' => (string) $this->option('dump-out'), // e.g. private/unesco/world-heritage-sites.json
+            '--out' => 'storage/app/private/unesco/normalized',
+            '--site-judgements-out' => 'storage/app/private/unesco/normalized/site-country-judgements.json',
+            '--exceptions-out' => 'storage/app/private/unesco/normalized/exceptions-missing-iso-codes.json',
+            '--clean' => true,
+            '--pretty' => $pretty ? true : null,
+        ], fn ($v) => $v !== null));
+
+        // 2) Import countries (FK parent)
+        $this->callOrFail('world-heritage:import-countries-split', [
+            '--in' => 'storage/app/private/unesco/normalized/countries.json',
+        ]);
+
+        // 3) Import sites (FK parent)
+        $this->callOrFail('world-heritage:import-sites-split', [
+            '--in' => 'storage/app/private/unesco/normalized/world_heritage_sites.json',
+        ]);
+
+        // 4) Import pivot (FK depends on countries + sites)
+        $this->callOrFail('world-heritage:import-site-state-parties-split', [
+            '--in' => 'storage/app/private/unesco/normalized/site_state_parties.json',
+        ]);
+
+        // 5) Images
+        $this->callOrFail('world-heritage:import-images-json', [
+            '--path' => 'storage/app/private/unesco/normalized/world_heritage_site_images.json',
+        ]);
+
+        // 6) Exceptions
+        $this->callOrFail('world-heritage:import-site-country-exceptions', [
+            '--in' => 'storage/app/private/unesco/normalized/exceptions-missing-iso-codes.json',
+        ]);
+
+        if ((bool) $this->option('jp')) {
+            $this->callOrFail('world-heritage:import-japanese-names', array_filter([
+                '--path' => (string) $this->option('jp-path'),
+                '--batch' => (int) $this->option('jp-batch'),
+
+                '--only-empty' => (bool) $this->option('jp-only-empty') ? true : null,
+                '--strict' => (bool) $this->option('jp-strict') ? true : null,
+                '--dry-run' => (bool) $this->option('jp-dry-run') ? true : null,
+
+                '--missing-out' => trim((string) $this->option('jp-missing-out')) !== '' ? (string) $this->option('jp-missing-out') : null,
+                '--missing-limit' => (int) $this->option('jp-missing-limit'),
+            ], fn ($v) => $v !== null));
+        }
+
+        $this->info('✅ Done: DB rebuilt + UNESCO data imported (dump -> split -> import)');
+        return self::SUCCESS;
+    }
+
+    private function callOrFail(string $command, array $options = []): void
+    {
+        $this->line("→ {$command}");
+
+        $code = Artisan::call($command, $options);
+
+        $out = trim(Artisan::output());
+        if ($out !== '') {
+            $this->output->writeln($out);
+        }
+
+        if ($code !== 0) {
+            throw new RuntimeException("Command failed: {$command} (exit={$code})");
+        }
+    }
+}
