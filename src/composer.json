@@ -15,6 +15,7 @@
         "ext-xml": "*"
     },
     "require-dev": {
+        "carthage-software/mago": "^1.2",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.1",
         "laravel/pint": "^1.13",
@@ -67,7 +68,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "carthage-software/mago": true
         }
     },
     "minimum-stability": "stable",
