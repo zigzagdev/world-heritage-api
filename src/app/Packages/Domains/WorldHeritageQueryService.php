@@ -43,7 +43,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'latitude',
                 'longitude',
                 'short_description',
-                'thumbnail_image_id',
                 'image_url'
             ])
             ->with([
@@ -51,13 +50,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                     $countriesQuery
                         ->withPivot(['is_primary'])
                         ->orderBy('countries.state_party_code', 'asc');
-                },
-                'thumbnail' => function ($thumbnailQuery) {
-                    $thumbnailQuery->select([
-                        'images.id',
-                        'images.world_heritage_id',
-                        'images.sort_order',
-                    ]);
                 },
             ])
             ->limit(30)
