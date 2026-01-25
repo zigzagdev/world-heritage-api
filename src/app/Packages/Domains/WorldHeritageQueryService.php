@@ -43,6 +43,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'latitude',
                 'longitude',
                 'short_description',
+                'thumbnail_image_id',
                 'image_url'
             ])
             ->with([
