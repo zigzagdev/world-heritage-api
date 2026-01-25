@@ -52,13 +52,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                         ->withPivot(['is_primary'])
                         ->orderBy('countries.state_party_code', 'asc');
                 },
-                'thumbnail' => function ($thumbnailQuery) {
-                    $thumbnailQuery->select([
-                        'images.id',
-                        'images.world_heritage_id',
-                        'images.sort_order',
-                    ]);
-                },
             ])
             ->limit(30)
             ->get();
