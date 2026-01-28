@@ -11,7 +11,6 @@ class WorldHeritageSummaryFactory
     {
         $thumbnail = null;
 
-        // ★ 追加：thumbnail リレーションにも対応させる
         if (is_array($data['image'] ?? null)) {
             $imageRow = $data['image'];
         } elseif (is_array($data['thumbnail'] ?? null)) {
@@ -24,7 +23,6 @@ class WorldHeritageSummaryFactory
             ?? $data['thumbnail_id']
             ?? ($imageRow['id'] ?? null);
 
-        // ★ thumbnail_url / image_url が無い場合に path から組み立てる
         $thumbnailUrl = $data['thumbnail_url']
             ?? $data['image_url']
             ?? ($imageRow ? self::buildThumbnailUrlFromRow($imageRow) : null);
@@ -55,7 +53,7 @@ class WorldHeritageSummaryFactory
             id: (int)$data['id'],
             officialName: (string)($data['official_name'] ?? ''),
             name: (string)($data['name'] ?? ''),
-            country: (string)($data['country'] ?? ''),
+            country: ($data['country'] ?? null),
             region: (string)($data['region'] ?? ''),
             category: (string)($data['category'] ?? ''),
             yearInscribed: (int)($data['year_inscribed'] ?? 0),
@@ -66,13 +64,13 @@ class WorldHeritageSummaryFactory
             stateParty: $data['state_party'] ?? null,
             criteria: $normalizedCriteria,
             areaHectares: array_key_exists('area_hectares', $data) ? (float)$data['area_hectares'] : null,
-            bufferZoneHectares: array_key_exists('buffer_zone_hectares', $data) ? (float)$data['buffer_zone_hectares'] : null,
+            bufferZoneHectares: array_key_exists('buffer_zone_hectares', $data) ? $data['buffer_zone_hectares'] : null,
             shortDescription: $data['short_description'] ?? null,
             collection: null,
             unescoSiteUrl: $data['unesco_site_url'] ?? null,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta,
-            thumbnail: $thumbnail
+            imageUrl: $thumbnail
         );
     }
 
@@ -121,10 +119,7 @@ class WorldHeritageSummaryFactory
         foreach ($normalizedCodes as $iso3) {
             $row = $inputMeta[$iso3] ?? [];
             $normalizedMeta[$iso3] = [
-                'is_primary' => (bool)($row['is_primary'] ?? false),
-                'inscription_year' => array_key_exists('inscription_year', $row)
-                    ? (int)$row['inscription_year']
-                    : null,
+                'is_primary' => (bool)($row['is_primary'] ?? false)
             ];
         }
 
