@@ -126,8 +126,16 @@ class ImportCountriesFromSplitFile extends Command
     {
         $path = trim($path);
         if ($path === '') return $path;
-        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
-        return base_path($path);
+
+        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
+
+        if (str_starts_with($path, 'storage/app/')) {
+            $path = substr($path, strlen('storage/app/'));
+        }
+
+        return storage_path('app/' . ltrim($path, '/'));
     }
 
     private function toNullableString(mixed $v): ?string
