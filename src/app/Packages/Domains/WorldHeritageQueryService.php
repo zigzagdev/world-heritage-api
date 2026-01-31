@@ -24,7 +24,10 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     /**
      * 一覧（最大30件）: サムネのみ、state_party/state_party_code を要件通りに整形
      */
-    public function getAllHeritages(): WorldHeritageDtoCollection
+    public function getAllHeritages(
+        int $currentPage,
+        int $perPage
+    ): WorldHeritageDtoCollection
     {
         $items = $this->model
             ->select([
@@ -53,8 +56,12 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                         ->orderBy('countries.state_party_code', 'asc');
                 },
             ])
-            ->limit(200)
-            ->get();
+            ->paginate(
+                $perPage,
+                ['*'],
+                'page',
+                $currentPage
+            );
 
         $array = $items
             ->map(fn ($heritage) => $this->buildWorldHeritagePayload($heritage))
