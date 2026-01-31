@@ -131,10 +131,16 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
 
     private function resolvePath(string $path): string
     {
-        if ($path !== '' && ($path[0] === '/' || preg_match('/^[A-Za-z]:\\\\/', $path) === 1)) {
-            return $path;
+        $path = trim($path);
+        if ($path === '') return $path;
+
+        if (str_starts_with($path, '/')) return $path;
+        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
+
+        if (str_starts_with($path, 'storage/app/')) {
+            $path = substr($path, strlen('storage/app/'));
         }
-        return base_path($path);
+        return storage_path('app/' . ltrim($path, '/'));
     }
 
     private function collectJsonFiles(string $fullPath): array

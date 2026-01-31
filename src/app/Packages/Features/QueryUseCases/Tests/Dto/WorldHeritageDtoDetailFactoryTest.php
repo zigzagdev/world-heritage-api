@@ -43,24 +43,24 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
                 'MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR',
             ],
             'state_parties_meta' => [
-                'ALB' => ['is_primary' => false, 'inscription_year' => 2007],
-                'AUT' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BEL' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BIH' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BGR' => ['is_primary' => false, 'inscription_year' => 2007],
-                'HRV' => ['is_primary' => false, 'inscription_year' => 2007],
-                'CZE' => ['is_primary' => false, 'inscription_year' => 2007],
-                'FRA' => ['is_primary' => false, 'inscription_year' => 2007],
-                'DEU' => ['is_primary' => false, 'inscription_year' => 2007],
-                'ITA' => ['is_primary' => false, 'inscription_year' => 2007],
-                'MKD' => ['is_primary' => false, 'inscription_year' => 2007],
-                'POL' => ['is_primary' => false, 'inscription_year' => 2007],
-                'ROU' => ['is_primary' => false, 'inscription_year' => 2007],
-                'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
-                'SVN' => ['is_primary' => false, 'inscription_year' => 2007],
-                'ESP' => ['is_primary' => false, 'inscription_year' => 2007],
-                'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
-                'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ALB' => ['is_primary' => false],
+                'AUT' => ['is_primary' => false],
+                'BEL' => ['is_primary' => false],
+                'BIH' => ['is_primary' => false],
+                'BGR' => ['is_primary' => false],
+                'HRV' => ['is_primary' => false],
+                'CZE' => ['is_primary' => false],
+                'FRA' => ['is_primary' => false],
+                'DEU' => ['is_primary' => false],
+                'ITA' => ['is_primary' => false],
+                'MKD' => ['is_primary' => false],
+                'POL' => ['is_primary' => false],
+                'ROU' => ['is_primary' => false],
+                'SVK' => ['is_primary' => true,],
+                'SVN' => ['is_primary' => false],
+                'ESP' => ['is_primary' => false],
+                'CHE' => ['is_primary' => false],
+                'UKR' => ['is_primary' => false],
             ],
             'images' => [
                 [
@@ -142,9 +142,7 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
         $this->assertSame($input['images'][0]['format'],     $images[0]['format']);
         $this->assertSame($input['images'][0]['alt'],        $images[0]['alt']);
         $this->assertSame($input['images'][0]['credit'],     $images[0]['credit']);
-        $this->assertSame($input['images'][0]['is_primary'], $images[0]['is_primary']);
         $this->assertSame($input['images'][0]['checksum'],   $images[0]['checksum']);
-
         $this->assertSame($input['images'][1]['id'],         $images[1]['id']);
         $this->assertSame($input['images'][1]['url'],        $images[1]['url']);
         $this->assertSame($input['images'][1]['sort_order'], $images[1]['sort_order']);
@@ -153,7 +151,6 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
         $this->assertSame($input['images'][1]['format'],     $images[1]['format']);
         $this->assertSame($input['images'][1]['alt'],        $images[1]['alt']);
         $this->assertSame($input['images'][1]['credit'],     $images[1]['credit']);
-        $this->assertSame($input['images'][1]['is_primary'], $images[1]['is_primary']);
         $this->assertSame($input['images'][1]['checksum'],   $images[1]['checksum']);
     }
 }

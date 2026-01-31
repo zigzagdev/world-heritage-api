@@ -9,20 +9,19 @@ use InvalidArgumentException;
 class SplitWorldHeritageJson extends Command
 {
     protected $signature = 'world-heritage:split-json
-        {--in= : Input raw JSON file (e.g. storage/app/private/unesco/world-heritage-sites.json)}
-        {--out=unesco/normalized : Output dir in storage/app/... (directory)}
-        {--site-judgements-out=unesco/normalized/site-country-judgements.json : Per-site judgement output (all rows)}
-        {--exceptions-out=unesco/normalized/exceptions-missing-iso-codes.json : Missing/invalid iso_codes rows (subset)}
-        {--exceptions-limit=2000 : Max number of exception rows to store}
-        {--pretty : Pretty print JSON}
-        {--log-limit=50 : Max number of skipped/invalid log lines}
-        {--summary-file= : Optional summary JSON file path (in storage/app/...)}
-        {--strict : Fail if any invalid/unknown rows exist}
-        {--clean : Delete existing *.json in output dir before writing}
-        {--dry-run : Do not write files (only logs/summary)}';
+    {--in=private/unesco/world-heritage-sites.json : Input raw UNESCO JSON file (dump output) in storage/app/...}
+    {--out=private/unesco/normalized : Output dir in storage/app/... (directory)}
+    {--site-judgements-out=private/unesco/normalized/site-country-judgements.json : Per-site judgement output (all rows)}
+    {--exceptions-out=private/unesco/normalized/exceptions-missing-iso-codes.json : Missing/invalid iso_codes rows (subset)}
+    {--exceptions-limit=2000 : Max number of exception rows to store}
+    {--pretty : Pretty print JSON}
+    {--log-limit=50 : Max number of skipped/invalid log lines}
+    {--summary-file= : Optional summary JSON file path (in storage/app/...)}
+    {--strict : Fail if any invalid/unknown rows exist}
+    {--clean : Delete existing *.json in output dir before writing}
+    {--dry-run : Do not write files (only logs/summary)}';
 
     protected $description = 'Normalize raw UNESCO JSON into DB-import-ready JSON files for local DB tables';
-
 
     public function handle(): int
     {
@@ -202,6 +201,7 @@ class SplitWorldHeritageJson extends Command
 
             $siteId = (int)$idNoRaw;
 
+            // site 本体は常に作る
             if (!isset($sites[$siteId])) {
                 $sites[$siteId] = $this->normalizeSiteRowImportReady($row, $siteId);
             } else {
@@ -265,7 +265,23 @@ class SplitWorldHeritageJson extends Command
                 $reason
             );
 
-            // If unresolved, keep exception and do not create pivot/country rows
+            /**
+             * ✅ ここが修正点：images は国コード判定に依存させない
+             * - iso_codes が null でも images_urls は入ってくる (148 がそれ)
+             */
+            $imageUrls = $this->extractImageUrls($row);
+            if (count($imageUrls) >= 2) { // rule: only_sites_with_multiple_images
+                foreach ($imageUrls as $idx => $url) {
+                    $images[] = [
+                        'world_heritage_site_id' => $siteId,
+                        'url' => $url,
+                        'sort_order' => $idx,
+                        'is_primary' => ($idx === 0) ? 1 : 0,
+                    ];
+                }
+            }
+
+            // unresolved の場合は countries/pivot だけ作らない
             if ($status !== 'ok') {
                 if (count($exceptions) < $exceptionsLimit) {
                     $exceptions[] = [
@@ -281,18 +297,6 @@ class SplitWorldHeritageJson extends Command
                     ];
                 }
                 continue;
-            }
-
-            $imageUrls = $this->extractImageUrls($row);
-            if (count($imageUrls) >= 2) {
-                foreach ($imageUrls as $idx => $url) {
-                    $images[] = [
-                        'world_heritage_site_id' => $siteId,
-                        'url' => $url,
-                        'sort_order' => $idx,
-                        'is_primary' => ($idx === 0) ? 1 : 0,
-                    ];
-                }
             }
 
             // Country rows and pivot rows
@@ -311,13 +315,13 @@ class SplitWorldHeritageJson extends Command
             }
 
             foreach ($iso3 as $idx => $code3) {
-                // countries.json row (DB import-ready for countries table)
+                // countries.json row
                 if (!isset($countries[$code3])) {
                     $countries[$code3] = [
                         'state_party_code' => $code3,
                         'name_en' => $names[$idx] ?? $names[0] ?? $code3,
                         'name_jp' => null,
-                        'region' => $region, // always a string (EUR/AFR/...)
+                        'region' => $region,
                     ];
                 } else {
                     if (($countries[$code3]['name_en'] ?? null) === $code3) {
@@ -331,7 +335,7 @@ class SplitWorldHeritageJson extends Command
                     }
                 }
 
-                // pivot table: site_state_parties
+                // pivot
                 $k = "{$siteId}|{$code3}";
                 if (!isset($pivot[$k])) {
                     $pivot[$k] = [
@@ -760,11 +764,7 @@ class SplitWorldHeritageJson extends Command
             $existing['category'] = $this->normalizeCategoryOrFallback($incoming['category'] ?? null);
         }
 
-        if (
-            !isset($existing['criteria'])
-            || !is_array($existing['criteria'])
-            || $existing['criteria'] === []
-        ) {
+        if (!isset($existing['criteria']) || !is_array($existing['criteria']) || $existing['criteria'] === []) {
             $existing['criteria'] = $this->resolveCriteriaList($incoming);
         }
 
@@ -807,6 +807,7 @@ class SplitWorldHeritageJson extends Command
             }
         }
 
+        // ここは元コード通り：常に null に戻す挙動（意味が薄いが、そのまま）
         if (($existing['primary_image_url'] ?? null) !== null) {
             $existing['primary_image_url'] = null;
         }

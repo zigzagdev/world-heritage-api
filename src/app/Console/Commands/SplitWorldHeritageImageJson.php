@@ -12,10 +12,10 @@ class SplitWorldHeritageImageJson extends Command
      * @var string
      */
     protected $signature = 'world-heritage:split-image-json
-        {--in= : Input raw JSON file (e.g. storage/app/private/unesco/world-heritage-sites.json)}
-        {--out=unesco/normalized/world_heritage_site_images.json : Output JSON path in storage/app/...}
-        {--pretty : Pretty print JSON}
-        {--dry-run : Do not write file (only logs)}';
+    {--in=private/unesco/world-heritage-sites.json : Input raw UNESCO JSON file in storage/app/...}
+    {--out=private/unesco/normalized/world_heritage_site_images.json : Output JSON path in storage/app/...}
+    {--pretty : Pretty print JSON}
+    {--dry-run : Do not write file (only logs)}';
 
     /**
      * The console command description.
