@@ -9,7 +9,10 @@ use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 
 interface WorldHeritageQueryServiceInterface
 {
-    public function getAllHeritages(): WorldHeritageDtoCollection;
+    public function getAllHeritages(
+        int $currentPage,
+        int $perPage
+    ): WorldHeritageDtoCollection;
 
     public function getHeritageById(
         int $id
