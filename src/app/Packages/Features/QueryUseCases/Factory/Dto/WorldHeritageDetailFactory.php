@@ -11,6 +11,7 @@ class WorldHeritageDetailFactory
     public static function build(array $data): WorldHeritageDto
     {
         $imageCollection = new ImageDtoCollection();
+
         foreach ((array)($data['images'] ?? []) as $index => $imageData) {
             $imageCollection->add(new ImageDto(
                 id: (int)($imageData['id'] ?? 0),
@@ -33,7 +34,7 @@ class WorldHeritageDetailFactory
             id: (int)$data['id'],
             officialName: (string)($data['official_name'] ?? ''),
             name: (string)($data['name'] ?? ''),
-            country: (string)($data['country'] ?? ''),
+            country: (string)($data['country'] ?? null),
             region: (string)($data['region'] ?? ''),
             category: (string)($data['category'] ?? ''),
             yearInscribed: (int)($data['year_inscribed'] ?? 0),
@@ -50,11 +51,8 @@ class WorldHeritageDetailFactory
             unescoSiteUrl: $data['unesco_site_url'] ?? null,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta,
-            thumbnail: null,
         );
     }
-
-    // ↓ ここより下はそのままでOK（primaryCodeはもう見ない）
 
     private static function normalizeCriteria(null|array|string $rawCriteria): ?array
     {
@@ -106,10 +104,7 @@ class WorldHeritageDetailFactory
         foreach ($codes as $iso3) {
             $row = $rawMeta[$iso3] ?? [];
             $normalizedMeta[$iso3] = [
-                'is_primary' => (bool)($row['is_primary'] ?? false),
-                'inscription_year' => array_key_exists('inscription_year', $row)
-                    ? (int)$row['inscription_year']
-                    : null,
+                'is_primary' => (bool)($row['is_primary'] ?? false)
             ];
         }
 
