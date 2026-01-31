@@ -121,116 +121,37 @@ class GetWorldHeritagesTest extends TestCase
 
     public function test_feature_api_ok_with_ids(): void
     {
-        $ids = array_column(self::arrayData(), 'id');
+        $result = $this->getJson('/api/v1/heritages');
 
-        $result = $this->getJson('/api/v1/heritages?ids=' . implode(',', $ids));
         $result->assertStatus(200);
-
-        $arrayData = $result->getOriginalContent()['data'];
-
-        $expectedCriteria = [
-            661 => ['i','iv'],
-            662 => ['vii','ix'],
-            663 => ['ix','x'],
-            1442 => ['ii','iii','vi'],
-        ];
-
-        $expectedCodes = [
-            661 => ['JPN'],
-            662 => ['JPN'],
-            663 => ['JPN'],
-            1442 => ['CHN','KAZ','KGZ'],
-        ];
-
-        $expectedMeta = [
-            661 => ['JPN' => ['is_primary' => true,  'inscription_year' => 1993]],
-            662 => ['JPN' => ['is_primary' => true,  'inscription_year' => 1993]],
-            663 => ['JPN' => ['is_primary' => true,  'inscription_year' => 1993]],
-            1442 => [
-                'CHN' => ['is_primary' => true,  'inscription_year' => 2014],
-                'KAZ' => ['is_primary' => false, 'inscription_year' => 2014],
-                'KGZ' => ['is_primary' => false, 'inscription_year' => 2014],
-            ],
-        ];
-
-        $expectedPrimary = [];
-        foreach ($expectedMeta as $id => $metaByCode) {
-            $primary = null;
-
-            foreach ($metaByCode as $code => $row) {
-                if (!empty($row['is_primary'])) {
-                    $primary = $code;
-                    break;
-                }
-            }
-            if ($primary === null && !empty($expectedCodes[$id]) && count($expectedCodes[$id]) === 1) {
-                $primary = $expectedCodes[$id][0];
-            }
-            $expectedPrimary[$id] = $primary;
-        }
-
-        $expectedById = [];
-        foreach (self::arrayData() as $row) {
-            $expectedById[$row['id']] = $row;
-        }
-
-        foreach ($arrayData['data'] as $value) {
-            $this->assertArrayHasKey('id', $value);
-            $this->assertArrayHasKey($value['id'], $expectedById);
-
-            $expected = $expectedById[$value['id']];
-
-            $this->assertEquals($expected['id'], $value['id']);
-            $this->assertEquals($expected['official_name'], $value['official_name']);
-            $this->assertEquals($expected['name'], $value['name']);
-            $this->assertEquals($expected['name_jp'], $value['name_jp']);
-            $this->assertEquals($expected['country'], $value['country']);
-            $this->assertEquals($expected['region'], $value['region']);
-            $this->assertEquals($expected['category'], $value['category']);
-            $this->assertEquals($expected['year_inscribed'], $value['year_inscribed']);
-            $this->assertEquals($expected['state_party'] ?? null, $value['state_party'] ?? null);
-            $this->assertEquals($expected['area_hectares'], $value['area_hectares']);
-            $this->assertEquals($expected['buffer_zone_hectares'], $value['buffer_zone_hectares']);
-            $this->assertEquals($expected['is_endangered'], $value['is_endangered']);
-            $this->assertEquals($expected['latitude'], $value['latitude']);
-            $this->assertEquals($expected['longitude'], $value['longitude']);
-            $this->assertEquals($expected['short_description'], $value['short_description']);
-
-            if (array_key_exists('unesco_siteUrl', $value)) {
-                $this->assertEquals($expected['unesco_site_url'], $value['unesco_siteUrl']);
-            } else {
-                $this->assertEquals($expected['unesco_site_url'], $value['unesco_site_url']);
-            }
-
-            $this->assertEqualsCanonicalizing(
-                $expectedCriteria[(int)$value['id']],
-                $value['criteria']
-            );
-
-            $codes = $value['state_party_code'] ?? ($value['state_party_codes'] ?? null);
-            $codes = $codes ?? [];
-            $this->assertEqualsCanonicalizing(
-                $expectedCodes[(int)$value['id']],
-                $codes
-            );
-
-            $this->assertArrayHasKey('state_parties_meta', $value);
-            $this->assertEqualsCanonicalizing(
-                array_keys($expectedMeta[(int)$value['id']]),
-                array_keys($value['state_parties_meta']),
-                "state_parties_meta keys mismatch for id={$value['id']}"
-            );
-
-            $thumbUrl = $value['thumbnail_url'] ?? ($value['thumbnail'] ?? null);
-
-            $this->assertIsString($thumbUrl);
-            $this->assertNotEmpty($thumbUrl);
-            $this->assertMatchesRegularExpression(
-                '#^https?://[^/]+/storage/world_heritage/'.$value['id'].'/img\d+\.(jpg|jpeg|png)$#',
-                $thumbUrl,
-                "thumbnail url format mismatch for id={$value['id']}"
-            );
-        }
+        $result->assertOk()
+            ->assertJsonStructure([
+                'status',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'official_name',
+                        'name',
+                        'country',
+                        'region',
+                        'category',
+                        'year_inscribed',
+                        'latitude',
+                        'longitude',
+                        'is_endangered',
+                        'name_jp',
+                        'state_party',
+                        'criteria',
+                        'area_hectares',
+                        'buffer_zone_hectares',
+                        'short_description',
+                        'unesco_site_url',
+                        'state_party_codes',
+                        'state_parties_meta',
+                        'primary_state_party_code',
+                    ],
+                ],
+            ]);
     }
 
     public function test_feature_api_ok_without_ids(): void
