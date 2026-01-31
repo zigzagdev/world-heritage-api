@@ -11,8 +11,14 @@ class GetWorldHeritagesUseCase
         private readonly WorldHeritageQueryServiceInterface $worldHeritageQueryService
     ){}
 
-    public function handle(): WorldHeritageDtoCollection
+    public function handle(
+        int $currentPage,
+        int $perPage
+    ): WorldHeritageDtoCollection
     {
-        return $this->worldHeritageQueryService->getAllHeritages();
+        return $this->worldHeritageQueryService->getAllHeritages(
+            $currentPage,
+            $perPage
+        );
     }
 }
