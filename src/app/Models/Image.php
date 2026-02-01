@@ -7,22 +7,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Image extends Model
 {
-    use SoftDeletes;
-
-    protected $table = 'images';
+    protected $table = 'world_heritage_site_images';
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'disk',
-        'path',
-        'width',
-        'height',
-        'format',
-        'checksum',
+        'url',
+        'url_hash',
+        'is_primary',
         'sort_order',
-        'alt',
-        'credit',
-        'world_heritage_id',
+        'world_heritage_site_id',
     ];
 
     protected $hidden = [
@@ -32,6 +25,6 @@ class Image extends Model
 
     public function worldHeritage()
     {
-        return $this->belongsTo(WorldHeritage::class, 'world_heritage_id', 'id');
+        return $this->belongsTo(WorldHeritage::class, 'world_heritage_site_id', 'id');
     }
 }

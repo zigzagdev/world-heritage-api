@@ -24,20 +24,14 @@ class ImageSeeder extends Seeder
         foreach ($sites as $site) {
             $count = 2;
 
-            for ($i = 1; $i <= $count; $i++) {
-                $disk = 'public';
-                $path = "world_heritage/{$site->id}/img{$i}.jpg";
+            for ($i = 0; $i < $count; $i++) {
+                $url = "https://example.test/world_heritage/{$site->id}/img{$i}.jpg";
 
                 $site->images()->create([
-                    'disk'       => $disk,
-                    'path'       => $path,
-                    'width'      => 1200,
-                    'height'     => 800,
-                    'format'     => 'jpg',
-                    'checksum'   => hash('sha256', $disk . ':' . $path),
+                    'url' => $url,
+                    'url_hash' => md5($url),
                     'sort_order' => $i,
-                    'alt'        => "{$site->name} #{$i}",
-                    'credit'     => 'seed',
+                    'is_primary' => ($i === 0),
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);

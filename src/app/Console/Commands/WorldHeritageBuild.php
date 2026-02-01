@@ -21,7 +21,7 @@ class WorldHeritageBuild extends Command
         {--dump-dry-run : Do not write dump file}
 
         {--jp : Also import Japanese names}
-        {--jp-path=storage/app/private/unesco/world-heritage-japanese-name-sorted.json : Japanese name JSON path}
+        {--jp-path=private/unesco/world-heritage-japanese-name-sorted.json : Japanese name JSON path in storage/app/...}
         {--jp-only-empty : Update only when DB name_jp is NULL/empty}
         {--jp-strict : Fail if any id_no does not exist in DB}
         {--jp-dry-run : No DB writes for Japanese name import}
@@ -30,6 +30,10 @@ class WorldHeritageBuild extends Command
         {--jp-missing-limit=200 : Max missing ids to print to console}';
 
     protected $description = 'Rebuild local DB and import UNESCO World Heritage data (dump -> split -> import)';
+
+    // storage/app relative paths (NO "storage/app/" prefix)
+    private const RAW_DUMP_DEFAULT = 'private/unesco/world-heritage-sites.json';
+    private const NORM_DIR = 'private/unesco/normalized';
 
     public function handle(): int
     {
@@ -48,55 +52,58 @@ class WorldHeritageBuild extends Command
 
         $pretty = (bool) $this->option('pretty');
 
-        // 0) Dump UNESCO raw JSON (ALL) -> storage/app/{dump-out}
-        // NOTE: dump command writes to Storage::disk("local"), so --dump-out must be "storage/app relative" (e.g. private/...)
+        $dumpOut = trim((string) $this->option('dump-out'));
+        if ($dumpOut === '') $dumpOut = self::RAW_DUMP_DEFAULT;
+
+        // 0) Dump UNESCO raw JSON (ALL) -> storage/app/{dumpOut}
         if ((bool) ($this->option('dump') ?? true)) {
             $this->callOrFail('world-heritage:dump-unesco', array_filter([
                 '--all' => true,
                 '--limit' => (int) $this->option('dump-limit'),
                 '--max' => (int) $this->option('dump-max'),
-                '--out' => (string) $this->option('dump-out'),
+                '--out' => $dumpOut, // e.g. private/unesco/world-heritage-sites.json
                 '--pretty' => $pretty ? true : null,
                 '--dry-run' => (bool) $this->option('dump-dry-run') ? true : null,
             ], fn ($v) => $v !== null));
         }
 
         // 1) Split raw UNESCO JSON -> normalized JSON files
-        // Split command resolves paths under storage/app/, so either "private/..." or "storage/app/private/..." works.
+        // IMPORTANT: pass storage/app relative paths ONLY (no "storage/app/")
         $this->callOrFail('world-heritage:split-json', array_filter([
-            '--in' => (string) $this->option('dump-out'), // e.g. private/unesco/world-heritage-sites.json
-            '--out' => 'storage/app/private/unesco/normalized',
-            '--site-judgements-out' => 'storage/app/private/unesco/normalized/site-country-judgements.json',
-            '--exceptions-out' => 'storage/app/private/unesco/normalized/exceptions-missing-iso-codes.json',
+            '--in' => $dumpOut,
+            '--out' => self::NORM_DIR,
+            '--site-judgements-out' => self::NORM_DIR . '/site-country-judgements.json',
+            '--exceptions-out' => self::NORM_DIR . '/exceptions-missing-iso-codes.json',
             '--clean' => true,
             '--pretty' => $pretty ? true : null,
         ], fn ($v) => $v !== null));
 
         // 2) Import countries (FK parent)
         $this->callOrFail('world-heritage:import-countries-split', [
-            '--in' => 'storage/app/private/unesco/normalized/countries.json',
+            '--in' => self::NORM_DIR . '/countries.json',
         ]);
 
         // 3) Import sites (FK parent)
         $this->callOrFail('world-heritage:import-sites-split', [
-            '--in' => 'storage/app/private/unesco/normalized/world_heritage_sites.json',
+            '--in' => storage_path('app/private/unesco/normalized/world_heritage_sites.json'),
         ]);
 
         // 4) Import pivot (FK depends on countries + sites)
         $this->callOrFail('world-heritage:import-site-state-parties-split', [
-            '--in' => 'storage/app/private/unesco/normalized/site_state_parties.json',
+            '--in' => self::NORM_DIR . '/site_state_parties.json',
         ]);
 
         // 5) Images
         $this->callOrFail('world-heritage:import-images-json', [
-            '--path' => 'storage/app/private/unesco/normalized/world_heritage_site_images.json',
+            '--path' => self::NORM_DIR . '/world_heritage_site_images.json',
         ]);
 
         // 6) Exceptions
         $this->callOrFail('world-heritage:import-site-country-exceptions', [
-            '--in' => 'storage/app/private/unesco/normalized/exceptions-missing-iso-codes.json',
+            '--in' => storage_path('app/private/unesco/normalized/exceptions-missing-iso-codes.json'),
         ]);
 
+        // 7) Japanese names (optional)
         if ((bool) $this->option('jp')) {
             $this->callOrFail('world-heritage:import-japanese-names', array_filter([
                 '--path' => (string) $this->option('jp-path'),

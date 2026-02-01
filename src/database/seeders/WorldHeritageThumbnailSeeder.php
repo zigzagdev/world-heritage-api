@@ -20,8 +20,6 @@ class WorldHeritageThumbnailSeeder extends Seeder
                     if (! $firstImage) {
                         continue;
                     }
-
-                    $site->thumbnail_image_id = $firstImage->id;
                     $site->save();
                 }
             });
