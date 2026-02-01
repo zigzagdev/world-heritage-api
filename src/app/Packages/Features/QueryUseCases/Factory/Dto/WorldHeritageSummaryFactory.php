@@ -66,7 +66,7 @@ class WorldHeritageSummaryFactory
             areaHectares: array_key_exists('area_hectares', $data) ? (float)$data['area_hectares'] : null,
             bufferZoneHectares: array_key_exists('buffer_zone_hectares', $data) ? $data['buffer_zone_hectares'] : null,
             shortDescription: $data['short_description'] ?? null,
-            collection: null,
+            images: null,
             unescoSiteUrl: $data['unesco_site_url'] ?? null,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta,

@@ -20,7 +20,7 @@ class WorldHeritageDto
         private readonly ?float $areaHectares = null,
         private readonly ?float $bufferZoneHectares = null,
         private readonly ?string $shortDescription = null,
-        private readonly ?ImageDtoCollection $collection = null,
+        private readonly ?ImageDtoCollection $images = null,
         private readonly ?string $unescoSiteUrl = null,
         private readonly array $statePartyCodes = [],
         private readonly array $statePartiesMeta = [],
@@ -151,12 +151,12 @@ class WorldHeritageDto
 
     public function hasImages(): bool
     {
-        return $this->collection !== null;
+        return $this->images !== null;
     }
 
     public function getImages(): array
     {
-        return $this->collection ? $this->collection->toArray() : [];
+        return $this->images ? $this->images->toArray() : [];
     }
 
     public function getImageUrl(): ?ImageDto
