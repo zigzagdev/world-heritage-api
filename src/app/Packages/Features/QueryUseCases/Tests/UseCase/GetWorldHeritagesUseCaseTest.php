@@ -15,10 +15,16 @@ use Mockery;
 
 class GetWorldHeritagesUseCaseTest extends TestCase
 {
+    protected $currentPage;
+    protected $perPage;
+
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->refresh();
+        $this->currentPage = 1;
+        $this->perPage = 10;
 
         $seeder = new DatabaseSeeder();
         $seeder->run();
@@ -57,7 +63,10 @@ class GetWorldHeritagesUseCaseTest extends TestCase
     {
         $useCase = new GetWorldHeritagesUseCase($this->mockQueryService());
 
-        $result = $useCase->handle();
+        $result = $useCase->handle(
+            $this->currentPage,
+            $this->perPage
+        );
 
         $this->assertInstanceOf(WorldHeritageDtoCollection::class, $result);
     }
