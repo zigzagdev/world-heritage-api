@@ -53,10 +53,11 @@ class WorldHeritageController extends Controller
         }
 
         $dto = $useCase->handle($id);
+        $worldHeritageViewModel = new WorldHeritageViewModel($dto);
 
         return response()->json([
             'status' => 'success',
-            'data' => $dto->toArray()
+            'data' => $worldHeritageViewModel->toArray(),
         ], 200);
     }
 

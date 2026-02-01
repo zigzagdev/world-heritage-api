@@ -46,7 +46,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'latitude',
                 'longitude',
                 'short_description',
-                'image_url'
+                'image_url',
             ])
             ->with([
                 'countries' => function ($countriesQuery) {
@@ -146,7 +146,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
-            'country' => $heritage->country,
+            'country' => $heritage->countries->first()->name_en ?? $heritage->country,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'year_inscribed' => $heritage->year_inscribed,
@@ -343,7 +343,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
             'name_jp' => $heritage->name_jp,
-            'country' => $heritage->country,
+            'country' => $heritage->country->first()->name_en ?? $heritage->country,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'criteria' => $heritage->criteria,
