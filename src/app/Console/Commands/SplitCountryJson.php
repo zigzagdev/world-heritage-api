@@ -10,16 +10,16 @@ use InvalidArgumentException;
 class SplitCountryJson extends Command
 {
     protected $signature = 'world-heritage:split-countries
-        {--in= : Input UNESCO JSON file or directory (raw dump). Supports {"results":[...]} or [...] }
-        {--out=country/normalized/countries.json : Output path in storage/app/... }
-        {--sites-out=country/normalized/site-country-codes.json : Output path for per-site country judgement}
-        {--exceptions-out=country/normalized/exceptions-missing-codes.json : Output path for rows missing/invalid country codes}
-        {--pretty : Pretty print JSON}
-        {--dry-run : Do not write output, only show counts}
-        {--strict : Fail if any row cannot be mapped to at least one country code}
-        {--merge-existing : Keep existing name_jp when countries.json already exists (recommended)}
-        {--clean : If output exists, delete it before writing (name_jp merge will be skipped)}
-        {--exceptions-limit=200 : Max number of missing/invalid-code rows to store in exceptions file}';
+    {--in=private/unesco/world-heritage-sites.json : Input UNESCO JSON file (raw dump) in storage/app/...}
+    {--out=private/unesco/normalized/countries.json : Output path in storage/app/...}
+    {--sites-out=private/unesco/normalized/site-country-codes.json : Output path for per-site country judgement}
+    {--exceptions-out=private/unesco/normalized/exceptions-missing-codes.json : Output path for rows missing/invalid country codes}
+    {--pretty : Pretty print JSON}
+    {--dry-run : Do not write output, only show counts}
+    {--strict : Fail if any row cannot be mapped to at least one country code}
+    {--merge-existing : Keep existing name_jp when countries.json already exists (recommended)}
+    {--clean : If output exists, delete it before writing (name_jp merge will be skipped)}
+    {--exceptions-limit=200 : Max number of missing/invalid-code rows to store in exceptions file}';
 
     protected $description = 'Extract/normalize country list from UNESCO JSON and also judge country per each world heritage row (iso3 or null)';
 
