@@ -11,15 +11,10 @@ class Image extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'disk',
-        'path',
-        'width',
-        'height',
-        'format',
-        'checksum',
+        'url',
+        'url_hash',
+        'is_primary',
         'sort_order',
-        'alt',
-        'credit',
         'world_heritage_site_id',
     ];
 
