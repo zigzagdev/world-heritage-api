@@ -34,11 +34,10 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
      */
     public function handle(): int
     {
-        $path     = base_path((string)$this->option('path'));
-        $dryRun   = (bool)$this->option('dry-run');
-        $strict   = (bool)$this->option('strict');
-        $onlyEmpty= (bool)$this->option('only-empty');
-        $batch    = max(1, (int)$this->option('batch'));
+        $path = base_path((string)$this->option('path'));
+        $dryRun = (bool)$this->option('dry-run');
+        $onlyEmpty = (bool)$this->option('only-empty');
+        $batch = max(1, (int)$this->option('batch'));
 
         if (!File::exists($path)) {
             $this->error("File not found: {$path}");
@@ -53,8 +52,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
             return self::FAILURE;
         }
 
-        // 1) normalise
-        $map = []; // [id_no => name_jp]
+        $map = [];
         $invalid = 0;
 
         foreach ($data as $i => $row) {
@@ -69,7 +67,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
             if ($idNo === null || $idNo === '' || !is_numeric($idNo)) { $invalid++; continue; }
             if ($nameJp === null || !is_string($nameJp) || $nameJp === '') { $invalid++; continue; }
 
-            $map[(int)$idNo] = $nameJp; // last write wins
+            $map[(int)$idNo] = $nameJp;
         }
 
         if (empty($map)) {
@@ -146,11 +144,15 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
 
                 $row->name_jp = $map[$id];
                 $row->save();
-                $updated++;
+                $updated ++;
             }
         }
 
-        $this->info("Done: updated={$updated}, missing=" . count($missing) . ", skipped_already_set={$skippedAlreadySet}, invalid/skipped={$invalid}");
+        $this->info(
+            "Done: updated={$updated}, missing=" . count($missing) .
+            ", skipped_already_set={$skippedAlreadySet}, invalid/skipped={$invalid}"
+        );
+
         return self::SUCCESS;
     }
 }

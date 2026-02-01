@@ -88,7 +88,6 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
                 'longitude' => $this->toNullableFloat($row['longitude'] ?? null),
                 'short_description' => $this->toNullableString($row['short_description'] ?? null),
                 'image_url' => $this->toNullableString($row['image_url'] ?? null),
-                'thumbnail_image_id' => $this->toNullableInt($row['thumbnail_image_id'] ?? null),
                 'unesco_site_url' => $this->toNullableString($row['unesco_site_url'] ?? null),
                 'created_at' => $now,
                 'updated_at' => $now,
