@@ -46,12 +46,12 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'latitude',
                 'longitude',
                 'short_description',
-                'image_url'
+                'image_url',
             ])
             ->with([
                 'countries' => function ($countriesQuery) {
                     $countriesQuery
-                        ->withPivot(['is_primary'])
+                        ->withPivot(['is_primary', 'name_en'])
                         ->orderBy('countries.state_party_code', 'asc');
                 },
             ])
@@ -146,7 +146,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
-            'country' => $heritage->country,
+            'country' => $heritage->countries->first()->name_en,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'year_inscribed' => $heritage->year_inscribed,
