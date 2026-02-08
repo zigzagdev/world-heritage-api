@@ -16,6 +16,9 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
 
     private $queryService;
 
+    private const CURRENT_PAGE = 1;
+    private const PER_PAGE = 10;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -45,14 +48,20 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
 
     public function test_fetch_data_check_type(): void
     {
-        $result = $this->queryService->getAllHeritages();
+        $result = $this->queryService->getAllHeritages(
+            self::CURRENT_PAGE,
+            self::PER_PAGE
+        );
 
         $this->assertInstanceOf(WorldHeritageDtoCollection::class, $result);
     }
 
     public function test_fetch_data_check_value(): void
     {
-        $result = $this->queryService->getAllHeritages();
+        $result = $this->queryService->getAllHeritages(
+            self::CURRENT_PAGE,
+            self::PER_PAGE
+        );
 
         $this->assertCount(9, $result->toArray());
         $this->assertContains(1133, array_column($result->toArray(), 'id'));

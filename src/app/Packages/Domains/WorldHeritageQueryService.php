@@ -9,16 +9,13 @@ use App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use App\Packages\Features\QueryUseCases\Factory\Dto\WorldHeritageDetailFactory;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
-use RuntimeException;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
-use App\Packages\Domains\Ports\SignedUrlPort;
 use App\Packages\Features\QueryUseCases\Factory\Dto\WorldHeritageDtoCollectionFactory;
 
 class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 {
     public function __construct(
         private readonly WorldHeritage $model,
-        private readonly SignedUrlPort $signedUrl
     ) {}
 
     /**
@@ -343,7 +340,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
             'name_jp' => $heritage->name_jp,
-            'country' => $heritage->country->first()->name_en ?? $heritage->country,
+            'country' => $countryRelations->first()?->name_en ?? $heritage->country,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'criteria' => $heritage->criteria,
