@@ -42,7 +42,7 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
         $this->assertSame($dto->getAreaHectares(), self::arrayDataNoStateParty()['area_hectares']);
         $this->assertSame($dto->getBufferZoneHectares(), self::arrayDataNoStateParty()['buffer_zone_hectares']);
         $this->assertSame($dto->getShortDescription(), self::arrayDataNoStateParty()['short_description']);
-        $this->assertSame($dto->toArray()['image_url']->getUrl(), self::arrayDataNoStateParty()['image_url']);
+        $this->assertSame($dto->getImageUrl()->url, self::arrayDataNoStateParty()['image_url']);
     }
 
     public function test_build_returns_dto_with_much_country_values()
@@ -87,8 +87,24 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
                     'country' => null,
                     'state_party' => null,
                     'state_party_codes' => [
-                        'ALB','AUT','BEL','BGR','BIH','CHE','CZE','DEU','ESP','FRA',
-                        'HRV','ITA','MKD','POL','ROU','SVK','SVN','UKR',
+                        'ALB',
+                        'AUT',
+                        'BEL',
+                        'BGR',
+                        'BIH',
+                        'CHE',
+                        'CZE',
+                        'DEU',
+                        'ESP',
+                        'FRA',
+                        'HRV',
+                        'ITA',
+                        'MKD',
+                        'POL',
+                        'ROU',
+                        'SVK',
+                        'SVN',
+                        'UKR',
                     ],
                     'state_parties_meta' => self::expectedTransnationalMeta(),
                 ],
@@ -99,8 +115,24 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
     private static function expectedTransnationalMeta(): array
     {
         $codes = [
-            'ALB','AUT','BEL','BGR','BIH','CHE','CZE','DEU','ESP','FRA',
-            'HRV','ITA','MKD','POL','ROU','SVK','SVN','UKR',
+            'ALB',
+            'AUT',
+            'BEL',
+            'BGR',
+            'BIH',
+            'CHE',
+            'CZE',
+            'DEU',
+            'ESP',
+            'FRA',
+            'HRV',
+            'ITA',
+            'MKD',
+            'POL',
+            'ROU',
+            'SVK',
+            'SVN',
+            'UKR',
         ];
 
         $meta = [];
@@ -143,8 +175,24 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
     private static function arrayDataTransnational(): array
     {
         $codes = [
-            'ALB','AUT','BEL','BGR','BIH','CHE','CZE','DEU','ESP','FRA',
-            'HRV','ITA','MKD','POL','ROU','SVK','SVN','UKR',
+            'ALB',
+            'AUT',
+            'BEL',
+            'BGR',
+            'BIH',
+            'CHE',
+            'CZE',
+            'DEU',
+            'ESP',
+            'FRA',
+            'HRV',
+            'ITA',
+            'MKD',
+            'POL',
+            'ROU',
+            'SVK',
+            'SVN',
+            'UKR',
         ];
 
         $meta = [];
@@ -169,7 +217,7 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
             'is_endangered' => false,
             'latitude' => 48.9,
             'longitude' => 22.1833333,
-            'short_description' => "This transnational property includes 93 component parts in 18 countries. Since the end of the last Ice Age, European Beech spread from a few isolated refuge areas in the Alps, Carpathians, Dinarides, Mediterranean and Pyrenees over a short period of a few thousand years in a process that is still ongoing. The successful expansion across a whole continent is related to the tree’s adaptability and tolerance of different climatic, geographical and physical conditions.",
+            'short_description' => 'This transnational property includes 93 component parts in 18 countries. Since the end of the last Ice Age, European Beech spread from a few isolated refuge areas in the Alps, Carpathians, Dinarides, Mediterranean and Pyrenees over a short period of a few thousand years in a process that is still ongoing. The successful expansion across a whole continent is related to the tree’s adaptability and tolerance of different climatic, geographical and physical conditions.',
             'thumbnail_id' => null,
             'unesco_site_url' => null,
             'state_parties' => $codes,

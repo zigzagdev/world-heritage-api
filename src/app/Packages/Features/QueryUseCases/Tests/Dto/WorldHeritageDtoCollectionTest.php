@@ -44,8 +44,8 @@ class WorldHeritageDtoCollectionTest extends TestCase
         return [
             [
                 'id' => 1133,
-                'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
-                'name' => "Ancient and Primeval Beech Forests",
+                'official_name' => 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe',
+                'name' => 'Ancient and Primeval Beech Forests',
                 'name_jp' => null,
                 'country' => 'Slovakia',
                 'region' => 'Europe',
@@ -61,7 +61,26 @@ class WorldHeritageDtoCollectionTest extends TestCase
                 'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
-                'state_parties' => ['ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'],
+                'state_parties' => [
+                    'ALB',
+                    'AUT',
+                    'BEL',
+                    'BIH',
+                    'BGR',
+                    'HRV',
+                    'CZE',
+                    'FRA',
+                    'DEU',
+                    'ITA',
+                    'MKD',
+                    'POL',
+                    'ROU',
+                    'SVK',
+                    'SVN',
+                    'ESP',
+                    'CHE',
+                    'UKR',
+                ],
                 'state_parties_meta' => [
                     'ALB' => ['is_primary' => false],
                     'AUT' => ['is_primary' => false],
@@ -76,7 +95,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
                     'MKD' => ['is_primary' => false],
                     'POL' => ['is_primary' => false],
                     'ROU' => ['is_primary' => false],
-                    'SVK' => ['is_primary' => true,],
+                    'SVK' => ['is_primary' => true],
                     'SVN' => ['is_primary' => false],
                     'ESP' => ['is_primary' => false],
                     'CHE' => ['is_primary' => false],
@@ -91,7 +110,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
                 'country' => 'China, Kazakhstan, Kyrgyzstan',
                 'region' => 'Asia',
                 'category' => 'cultural',
-                'criteria' => ['ii','iii','vi'],
+                'criteria' => ['ii', 'iii', 'vi'],
                 'state_party' => null,
                 'year_inscribed' => 2014,
                 'area_hectares' => 0.0,
@@ -102,7 +121,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
                 'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
-                'state_parties' => ['CHN','KAZ','KGZ'],
+                'state_parties' => ['CHN', 'KAZ', 'KGZ'],
                 'state_parties_meta' => [
                     'CHN' => ['is_primary' => true],
                     'KAZ' => ['is_primary' => false],
@@ -126,30 +145,30 @@ class WorldHeritageDtoCollectionTest extends TestCase
         $dtoCollection = WorldHeritageDtoCollectionFactory::build($data);
 
         $expectFirstCode = [
-            0 => "ALB",
-            1 => "AUT",
-            2 => "BEL",
-            3 => "BIH",
-            4 => "BGR",
-            5 => "HRV",
-            6 => "CZE",
-            7 => "FRA",
-            8 => "DEU",
-            9 => "ITA",
-            10 => "MKD",
-            11 => "POL",
-            12 => "ROU",
-            13 => "SVK",
-            14 => "SVN",
-            15 => "ESP",
-            16 => "CHE",
-            17 => "UKR",
+            0 => 'ALB',
+            1 => 'AUT',
+            2 => 'BEL',
+            3 => 'BIH',
+            4 => 'BGR',
+            5 => 'HRV',
+            6 => 'CZE',
+            7 => 'FRA',
+            8 => 'DEU',
+            9 => 'ITA',
+            10 => 'MKD',
+            11 => 'POL',
+            12 => 'ROU',
+            13 => 'SVK',
+            14 => 'SVN',
+            15 => 'ESP',
+            16 => 'CHE',
+            17 => 'UKR',
         ];
 
         $expectSecondCode = [
-            0 => "CHN",
-            1 => "KAZ",
-            2 => "KGZ",
+            0 => 'CHN',
+            1 => 'KAZ',
+            2 => 'KGZ',
         ];
 
         foreach ($dtoCollection->getHeritages() as $index => $dto) {
@@ -195,7 +214,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
             $this->assertArrayHasKey('thumbnail', $item);
             $this->assertTrue(is_string($item['thumbnail']) || is_null($item['thumbnail']));
 
-            return collect($item)->keyBy(fn($v,$k)=>Str::snake($k))->toArray();
+            return collect($item)->keyBy(fn($v, $k) => Str::snake($k))->toArray();
         })->toArray();
     }
 }
