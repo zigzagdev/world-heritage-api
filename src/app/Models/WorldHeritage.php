@@ -66,7 +66,7 @@ class WorldHeritage extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(Image::class, 'world_heritage_id', 'id')
+        return $this->hasMany(Image::class, 'world_heritage_site_id', 'id')
             ->orderBy('sort_order', 'asc');
     }
 

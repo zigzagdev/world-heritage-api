@@ -22,7 +22,6 @@ class GetWorldHeritageByIdUseCaseTest extends TestCase
         parent::setUp();
         $this->refresh();
 
-        $this->app->instance(SignedUrlPort::class, $this->mockSignedUrlPort());
         $this->queryService = app(WorldHeritageQueryService::class);
 
         $seeder = new DatabaseSeeder();
@@ -45,19 +44,6 @@ class GetWorldHeritageByIdUseCaseTest extends TestCase
             Image::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
-    }
-
-    private function mockSignedUrlPort(): SignedUrlPort
-    {
-        $mock = Mockery::mock(SignedUrlPort::class);
-
-        $mock
-            ->shouldReceive('forGet')
-            ->andReturnUsing(function ($disk, $path, $expiration) {
-                return "https://example.com/{$disk}/{$path}?expires_in={$expiration}";
-            });
-
-        return $mock;
     }
 
     private static function arrayData(): array

@@ -22,9 +22,9 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
     {
         return [
             'id' => 1133,
-            'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
-            'name' => "Ancient and Primeval Beech Forests",
-            'name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
+            'official_name' => 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe',
+            'name' => 'Ancient and Primeval Beech Forests',
+            'name_jp' => 'カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林',
             'country' => 'Slovakia',
             'region' => 'Europe',
             'category' => 'Natural',
@@ -39,28 +39,44 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
             'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
             'state_party_codes' => [
-                'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA',
-                'MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR',
+                'ALB',
+                'AUT',
+                'BEL',
+                'BIH',
+                'BGR',
+                'HRV',
+                'CZE',
+                'FRA',
+                'DEU',
+                'ITA',
+                'MKD',
+                'POL',
+                'ROU',
+                'SVK',
+                'SVN',
+                'ESP',
+                'CHE',
+                'UKR',
             ],
             'state_parties_meta' => [
-                'ALB' => ['is_primary' => false, 'inscription_year' => 2007],
-                'AUT' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BEL' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BIH' => ['is_primary' => false, 'inscription_year' => 2007],
-                'BGR' => ['is_primary' => false, 'inscription_year' => 2007],
-                'HRV' => ['is_primary' => false, 'inscription_year' => 2007],
-                'CZE' => ['is_primary' => false, 'inscription_year' => 2007],
-                'FRA' => ['is_primary' => false, 'inscription_year' => 2007],
-                'DEU' => ['is_primary' => false, 'inscription_year' => 2007],
-                'ITA' => ['is_primary' => false, 'inscription_year' => 2007],
-                'MKD' => ['is_primary' => false, 'inscription_year' => 2007],
-                'POL' => ['is_primary' => false, 'inscription_year' => 2007],
-                'ROU' => ['is_primary' => false, 'inscription_year' => 2007],
-                'SVK' => ['is_primary' => true,  'inscription_year' => 2007],
-                'SVN' => ['is_primary' => false, 'inscription_year' => 2007],
-                'ESP' => ['is_primary' => false, 'inscription_year' => 2007],
-                'CHE' => ['is_primary' => false, 'inscription_year' => 2007],
-                'UKR' => ['is_primary' => false, 'inscription_year' => 2007],
+                'ALB' => ['is_primary' => false],
+                'AUT' => ['is_primary' => false],
+                'BEL' => ['is_primary' => false],
+                'BIH' => ['is_primary' => false],
+                'BGR' => ['is_primary' => false],
+                'HRV' => ['is_primary' => false],
+                'CZE' => ['is_primary' => false],
+                'FRA' => ['is_primary' => false],
+                'DEU' => ['is_primary' => false],
+                'ITA' => ['is_primary' => false],
+                'MKD' => ['is_primary' => false],
+                'POL' => ['is_primary' => false],
+                'ROU' => ['is_primary' => false],
+                'SVK' => ['is_primary' => true],
+                'SVN' => ['is_primary' => false],
+                'ESP' => ['is_primary' => false],
+                'CHE' => ['is_primary' => false],
+                'UKR' => ['is_primary' => false],
             ],
             'images' => [
                 [
@@ -101,7 +117,7 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
     public function test_check_return_data_value(): void
     {
         $result = WorldHeritageDetailFactory::build(self::arrayData());
-        $input  = self::arrayData();
+        $input = self::arrayData();
 
         $this->assertSame($input['id'], $result->getId());
         $this->assertSame($input['official_name'], $result->getOfficialName());
@@ -121,39 +137,30 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
         $this->assertSame($input['short_description'], $result->getShortDescription());
         $this->assertSame($input['unesco_site_url'], $result->getUnescoSiteUrl());
 
-        $this->assertSame(
-            $input['state_party_codes'],
-            $result->getStatePartyCodes()
-        );
+        $this->assertSame($input['state_party_codes'], $result->getStatePartyCodes());
 
-        $this->assertSame(
-            $input['state_parties_meta'],
-            $result->getStatePartiesMeta()
-        );
+        $this->assertSame($input['state_parties_meta'], $result->getStatePartiesMeta());
 
         $images = $result->getImages();
         $this->assertCount(2, $images);
 
-        $this->assertSame($input['images'][0]['id'],         $images[0]['id']);
-        $this->assertSame($input['images'][0]['url'],        $images[0]['url']);
+        $this->assertSame($input['images'][0]['id'], $images[0]['id']);
+        $this->assertSame($input['images'][0]['url'], $images[0]['url']);
         $this->assertSame($input['images'][0]['sort_order'], $images[0]['sort_order']);
-        $this->assertSame($input['images'][0]['width'],      $images[0]['width']);
-        $this->assertSame($input['images'][0]['height'],     $images[0]['height']);
-        $this->assertSame($input['images'][0]['format'],     $images[0]['format']);
-        $this->assertSame($input['images'][0]['alt'],        $images[0]['alt']);
-        $this->assertSame($input['images'][0]['credit'],     $images[0]['credit']);
-        $this->assertSame($input['images'][0]['is_primary'], $images[0]['is_primary']);
-        $this->assertSame($input['images'][0]['checksum'],   $images[0]['checksum']);
-
-        $this->assertSame($input['images'][1]['id'],         $images[1]['id']);
-        $this->assertSame($input['images'][1]['url'],        $images[1]['url']);
+        $this->assertSame($input['images'][0]['width'], $images[0]['width']);
+        $this->assertSame($input['images'][0]['height'], $images[0]['height']);
+        $this->assertSame($input['images'][0]['format'], $images[0]['format']);
+        $this->assertSame($input['images'][0]['alt'], $images[0]['alt']);
+        $this->assertSame($input['images'][0]['credit'], $images[0]['credit']);
+        $this->assertSame($input['images'][0]['checksum'], $images[0]['checksum']);
+        $this->assertSame($input['images'][1]['id'], $images[1]['id']);
+        $this->assertSame($input['images'][1]['url'], $images[1]['url']);
         $this->assertSame($input['images'][1]['sort_order'], $images[1]['sort_order']);
-        $this->assertSame($input['images'][1]['width'],      $images[1]['width']);
-        $this->assertSame($input['images'][1]['height'],     $images[1]['height']);
-        $this->assertSame($input['images'][1]['format'],     $images[1]['format']);
-        $this->assertSame($input['images'][1]['alt'],        $images[1]['alt']);
-        $this->assertSame($input['images'][1]['credit'],     $images[1]['credit']);
-        $this->assertSame($input['images'][1]['is_primary'], $images[1]['is_primary']);
-        $this->assertSame($input['images'][1]['checksum'],   $images[1]['checksum']);
+        $this->assertSame($input['images'][1]['width'], $images[1]['width']);
+        $this->assertSame($input['images'][1]['height'], $images[1]['height']);
+        $this->assertSame($input['images'][1]['format'], $images[1]['format']);
+        $this->assertSame($input['images'][1]['alt'], $images[1]['alt']);
+        $this->assertSame($input['images'][1]['credit'], $images[1]['credit']);
+        $this->assertSame($input['images'][1]['checksum'], $images[1]['checksum']);
     }
 }

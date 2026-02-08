@@ -7,7 +7,7 @@ class WorldHeritageDto
         private readonly int $id,
         private readonly string $officialName,
         private readonly string $name,
-        private readonly string $country,
+        private readonly ?string $country = null,
         private readonly string $region,
         private readonly string $category,
         private readonly int $yearInscribed,
@@ -20,11 +20,11 @@ class WorldHeritageDto
         private readonly ?float $areaHectares = null,
         private readonly ?float $bufferZoneHectares = null,
         private readonly ?string $shortDescription = null,
-        private readonly ?ImageDtoCollection $collection = null,
+        private readonly ?ImageDtoCollection $images = null,
         private readonly ?string $unescoSiteUrl = null,
         private readonly array $statePartyCodes = [],
         private readonly array $statePartiesMeta = [],
-        private readonly ?ImageDto $thumbnail = null,
+        private readonly ?ImageDto $imageUrl = null,
     ){}
 
 
@@ -43,7 +43,7 @@ class WorldHeritageDto
         return $this->name;
     }
 
-    public function getCountry(): string
+    public function getCountry(): ?string
     {
         return $this->country;
     }
@@ -151,22 +151,22 @@ class WorldHeritageDto
 
     public function hasImages(): bool
     {
-        return $this->collection !== null;
+        return $this->images !== null;
     }
 
     public function getImages(): array
     {
-        return $this->collection ? $this->collection->toArray() : [];
+        return $this->images ? $this->images->toArray() : [];
     }
 
-    public function getThumbnailImage(): ?ImageDto
+    public function getImageUrl(): ?ImageDto
     {
-        return $this->thumbnail;
+        return $this->imageUrl;
     }
 
     public function getThumbnailUrl(): ?string
     {
-        return $this->thumbnail?->getUrl();
+        return $this->imageUrl?->getUrl();
     }
 
     public function toArray(): array
@@ -196,8 +196,8 @@ class WorldHeritageDto
 
         if ($this->hasImages()) {
             $value['images'] = $this->getImages();
-        } elseif ($this->thumbnail !== null) {
-            $value['thumbnail_url'] = $this->getThumbnailUrl();
+        } elseif ($this->imageUrl !== null) {
+            $value['thumbnail'] = $this->getImageUrl()->toArray();
         }
 
         return $value;

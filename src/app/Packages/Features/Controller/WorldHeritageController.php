@@ -25,6 +25,23 @@ use InvalidArgumentException;
 
 class WorldHeritageController extends Controller
 {
+    public function getWorldHeritages(
+        Request $request,
+        GetWorldHeritagesUseCase $useCase
+    ): JsonResponse
+    {
+        $currentPage = $request->get('current_page', 1);
+        $perPage = $request->get('per_page', 30);
+
+        $dto = $useCase->handle($currentPage, $perPage);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $dto->toArray(),
+        ], 200);
+
+    }
+
     public function getWorldHeritageById(
         Request $request,
         GetWorldHeritageByIdUseCase $useCase
@@ -36,10 +53,11 @@ class WorldHeritageController extends Controller
         }
 
         $dto = $useCase->handle($id);
+        $worldHeritageViewModel = new WorldHeritageViewModel($dto);
 
         return response()->json([
             'status' => 'success',
-            'data' => $dto->toArray()
+            'data' => $worldHeritageViewModel->toArray(),
         ], 200);
     }
 
