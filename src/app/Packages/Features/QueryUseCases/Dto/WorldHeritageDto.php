@@ -197,7 +197,7 @@ class WorldHeritageDto
         if ($this->hasImages()) {
             $value['images'] = $this->getImages();
         } elseif ($this->imageUrl !== null) {
-            $value['image_url'] = $this->getImageUrl();
+            $value['thumbnail'] = $this->getImageUrl()->toArray();
         }
 
         return $value;
