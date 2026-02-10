@@ -7,12 +7,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-dom": "*",
+        "ext-xml": "*",
+        "algolia/algoliasearch-client-php": "^4.0",
         "google/cloud-storage": "^1",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
-        "league/flysystem-google-cloud-storage": "^3",
-        "ext-dom": "*",
-        "ext-xml": "*"
+        "league/flysystem-google-cloud-storage": "^3"
     },
     "require-dev": {
         "carthage-software/mago": "^1.2",
