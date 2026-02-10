@@ -23,4 +23,15 @@ interface WorldHeritageQueryServiceInterface
         int $currentPage,
         int $perPage
     ): PaginationDto;
+
+    public function searchHeritages(
+        ?string $keyword,
+        ?string $country,
+        ?string $region,
+        ?string $category,
+        ?int $yearInscribedFrom,
+        ?int $yearInscribedTo,
+        int $currentPage,
+        int $perPage
+    ): PaginationDto;
 }

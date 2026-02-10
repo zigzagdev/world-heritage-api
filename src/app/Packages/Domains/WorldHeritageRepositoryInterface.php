@@ -4,27 +4,15 @@ namespace App\Packages\Domains;
 
 interface WorldHeritageRepositoryInterface
 {
-    public function insertHeritage(
-        WorldHeritageEntity $heritage
-    ): WorldHeritageEntity;
+    public function insertHeritage(WorldHeritageEntity $heritage): WorldHeritageEntity;
 
-    public function insertHeritages(
-        WorldHeritageEntityCollection $collection
-    ): WorldHeritageEntityCollection;
+    public function insertHeritages(WorldHeritageEntityCollection $collection): WorldHeritageEntityCollection;
 
-    public function updateOneHeritage(
-        WorldHeritageEntity $entity
-    ): WorldHeritageEntity;
+    public function updateOneHeritage(WorldHeritageEntity $entity): WorldHeritageEntity;
 
-    public function updateManyHeritages(
-        WorldHeritageEntityCollection $collection
-    ): WorldHeritageEntityCollection;
+    public function updateManyHeritages(WorldHeritageEntityCollection $collection): WorldHeritageEntityCollection;
 
-    public function deleteOneHeritage(
-        int $id
-    ): void;
+    public function deleteOneHeritage(int $id): void;
 
-    public function deleteManyHeritages(
-        array $ids
-    ): void;
+    public function deleteManyHeritages(array $ids): void;
 }
