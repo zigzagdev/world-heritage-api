@@ -23,17 +23,12 @@ class AppServiceProvider extends ServiceProvider
         // We bind via a factory closure (instead of a simple class binding) because:
         // - The adapter needs runtime configuration (Algolia app id / API key / index name)
         $this->app->bind(WorldHeritageSearchPort::class, function () {
-            $client = SearchClient::create(
-                config('algolia.algolia_app_id'),
-                config('algolia.algolia_search_api_key')
-            );
+            $client = SearchClient::create(config('algolia.algolia_app_id'), config('algolia.algolia_search_api_key'));
 
-            return new AlgoliaWorldHeritageSearchAdapter(
-                client: $client,
-                indexName: config('algolia.algolia_index')
-            );
+            return new AlgoliaWorldHeritageSearchAdapter(client: $client, indexName: config('algolia.algolia_index'));
         });
     }
+
     /**
      * Bootstrap any application services.
      */
