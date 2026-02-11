@@ -13,6 +13,7 @@ use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\SearchWorldHeritagesWithAlgoliaUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
@@ -272,4 +273,30 @@ class WorldHeritageController extends Controller
 
         }
     }
+
+    public function searchWorldHeritages(
+        Request $request,
+        SearchWorldHeritagesWithAlgoliaUseCase $useCase
+    ): JsonResponse
+    {
+        $currentPage = $request->query('current_page', 1);
+        $perPage = $request->query('per_page', 30);
+
+        $dto = $useCase->handle(
+            $request->query('search_query'),
+            $request->query('country'),
+            $request->query('region'),
+            $request->query('category'),
+            $request->query('year_inscribed_from'),
+            $request->query('year_inscribed_to'),
+            $currentPage,
+            $perPage,
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $dto->toArray()['data'],
+        ], 200);
+    }
+
 }
