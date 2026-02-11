@@ -10,6 +10,8 @@ use App\Packages\Domains\Ports\ObjectStoragePort;
 use App\Packages\Domains\Ports\SignedUrlPort;
 use Illuminate\Support\ServiceProvider;
 use Google\Cloud\Storage\StorageClient;
+use App\Packages\Domains\Ports\WorldHeritageSearchPort;
+use App\Packages\Domains\Adapter\AlgoliaWorldHeritageSearchAdapter;
 
 class PortsServiceProvider extends ServiceProvider
 {
