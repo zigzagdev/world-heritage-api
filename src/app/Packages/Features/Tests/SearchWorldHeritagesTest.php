@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Packages\Domains\Ports\WorldHeritageSearchPort;
 use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
 use Mockery;
+use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
 
 class SearchWorldHeritagesTest extends TestCase
 {
@@ -59,7 +60,7 @@ class SearchWorldHeritagesTest extends TestCase
 
         $this->app->instance(WorldHeritageSearchPort::class, $mock);
 
-        $result = $this->getJson('/api/v1/heritages/search?search_query=Japan');
+        $result = $this->getJson('/api/v1/heritages/search?search_query=Japan&current_page=1&per_page=30');
 
         $result->assertStatus(200);
         $result->assertOk()
@@ -83,6 +84,9 @@ class SearchWorldHeritagesTest extends TestCase
                         'area_hectares',
                         'buffer_zone_hectares',
                         'short_description',
+                        'thumbnail',
+                        'state_party_codes',
+                        'state_parties_meta'
                     ],
                 ],
             ]);
@@ -90,7 +94,7 @@ class SearchWorldHeritagesTest extends TestCase
 
     public function test_feature_api_return_check_value(): void
     {
-        $result = $this->getJson('/api/v1/heritages/search?search_query=Japan');
+        $result = $this->getJson('/api/v1/heritages/search?search_query=Japan&current_page=1&per_page=30');
 
         $result->assertStatus(200);
         $resultData = $result->json('data');
@@ -100,5 +104,49 @@ class SearchWorldHeritagesTest extends TestCase
         $this->assertEquals('Himeji-jo', $resultData[0]['name']);
         $this->assertEquals(663, $resultData[1]['id']);
         $this->assertEquals('Shirakami-Sanchi', $resultData[1]['name']);
+    }
+
+    public function test_feature_api_with_typo_return_correct_value(): void
+    {
+        $result = $this->getJson('/api/v1/heritages/search?search_query=Jpan&current_page=1&per_page=30');
+
+        $result->assertStatus(200);
+        $resultData = $result->json('data');
+
+        $this->assertCount(2, $resultData);
+        $this->assertEquals(661, $resultData[0]['id']);
+        $this->assertEquals('Himeji-jo', $resultData[0]['name']);
+        $this->assertEquals(663, $resultData[1]['id']);
+        $this->assertEquals('Shirakami-Sanchi', $resultData[1]['name']);
+    }
+
+    public function test_feature_api_with_no_result(): void
+    {
+        $mock = Mockery::mock(WorldHeritageSearchPort::class);
+
+        $mock->shouldReceive('search')
+            ->with(
+                Mockery::on(function ($arg) {
+                    return $arg instanceof AlgoliaSearchListQuery
+                        && $arg->keyword === 'Ecuador'
+                        && $arg->currentPage === 1
+                        && $arg->perPage === 30
+                        && $arg->country === null
+                        && $arg->region === null
+                        && $arg->category === null
+                        && $arg->yearFrom === null
+                        && $arg->yearTo === null;
+                }),
+                1,
+                30
+            )
+            ->andReturn(new HeritageSearchResult(ids: [], total: 0));
+
+        $this->app->instance(WorldHeritageSearchPort::class, $mock);
+
+        $result = $this->getJson('/api/v1/heritages/search?search_query=Ecuador&current_page=1&per_page=30');
+
+        $result->assertStatus(200);
+        $this->assertCount(0, $result->json('data'));
     }
 }

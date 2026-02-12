@@ -298,5 +298,4 @@ class WorldHeritageController extends Controller
             'data' => $dto->toArray()['data'],
         ], 200);
     }
-
 }
