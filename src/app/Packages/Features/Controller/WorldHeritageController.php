@@ -295,7 +295,7 @@ class WorldHeritageController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $dto->toArray()['data'],
+            'data' => $dto->toArray(),
         ], 200);
     }
 }
