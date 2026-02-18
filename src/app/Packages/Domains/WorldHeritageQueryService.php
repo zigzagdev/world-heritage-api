@@ -27,7 +27,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     /**
      * 一覧（最大30件）: サムネのみ、state_party/state_party_code を要件通りに整形
      */
-    public function getAllHeritages(int $currentPage, int $perPage): WorldHeritageDtoCollection
+    public function getAllHeritages(int $currentPage, int $perPage): PaginationDto
     {
         $items = $this->model->select([
             'id',
@@ -53,8 +53,18 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         ])->paginate($perPage, ['*'], 'page', $currentPage);
 
         $array = $items->map(fn($heritage) => $this->buildWorldHeritagePayload($heritage))->all();
+        $dtoCollection = $this->buildDtoFromCollection($array);
+        $lastPage = (int) ceil($items->toArray()['total'] / max(1, $perPage));
 
-        return $this->buildDtoFromCollection($array);
+        return new PaginationDto(
+            collection: $dtoCollection,
+            pagination: [
+                'current_page' => $currentPage,
+                'per_page' => $perPage,
+                'total' => $items->toArray()['total'],
+                'last_page' => $lastPage,
+            ]
+        );
     }
 
     public function getHeritageById(int $id): WorldHeritageDto
