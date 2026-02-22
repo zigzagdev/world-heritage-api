@@ -2,6 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
+use App\Common\Pagination\PaginationDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 
@@ -14,7 +15,7 @@ class GetWorldHeritagesUseCase
     public function handle(
         int $currentPage,
         int $perPage
-    ): WorldHeritageDtoCollection
+    ): PaginationDto
     {
         return $this->worldHeritageQueryService->getAllHeritages(
             $currentPage,

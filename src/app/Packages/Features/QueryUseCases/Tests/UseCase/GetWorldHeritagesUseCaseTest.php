@@ -2,6 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
+use App\Common\Pagination\PaginationDto;
 use App\Models\Country;
 use App\Models\WorldHeritage;
 use App\Models\Image;
@@ -68,6 +69,6 @@ class GetWorldHeritagesUseCaseTest extends TestCase
             $this->perPage
         );
 
-        $this->assertInstanceOf(WorldHeritageDtoCollection::class, $result);
+        $this->assertInstanceOf(PaginationDto::class, $result);
     }
 }
