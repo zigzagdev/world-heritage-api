@@ -65,9 +65,14 @@ class WorldHeritageViewModel
         return $this->dto->isEndangered();
     }
 
-    public function getNameJp(): ?string
+    public function getHeritageNameJp(): ?string
     {
-        return $this->dto->getNameJp();
+        return $this->dto->getHeritageNameJp();
+    }
+
+    public function getCountryNameJp(): ?string
+    {
+        return $this->dto->getCountryNameJp();
     }
 
     public function getStateParty(): ?string
@@ -127,13 +132,14 @@ class WorldHeritageViewModel
             'official_name' => $this->getOfficialName(),
             'name' => $this->getName(),
             'country' => $this->getCountry(),
+            'country_name_jp' => $this->getCountryNameJp(),
             'region' => $this->getRegion(),
             'category' => $this->getCategory(),
             'year_inscribed' => $this->getYearInscribed(),
             'latitude' => $this->getLatitude(),
             'longitude' => $this->getLongitude(),
             'is_endangered' => $this->isEndangered(),
-            'name_jp' => $this->getNameJp(),
+            'heritage_name_jp' => $this->getHeritageNameJp(),
             'state_party' => $this->getStateParty(),
             'criteria' => $this->getCriteria(),
             'area_hectares' => $this->getAreaHectares(),
