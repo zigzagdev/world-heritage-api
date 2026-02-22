@@ -29,28 +29,29 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
      */
     public function getAllHeritages(int $currentPage, int $perPage): PaginationDto
     {
-        $items = $this->model->select([
-            'id',
-            'official_name',
-            'name',
-            'name_jp',
-            'country',
-            'region',
-            'category',
-            'criteria',
-            'year_inscribed',
-            'area_hectares',
-            'buffer_zone_hectares',
-            'is_endangered',
-            'latitude',
-            'longitude',
-            'short_description',
-            'image_url',
-        ])->with([
-            'countries' => function ($countriesQuery) {
-                $countriesQuery->withPivot(['is_primary'])->orderBy('countries.state_party_code', 'asc');
-            },
-        ])->paginate($perPage, ['*'], 'page', $currentPage);
+        $items = $this->model
+            ->from('world_heritage_sites')
+            ->leftJoin('countries', 'countries.state_party_code', '=', 'world_heritage_sites.country')
+            ->select([
+                'id',
+                'official_name',
+                'name',
+                'world_heritage_sites.name_jp as heritage_name_jp',
+                'country',
+                'countries.name_jp as country_name_jp',
+                'world_heritage_sites.region',
+                'category',
+                'criteria',
+                'year_inscribed',
+                'area_hectares',
+                'buffer_zone_hectares',
+                'is_endangered',
+                'latitude',
+                'longitude',
+                'short_description',
+                'image_url',
+            ])
+            ->paginate($perPage, page: $currentPage);
 
         $array = $items->map(fn($heritage) => $this->buildWorldHeritagePayload($heritage))->all();
         $dtoCollection = $this->buildDtoFromCollection($array);
@@ -69,12 +70,14 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
     public function getHeritageById(int $id): WorldHeritageDto
     {
-        $heritage = $this->model->with([
+        $heritage = $this->model
+            ->leftJoin('countries', 'countries.state_party_code', '=', 'world_heritage_sites.country')
+            ->with([
             'countries' => function ($countriesQuery) {
-                $countriesQuery->withPivot(['is_primary', 'inscription_year'])->orderBy(
-                    'countries.state_party_code',
-                    'asc',
-                )->orderBy('site_state_parties.inscription_year', 'asc');
+                $countriesQuery
+                    ->withPivot(['is_primary', 'inscription_year'])
+                    ->orderBy('countries.state_party_code', 'asc')
+                    ->orderBy('site_state_parties.inscription_year', 'asc');
             },
             'images' => function ($imagesQuery) {
                 $imagesQuery->orderBy('sort_order', 'asc');
@@ -128,8 +131,9 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
         foreach ($heritage->countries as $country) {
             $code = $this->statePartyCodeNormalize($country->state_party_code);
-            if ($code === null)
+            if ($code === null) {
                 continue;
+            }
 
             $statePartiesMeta[$code] = [
                 'is_primary' => (bool) data_get($country, 'pivot.is_primary', false),
@@ -137,19 +141,32 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         }
 
         $statePartyCodesCompat = $codes->all();
+        $displayCountry = null;
+
+        if ($codes->count() === 1) {
+            $displayCountry = $heritage->countries->first()?->name_en;
+        } elseif ($codes->count() > 1) {
+            $primary = $heritage->countries->first(
+                fn($c) => (bool) data_get($c, 'pivot.is_primary', false),
+            );
+            $displayCountry = $primary?->name_en;
+        }
+
+        $displayCountry = $displayCountry ?? $heritage->country;
 
         return WorldHeritageDetailFactory::build([
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
-            'country' => $heritage->countries->first()->name_en ?? $heritage->country,
+            'country' => $displayCountry,
+            'country_name_jp' => $heritage->country_name_jp,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'year_inscribed' => $heritage->year_inscribed,
             'latitude' => $heritage->latitude,
             'longitude' => $heritage->longitude,
             'is_endangered' => (bool) $heritage->is_endangered,
-            'name_jp' => $heritage->name_jp,
+            'heritage_name_jp' => $heritage->heritage_name_jp,
             'state_party' => $statePartyName,
             'criteria' => $heritage->criteria,
             'area_hectares' => $heritage->area_hectares,
@@ -376,8 +393,9 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
-            'name_jp' => $heritage->name_jp,
+            'heritage_name_jp' => $heritage->heritage_name_jp,
             'country' => $countryRelations->first()?->name_en ?? $heritage->country,
+            'country_name_jp' => $heritage->country_name_jp,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'criteria' => $heritage->criteria,

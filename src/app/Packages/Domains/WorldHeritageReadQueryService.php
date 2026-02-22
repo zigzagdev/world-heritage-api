@@ -19,9 +19,10 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
                 'id',
                 'official_name',
                 'name',
-                'name_jp',
+                'world_heritage_sites.name_jp as heritage_name_jp',
                 'country',
-                'region',
+                'countries.name_jp as country_name_jp',
+                'world_heritage_sites.region',
                 'category',
                 'criteria',
                 'year_inscribed',
@@ -33,6 +34,7 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
                 'short_description',
                 'image_url',
             ])
+            ->leftJoin('countries', 'countries.state_party_code', '=', 'world_heritage_sites.country')
             ->with([
                 'countries' => function ($q) {
                     $q->withPivot(['is_primary'])->orderBy('countries.state_party_code', 'asc');
