@@ -279,18 +279,23 @@ class WorldHeritageController extends Controller
         SearchWorldHeritagesWithAlgoliaUseCase $useCase
     ): JsonResponse
     {
-        $currentPage = $request->query('current_page', 1);
-        $perPage = $request->query('per_page', 30);
+        $currentPage = (int) $request->query('current_page', 1);
+        $perPage = (int) $request->query('per_page', 30);
+        $keyword = $request->query('search_query');
+        if ($keyword === null || trim((string) $keyword) === '') {
+            $keyword = $request->query('keyword');
+        }
 
         $dto = $useCase->handle(
-            $request->query('search_query'),
-            $request->query('country'),
+            $keyword,
+            $request->query('country_name'),
+            $request->query('country_iso3'),
             $request->query('region'),
             $request->query('category'),
             $request->query('year_inscribed_from'),
             $request->query('year_inscribed_to'),
             $currentPage,
-            $perPage,
+            $perPage
         );
 
         return response()->json([
