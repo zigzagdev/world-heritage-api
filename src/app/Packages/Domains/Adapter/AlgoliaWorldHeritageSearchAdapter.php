@@ -22,60 +22,59 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 
         /**
          * Algolia uses 0-based pagination.
-         * Convert the application's 1-based page number to 0-based.
          */
         $firstPage = max(0, $currentPage - 1);
 
         /**
-         * Build an array of Algolia filter expressions.
-         * These will later be joined using "AND".
+         * Build Algolia filters (joined by AND later).
          */
         $filters = [];
 
         /**
-         * If an ISO3 country code is provided:
+         * Country filtering strategy:
+         * - If ISO3 is explicitly provided, use strict ISO3 filtering and disable full-text search.
+         * - Otherwise, attempt to treat the provided countryName as one of:
+         *   - English country name (e.g. "Japan" / "japan")
+         *   - Japanese name (e.g. "日本")
+         *   - ISO3 (e.g. "JPN")
          *
-         * Do NOT perform full-text search (query = '').
-         * Filter strictly by state_party_codes.
-         *
-         * This represents a different search strategy from
-         * the regular country name search.
+         * In that case we build an OR-filter across relevant fields.
          */
-        if ($query->countryIso3) {
-            $filters[] = 'state_party_codes:' . $query->countryIso3;
+        $queryString = $query->keyword ?? '';
+
+        if ($this->hasValue($query->countryIso3)) {
+            // Requirement: ISO3 -> query='' and filter by state_party_codes:<ISO3>
+            $filters[] = 'state_party_codes:' . $this->escapeToken($query->countryIso3);
             $queryString = '';
         } else {
-            /**
-             * Default behaviour:
-             * Perform standard full-text search using keyword.
-             */
-            $queryString = $query->keyword ?? '';
+            if ($this->hasValue($query->countryName)) {
+                $filters[] = $this->buildCountryOrFilter($query->countryName);
 
-            /**
-             * If a country name is provided,
-             * apply a strict match filter on the "country" field.
-             */
-            if ($query->countryName) {
-                $filters[] = 'country:"' . addslashes($query->countryName) . '"';
+                /**
+                 * IMPORTANT:
+                 * Do not blank out query here.
+                 * If the input was not a real country (e.g. "japan" typo / random word),
+                 * we still want full-text search to work rather than returning "top hits".
+                 */
             }
         }
 
         /**
-         * Apply region filter (exact match).
+         * Region filter (exact match).
          */
-        if ($query->region) {
-            $filters[] = 'region:"' . addslashes($query->region) . '"';
+        if ($this->hasValue($query->region)) {
+            $filters[] = 'region:"' . $this->escapeForQuotedString($query->region) . '"';
         }
 
         /**
-         * Apply category filter (exact match).
+         * Category filter (exact match).
          */
-        if ($query->category) {
-            $filters[] = 'category:"' . addslashes($query->category) . '"';
+        if ($this->hasValue($query->category)) {
+            $filters[] = 'category:"' . $this->escapeForQuotedString($query->category) . '"';
         }
 
         /**
-         * Apply numeric range filters for inscription year.
+         * Numeric range filters for inscription year.
          */
         if ($query->yearFrom !== null) {
             $filters[] = 'year_inscribed >= ' . (int) $query->yearFrom;
@@ -86,13 +85,18 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
         }
 
         /**
-         * Execute the Algolia search request.
-         *
-         * - query: full-text search string
-         * - page: zero-based page index
-         * - hitsPerPage: number of results per page
-         * - filters: combined filter conditions
+         * Guardrail:
+         * Never execute Algolia with query='' AND no filters,
+         * otherwise you will get "top results" unrelated to the user input.
          */
+        $hasAnyFilter = !empty($filters);
+        $hasQueryText = $this->hasValue($queryString);
+
+        if (!$hasAnyFilter && !$hasQueryText) {
+            // Prefer returning empty result rather than misleading "top hits".
+            return new HeritageSearchResult(ids: [], total: 0);
+        }
+
         $response = $this->client->searchSingleIndex(
             $this->indexName,
             array_filter(
@@ -100,34 +104,89 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
                     'query' => $queryString,
                     'page' => $firstPage,
                     'hitsPerPage' => $perPage,
-                    'filters' => $filters ? implode(' AND ', $filters) : null,
+                    'filters' => $hasAnyFilter ? implode(' AND ', $filters) : null,
                 ],
                 fn ($v) => $v !== null,
             ),
         );
 
-        /**
-         * Extract search hits from the response.
-         */
         $hits = $response['hits'] ?? [];
 
-        /**
-         * Extract entity IDs from each hit.
-         * Depending on index configuration, either "id" or "objectID" is used.
-         */
         $ids = array_values(array_filter(array_map(function (array $h) {
             return isset($h['id'])
                 ? (int) $h['id']
                 : (isset($h['objectID']) ? (int) $h['objectID'] : null);
         }, $hits)));
 
-        /**
-         * Return the search result DTO containing:
-         * - Ordered list of IDs (for DB re-fetching)
-         */
         return new HeritageSearchResult(
             ids: $ids,
             total: (int) ($response['nbHits'] ?? 0)
         );
+    }
+
+    /**
+     * Build an OR-filter that can match different country input shapes:
+     * - English: country / state_party (exact match)
+     * - Japanese: country_name_jp (exact match)
+     * - ISO3-like: state_party_codes:<ISO3>
+     *
+     * Example output:
+     * (country:"Japan" OR state_party:"Japan" OR country_name_jp:"日本" OR state_party_codes:JPN)
+     */
+    private function buildCountryOrFilter(string $raw): string
+    {
+        $term = trim($raw);
+        $quoted = $this->escapeForQuotedString($term);
+
+        $orParts = [
+            'country:"' . $quoted . '"',
+            'state_party:"' . $quoted . '"',
+            'country_name_jp:"' . $quoted . '"',
+        ];
+
+        // If the term looks like ISO3 (3 letters), also try state_party_codes
+        $maybeIso3 = $this->normaliseIso3Candidate($term);
+        if ($maybeIso3 !== null) {
+            $orParts[] = 'state_party_codes:' . $this->escapeToken($maybeIso3);
+        }
+
+        return '(' . implode(' OR ', $orParts) . ')';
+    }
+
+    private function normaliseIso3Candidate(string $term): ?string
+    {
+        $t = strtoupper(trim($term));
+
+        // Accept only A-Z length 3 as ISO3 candidate.
+        if (preg_match('/^[A-Z]{3}$/', $t) === 1) {
+            return $t;
+        }
+
+        return null;
+    }
+
+    private function hasValue(?string $v): bool
+    {
+        return $v !== null && trim($v) !== '';
+    }
+
+    /**
+     * For quoted string filters: country:"...".
+     */
+    private function escapeForQuotedString(string $s): string
+    {
+        // Minimal escaping for Algolia filter quoted strings.
+        // Escape backslash and double-quote.
+        $s = str_replace('\\', '\\\\', $s);
+        return str_replace('"', '\\"', $s);
+    }
+
+    /**
+     * For token filters: state_party_codes:JPN
+     */
+    private function escapeToken(string $s): string
+    {
+        // Conservative: remove spaces, keep as-is otherwise.
+        return preg_replace('/\s+/', '', $s) ?? $s;
     }
 }
