@@ -21,7 +21,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     public function __construct(
         private readonly WorldHeritage $model,
         private readonly WorldHeritageReadQueryServiceInterface $readQueryService,
-        private WorldHeritageSearchPort $searchPort,
+        private readonly WorldHeritageSearchPort $searchPort,
     ) {}
 
     /**
@@ -71,7 +71,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     public function getHeritageById(int $id): WorldHeritageDto
     {
         $heritage = $this->model
-            ->leftJoin('countries', 'countries.state_party_code', '=', 'world_heritage_sites.country')
             ->with([
             'countries' => function ($countriesQuery) {
                 $countriesQuery
@@ -158,15 +157,15 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
+            'heritage_name_jp' => $heritage->name_jp,
             'country' => $displayCountry,
-            'country_name_jp' => $heritage->country_name_jp,
+            'country_name_jp' => $heritage->countries->first()->name_jp,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'year_inscribed' => $heritage->year_inscribed,
             'latitude' => $heritage->latitude,
             'longitude' => $heritage->longitude,
             'is_endangered' => (bool) $heritage->is_endangered,
-            'heritage_name_jp' => $heritage->heritage_name_jp,
             'state_party' => $statePartyName,
             'criteria' => $heritage->criteria,
             'area_hectares' => $heritage->area_hectares,
@@ -314,7 +313,8 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
         $search = new AlgoliaSearchListQuery(
             keyword: $keyword,
-            country: $country,
+            countryName: $country,
+            countryIso3: $country ? $this->statePartyCodeNormalize($country) : null,
             region: $region,
             category: $category,
             yearFrom: $yearInscribedFrom,
