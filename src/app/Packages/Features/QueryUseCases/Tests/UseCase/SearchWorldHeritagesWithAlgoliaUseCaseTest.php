@@ -8,6 +8,7 @@ use Mockery;
 use App\Common\Pagination\PaginationDto;
 use App\Packages\Features\QueryUseCases\UseCase\SearchWorldHeritagesWithAlgoliaUseCase;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
+use App\Packages\Domains\Infra\CountryResolver;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 
@@ -30,28 +31,28 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
                 officialName: 'test1234',
                 name: 'Fuji Mountain',
                 country: null,
+                countryNameJp: null,
                 region: 'JPN',
                 category: 'Cultural',
                 yearInscribed: 2000,
                 latitude: null,
                 longitude: null,
                 isEndangered: false,
-                nameJp: null,
+                heritageNameJp: 'テスト1234',
                 stateParty: null,
                 criteria: [],
                 areaHectares: null,
                 bufferZoneHectares: null,
                 shortDescription: '',
                 images: null,
+                imageUrl: null,
                 unescoSiteUrl: null,
                 statePartyCodes: [],
                 statePartiesMeta: [],
-                imageUrl: null,
             );
         }, $heritageIds);
 
         $collection = new WorldHeritageDtoCollection();
-
         foreach ($heritages as $heritage) {
             $collection->add($heritage);
         }
@@ -67,16 +68,24 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
         );
     }
 
-    public function test_search_heritages_use_case_calls_query_service_and_returns_pagination_dto(): void
+    public function test_search_heritages_resolves_country_name_and_calls_query_service(): void
     {
         $expectedDto = $this->makePaginationDto([661, 662], self::CURRENT_PAGE, self::PER_PAGE, 2);
 
         $queryService = Mockery::mock(WorldHeritageQueryServiceInterface::class);
+
+        $resolver = Mockery::mock(CountryResolver::class);
+        $resolver->shouldReceive('resolveIso3')
+            ->with('test country')
+            ->once()
+            ->andReturn('FRA');
+
         $queryService
             ->shouldReceive('searchHeritages')
             ->with(
                 'test keyword',
                 'test country',
+                'FRA',
                 'test region',
                 'test category',
                 2000,
@@ -84,13 +93,15 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
                 self::CURRENT_PAGE,
                 self::PER_PAGE
             )
+            ->once()
             ->andReturn($expectedDto);
 
-        $useCase = new SearchWorldHeritagesWithAlgoliaUseCase($queryService);
+        $useCase = new SearchWorldHeritagesWithAlgoliaUseCase($queryService, $resolver);
 
         $result = $useCase->handle(
             'test keyword',
             'test country',
+            null,
             'test region',
             'test category',
             2000,
@@ -105,14 +116,16 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
         $array = $result->toArray();
         $this->assertSame(self::CURRENT_PAGE, $array['pagination']['current_page'] ?? null);
         $this->assertSame(self::PER_PAGE, $array['pagination']['per_page'] ?? null);
-        $this->assertSame(2, $ar['pagination']['total'] ?? null);
+        $this->assertSame(2, $array['pagination']['total'] ?? null);
     }
 
-    public function test_search_nullable_params_use_case_calls_query_service_with_nulls(): void
+    public function test_search_nullable_params_calls_query_service_with_nulls(): void
     {
         $expectedDto = $this->makePaginationDto([], self::CURRENT_PAGE, self::PER_PAGE, 0);
-
         $queryService = Mockery::mock(WorldHeritageQueryServiceInterface::class);
+        $resolver = Mockery::mock(CountryResolver::class);
+        $resolver->shouldNotReceive('resolveIso3');
+
         $queryService
             ->shouldReceive('searchHeritages')
             ->with(
@@ -122,14 +135,17 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
                 null,
                 null,
                 null,
+                null,
                 self::CURRENT_PAGE,
                 self::PER_PAGE
             )
+            ->once()
             ->andReturn($expectedDto);
 
-        $useCase = new SearchWorldHeritagesWithAlgoliaUseCase($queryService);
+        $useCase = new SearchWorldHeritagesWithAlgoliaUseCase($queryService, $resolver);
 
         $result = $useCase->handle(
+            null,
             null,
             null,
             null,
