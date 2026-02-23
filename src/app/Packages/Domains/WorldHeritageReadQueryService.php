@@ -16,7 +16,7 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
     {
         $models = $this->model
             ->select([
-                'id',
+                'world_heritage_sites.id',
                 'official_name',
                 'name',
                 'world_heritage_sites.name_jp as heritage_name_jp',
@@ -40,7 +40,7 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
                     $q->withPivot(['is_primary'])->orderBy('countries.state_party_code', 'asc');
                 },
             ])
-            ->whereIn('id', $ids)
+            ->whereIn('world_heritage_sites.id', $ids)
             ->get()
             ->keyBy('id');
 
