@@ -67,26 +67,35 @@ class SearchWorldHeritagesTest extends TestCase
             ->assertJsonStructure([
                 'status',
                 'data' => [
-                    '*' => [
-                        'id',
-                        'official_name',
-                        'name',
-                        'country',
-                        'region',
-                        'category',
-                        'year_inscribed',
-                        'latitude',
-                        'longitude',
-                        'is_endangered',
-                        'name_jp',
-                        'state_party',
-                        'criteria',
-                        'area_hectares',
-                        'buffer_zone_hectares',
-                        'short_description',
-                        'thumbnail',
-                        'state_party_codes',
-                        'state_parties_meta'
+                    'items' => [
+                        '*' => [
+                            'id',
+                            'official_name',
+                            'name',
+                            'country',
+                            'country_name_jp',
+                            'region',
+                            'category',
+                            'year_inscribed',
+                            'latitude',
+                            'longitude',
+                            'is_endangered',
+                            'heritage_name_jp',
+                            'state_party',
+                            'criteria',
+                            'area_hectares',
+                            'buffer_zone_hectares',
+                            'short_description',
+                            'thumbnail',
+                            'state_party_codes',
+                            'state_parties_meta',
+                        ],
+                    ],
+                    'pagination' => [
+                        'current_page',
+                        'per_page',
+                        'total',
+                        'last_page',
                     ],
                 ],
             ]);
@@ -100,10 +109,10 @@ class SearchWorldHeritagesTest extends TestCase
         $resultData = $result->json('data');
 
         $this->assertCount(2, $resultData);
-        $this->assertEquals(661, $resultData[0]['id']);
-        $this->assertEquals('Himeji-jo', $resultData[0]['name']);
-        $this->assertEquals(663, $resultData[1]['id']);
-        $this->assertEquals('Shirakami-Sanchi', $resultData[1]['name']);
+        $this->assertEquals(661, $resultData['items'][0]['id']);
+        $this->assertEquals('Himeji-jo', $resultData['items'][0]['name']);
+        $this->assertEquals(663, $resultData['items'][1]['id']);
+        $this->assertEquals('Shirakami-Sanchi', $resultData['items'][1]['name']);
     }
 
     public function test_feature_api_with_typo_return_correct_value(): void
@@ -114,10 +123,10 @@ class SearchWorldHeritagesTest extends TestCase
         $resultData = $result->json('data');
 
         $this->assertCount(2, $resultData);
-        $this->assertEquals(661, $resultData[0]['id']);
-        $this->assertEquals('Himeji-jo', $resultData[0]['name']);
-        $this->assertEquals(663, $resultData[1]['id']);
-        $this->assertEquals('Shirakami-Sanchi', $resultData[1]['name']);
+        $this->assertEquals(661, $resultData['items'][0]['id']);
+        $this->assertEquals('Himeji-jo', $resultData['items'][0]['name']);
+        $this->assertEquals(663, $resultData['items'][1]['id']);
+        $this->assertEquals('Shirakami-Sanchi', $resultData['items'][1]['name']);
     }
 
     public function test_feature_api_with_no_result(): void
@@ -131,7 +140,8 @@ class SearchWorldHeritagesTest extends TestCase
                         && $arg->keyword === 'Ecuador'
                         && $arg->currentPage === 1
                         && $arg->perPage === 30
-                        && $arg->country === null
+                        && $arg->countryName === 'Ecuador'
+                        && $arg->countryIso3 === 'ECU'
                         && $arg->region === null
                         && $arg->category === null
                         && $arg->yearFrom === null
@@ -143,10 +153,9 @@ class SearchWorldHeritagesTest extends TestCase
             ->andReturn(new HeritageSearchResult(ids: [], total: 0));
 
         $this->app->instance(WorldHeritageSearchPort::class, $mock);
-
         $result = $this->getJson('/api/v1/heritages/search?search_query=Ecuador&current_page=1&per_page=30');
 
         $result->assertStatus(200);
-        $this->assertCount(0, $result->json('data'));
+        $this->assertCount(0, $result->getOriginalContent()['data']['items']);
     }
 }

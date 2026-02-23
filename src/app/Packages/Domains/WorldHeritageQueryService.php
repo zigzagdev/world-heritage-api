@@ -302,7 +302,8 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
     public function searchHeritages(
         ?string $keyword,
-        ?string $country,
+        ?string $countryName,
+        ?string $countryIso3,
         ?string $region,
         ?string $category,
         ?int $yearInscribedFrom,
@@ -313,8 +314,8 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
         $search = new AlgoliaSearchListQuery(
             keyword: $keyword,
-            countryName: $country,
-            countryIso3: $country ? $this->statePartyCodeNormalize($country) : null,
+            countryName: $countryName,
+            countryIso3: $countryIso3,
             region: $region,
             category: $category,
             yearFrom: $yearInscribedFrom,
