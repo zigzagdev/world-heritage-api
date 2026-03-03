@@ -102,7 +102,7 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
             array_filter(
                 [
                     'query' => $queryString,
-                    'page' => $firstPage,
+                    'page' => $firstPage,         // 0-based
                     'hitsPerPage' => $perPage,
                     'filters' => $hasAnyFilter ? implode(' AND ', $filters) : null,
                 ],
@@ -118,9 +118,17 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
                 : (isset($h['objectID']) ? (int) $h['objectID'] : null);
         }, $hits)));
 
+        $nbHits = (int) ($response['nbHits'] ?? 0);
+        $nbPages = (int) ($response['nbPages'] ?? 0);
+        $algoliaPage = (int) ($response['page'] ?? $firstPage);
+        $hitsPerPage = (int) ($response['hitsPerPage'] ?? $perPage);
+
         return new HeritageSearchResult(
             ids: $ids,
-            total: (int) ($response['nbHits'] ?? 0)
+            total: $nbHits,
+            currentPage: $algoliaPage + 1,
+            perPage: $hitsPerPage,
+            lastPage: $nbPages,
         );
     }
 
