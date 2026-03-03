@@ -10,8 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx ca-certificates curl tzdata gettext-base \
     git unzip \
     libpng-dev libjpeg62-turbo-dev libfreetype6-dev libzip-dev libonig-dev libxml2-dev \
+    libicu-dev \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring bcmath exif gd zip \
+ && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring bcmath exif gd zip intl \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
@@ -34,7 +35,6 @@ ENV COMPOSER_CACHE_DIR=/var/www/.composer/cache
 RUN mkdir -p /var/www/.composer && chown -R www-data:www-data /var/www/.composer
 
 COPY environment/nginx/app.common.conf /etc/nginx/app.common.conf
-
 COPY environment/local/nginx/app.local.conf.tpl /etc/nginx/templates/default.conf.template
 
 COPY environment/local/docker/php-local.ini /usr/local/etc/php/conf.d/zz-local.ini
@@ -42,7 +42,6 @@ COPY environment/local/docker/php-fpm.conf /usr/local/etc/php-fpm.d/zz-pool.conf
 
 COPY environment/local/docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
 
 USER www-data
 CMD ["/entrypoint.sh"]

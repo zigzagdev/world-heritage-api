@@ -166,17 +166,16 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($expectedCodes, $result->getStatePartyCodes());
         $this->assertEquals($orderedExpected, $result->getStatePartiesMeta());
         foreach ($result->getImages() as $img) {
-            $this->assertArrayHasKey('id',         $img);
-            $this->assertArrayHasKey('url',        $img);
+            $this->assertArrayHasKey('id', $img);
+            $this->assertArrayHasKey('url', $img);
             $this->assertArrayHasKey('sort_order', $img);
-            $this->assertArrayHasKey('width',      $img);
-            $this->assertArrayHasKey('height',     $img);
-            $this->assertArrayHasKey('format',     $img);
-            $this->assertArrayHasKey('alt',        $img);
-            $this->assertArrayHasKey('credit',     $img);
+            $this->assertArrayHasKey('width', $img);
+            $this->assertArrayHasKey('height', $img);
+            $this->assertArrayHasKey('format', $img);
+            $this->assertArrayHasKey('alt', $img);
+            $this->assertArrayHasKey('credit', $img);
             $this->assertArrayHasKey('is_primary', $img);
-            $this->assertArrayHasKey('checksum',   $img);
-
+            $this->assertArrayHasKey('checksum', $img);
             $this->assertIsBool($img['is_primary']);
             $this->assertNotEmpty($img['url']);
         }

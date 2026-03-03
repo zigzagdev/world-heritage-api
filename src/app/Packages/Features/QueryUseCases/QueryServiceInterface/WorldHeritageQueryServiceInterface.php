@@ -12,7 +12,7 @@ interface WorldHeritageQueryServiceInterface
     public function getAllHeritages(
         int $currentPage,
         int $perPage
-    ): WorldHeritageDtoCollection;
+    ): PaginationDto;
 
     public function getHeritageById(
         int $id
@@ -26,7 +26,8 @@ interface WorldHeritageQueryServiceInterface
 
     public function searchHeritages(
         ?string $keyword,
-        ?string $country,
+        ?string $countryName,
+        ?string $countryIso3,
         ?string $region,
         ?string $category,
         ?int $yearInscribedFrom,

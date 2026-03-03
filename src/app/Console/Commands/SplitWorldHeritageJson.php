@@ -120,18 +120,18 @@ class SplitWorldHeritageJson extends Command
         $transnationalExamples = [];
         $transnationalExampleLimit = 25;
 
-        foreach ($results as $i => $row) {
-            $i = (int)$i;
+        foreach ($results as $index => $row) {
+            $index = (int)$index;
 
             if (!is_array($row)) {
                 $invalid++;
-                $logSkip('row_not_object', $i, null);
+                $logSkip('row_not_object', $index, null);
 
-                $siteJudgements[] = $this->buildJudgement($i, null, null, null, null, [], [], 'unresolved', 'row_not_object');
+                $siteJudgements[] = $this->buildJudgement($index, null, null, null, null, [], [], 'unresolved', 'row_not_object');
 
                 if (count($exceptions) < $exceptionsLimit) {
                     $exceptions[] = [
-                        'index' => $i,
+                        'index' => $index,
                         'site_id' => null,
                         'reason' => 'row_not_object',
                         'row_type' => gettype($row),
@@ -143,10 +143,10 @@ class SplitWorldHeritageJson extends Command
             $idNoRaw = trim((string)($row['id_no'] ?? ($row['id'] ?? '')));
             if ($idNoRaw === '') {
                 $rowsMissingId++;
-                $logSkip('id_no_missing', $i, null);
+                $logSkip('id_no_missing', $index, null);
 
                 $siteJudgements[] = $this->buildJudgement(
-                    $i,
+                    $index,
                     null,
                     $row['name_en'] ?? null,
                     $row['region_code'] ?? null,
@@ -159,7 +159,7 @@ class SplitWorldHeritageJson extends Command
 
                 if (count($exceptions) < $exceptionsLimit) {
                     $exceptions[] = [
-                        'index' => $i,
+                        'index' => $index,
                         'site_id' => null,
                         'name_en' => $row['name_en'] ?? null,
                         'reason' => 'id_no_missing',
@@ -172,10 +172,10 @@ class SplitWorldHeritageJson extends Command
 
             if (!is_numeric($idNoRaw)) {
                 $rowsNonNumericId++;
-                $logSkip('id_no_not_numeric', $i, $idNoRaw);
+                $logSkip('id_no_not_numeric', $index, $idNoRaw);
 
                 $siteJudgements[] = $this->buildJudgement(
-                    $i,
+                    $index,
                     $idNoRaw,
                     $row['name_en'] ?? null,
                     $row['region_code'] ?? null,
@@ -188,7 +188,7 @@ class SplitWorldHeritageJson extends Command
 
                 if (count($exceptions) < $exceptionsLimit) {
                     $exceptions[] = [
-                        'index' => $i,
+                        'index' => $index,
                         'site_id' => $idNoRaw,
                         'name_en' => $row['name_en'] ?? null,
                         'reason' => 'id_no_not_numeric',
@@ -220,7 +220,7 @@ class SplitWorldHeritageJson extends Command
                 $rowsMissingCodes++;
                 $status = 'unresolved';
                 $reason = 'iso_codes_missing_or_empty';
-                $logSkip('iso_codes_missing_or_empty', $i, $siteId);
+                $logSkip('iso_codes_missing_or_empty', $index, $siteId);
             } else {
                 try {
                     $iso3 = $normalizer->toIso3List($iso2);
@@ -228,19 +228,19 @@ class SplitWorldHeritageJson extends Command
                         $rowsMissingCodes++;
                         $status = 'unresolved';
                         $reason = 'iso3_empty_after_normalize';
-                        $logSkip('iso3_empty_after_normalize', $i, $siteId, ['codes' => $iso2]);
+                        $logSkip('iso3_empty_after_normalize', $index, $siteId, ['codes' => $iso2]);
                     }
                 } catch (InvalidArgumentException $e) {
                     $rowsUnknownCodes++;
                     $invalid++;
                     $status = 'unresolved';
                     $reason = 'iso_codes_unknown';
-                    $logSkip('iso_codes_unknown', $i, $siteId, ['codes' => $iso2, 'msg' => $e->getMessage()]);
+                    $logSkip('iso_codes_unknown', $index, $siteId, ['codes' => $iso2, 'msg' => $e->getMessage()]);
                     if ($strict) throw $e;
 
                     if (count($exceptions) < $exceptionsLimit) {
                         $exceptions[] = [
-                            'index' => $i,
+                            'index' => $index,
                             'site_id' => $siteId,
                             'name_en' => $row['name_en'] ?? null,
                             'reason' => $reason,
@@ -254,7 +254,7 @@ class SplitWorldHeritageJson extends Command
             }
 
             $siteJudgements[] = $this->buildJudgement(
-                $i,
+                $index,
                 $siteId,
                 $row['name_en'] ?? null,
                 $row['region_code'] ?? null,
@@ -285,7 +285,7 @@ class SplitWorldHeritageJson extends Command
             if ($status !== 'ok') {
                 if (count($exceptions) < $exceptionsLimit) {
                     $exceptions[] = [
-                        'index' => $i,
+                        'index' => $index,
                         'site_id' => $siteId,
                         'name_en' => $row['name_en'] ?? null,
                         'reason' => $reason,
@@ -306,7 +306,7 @@ class SplitWorldHeritageJson extends Command
                 $transnationalCount++;
                 if (count($transnationalExamples) < $transnationalExampleLimit) {
                     $transnationalExamples[] = [
-                        'index' => $i,
+                        'index' => $index,
                         'site_id' => $siteId,
                         'iso3' => $iso3,
                         'states_names' => $names,
@@ -336,9 +336,9 @@ class SplitWorldHeritageJson extends Command
                 }
 
                 // pivot
-                $k = "{$siteId}|{$code3}";
-                if (!isset($pivot[$k])) {
-                    $pivot[$k] = [
+                $key = "{$siteId}|{$code3}";
+                if (!isset($pivot[$key])) {
+                    $pivot[$key] = [
                         'world_heritage_site_id' => $siteId,
                         'state_party_code' => $code3,
                         'is_primary' => ($idx === 0) ? 1 : 0,

@@ -2,10 +2,10 @@
 
 namespace App\Packages\Domains\Test\QueryService;
 
+use App\Common\Pagination\PaginationDto;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
-use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -53,7 +53,7 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
             self::PER_PAGE
         );
 
-        $this->assertInstanceOf(WorldHeritageDtoCollection::class, $result);
+        $this->assertInstanceOf(PaginationDto::class, $result);
     }
 
     public function test_fetch_data_check_value(): void
@@ -63,8 +63,27 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
             self::PER_PAGE
         );
 
-        $this->assertCount(9, $result->toArray());
-        $this->assertContains(1133, array_column($result->toArray(), 'id'));
-        $this->assertContains(1442, array_column($result->toArray(), 'id'));
+        $arrayResult = $result->toArray();
+
+        $this->assertArrayHasKey('items', $arrayResult);
+        $this->assertArrayHasKey('pagination', $arrayResult);
+
+        $this->assertIsArray($arrayResult['items']);
+        $this->assertIsArray($arrayResult['pagination']);
+
+        $this->assertSame([
+            'current_page',
+            'per_page',
+            'total',
+            'last_page',
+            'from',
+            'to',
+            'path',
+            'first_page_url',
+            'last_page_url',
+            'next_page_url',
+            'prev_page_url',
+            'links'
+        ], array_keys($arrayResult['pagination']));
     }
 }

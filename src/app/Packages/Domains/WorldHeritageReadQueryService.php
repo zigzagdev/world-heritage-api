@@ -14,39 +14,38 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
 
     public function findByIdsPreserveOrder(array $ids): Collection
     {
-        $models = $this->model
+        if (empty($ids)) return collect();
+
+        $modelsById = WorldHeritage::query()
             ->select([
-                'id',
-                'official_name',
-                'name',
-                'name_jp',
-                'country',
-                'region',
-                'category',
-                'criteria',
-                'year_inscribed',
-                'area_hectares',
-                'buffer_zone_hectares',
-                'is_endangered',
-                'latitude',
-                'longitude',
-                'short_description',
-                'image_url',
+                'world_heritage_sites.id',
+                'world_heritage_sites.official_name',
+                'world_heritage_sites.name',
+                'world_heritage_sites.name_jp as heritage_name_jp',
+                'world_heritage_sites.region',
+                'world_heritage_sites.category',
+                'world_heritage_sites.criteria',
+                'world_heritage_sites.year_inscribed',
+                'world_heritage_sites.area_hectares',
+                'world_heritage_sites.buffer_zone_hectares',
+                'world_heritage_sites.is_endangered',
+                'world_heritage_sites.latitude',
+                'world_heritage_sites.longitude',
+                'world_heritage_sites.short_description',
+                'world_heritage_sites.image_url',
             ])
             ->with([
                 'countries' => function ($q) {
-                    $q->withPivot(['is_primary'])->orderBy('countries.state_party_code', 'asc');
+                    $q->select('countries.state_party_code', 'countries.name_en', 'countries.name_jp', 'countries.region')
+                        ->orderBy('countries.state_party_code', 'asc');
                 },
             ])
-            ->whereIn('id', $ids)
+            ->whereIn('world_heritage_sites.id', $ids)
             ->get()
             ->keyBy('id');
 
-        $ordered = collect();
-        foreach ($ids as $id) {
-            if ($models->has($id))
-                $ordered->push($models->get($id));
-        }
-        return $ordered;
+        return collect($ids)
+            ->map(fn ($id) => $modelsById->get($id))
+            ->filter();
     }
 }
