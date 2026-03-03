@@ -91,6 +91,8 @@ class AlgoliaImportWorldHeritages extends Command
 
                     $objects[] = [
                         'objectID' => (string)$row->id,
+                        // for sorting in algolia
+                        'id' => (int)$row->id,
                         'official_name' => (string)$row->official_name,
                         'name' => (string)$row->name,
                         'name_jp' => (string)$row->name_jp,
