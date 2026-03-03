@@ -94,7 +94,13 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 
         if (!$hasAnyFilter && !$hasQueryText) {
             // Prefer returning empty result rather than misleading "top hits".
-            return new HeritageSearchResult(ids: [], total: 0);
+            return new HeritageSearchResult(
+                ids: [],
+                total: 0,
+                currentPage: $currentPage,
+                perPage: $perPage,
+                lastPage: 0,
+            );
         }
 
         $response = $this->client->searchSingleIndex(
@@ -118,9 +124,17 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
                 : (isset($h['objectID']) ? (int) $h['objectID'] : null);
         }, $hits)));
 
+        $nbHits = (int) ($response['nbHits'] ?? 0);
+        $nbPages = (int) ($response['nbPages'] ?? 0);
+        $algoliaPage = (int) ($response['page'] ?? $firstPage);
+        $hitsPerPage = (int) ($response['hitsPerPage'] ?? $perPage);
+
         return new HeritageSearchResult(
             ids: $ids,
-            total: (int) ($response['nbHits'] ?? 0)
+            total: $nbHits,
+            currentPage: $algoliaPage + 1,
+            perPage: $hitsPerPage,
+            lastPage: $nbPages,
         );
     }
 
