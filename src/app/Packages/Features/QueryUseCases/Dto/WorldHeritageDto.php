@@ -8,23 +8,24 @@ class WorldHeritageDto
         private readonly string $officialName,
         private readonly string $name,
         private readonly ?string $country = null,
+        private readonly ?string $countryNameJp = null,
         private readonly string $region,
         private readonly string $category,
         private readonly int $yearInscribed,
         private readonly ?float $latitude,
         private readonly ?float $longitude,
         private readonly bool $isEndangered = false,
-        private readonly ?string $nameJp = null,
+        private readonly ?string $heritageNameJp = null,
         private readonly ?string $stateParty = null,
         private readonly ?array $criteria = null,
         private readonly ?float $areaHectares = null,
         private readonly ?float $bufferZoneHectares = null,
         private readonly ?string $shortDescription = null,
         private readonly ?ImageDtoCollection $images = null,
+        private readonly ?ImageDto $imageUrl = null,
         private readonly ?string $unescoSiteUrl = null,
         private readonly array $statePartyCodes = [],
         private readonly array $statePartiesMeta = [],
-        private readonly ?ImageDto $imageUrl = null,
     ){}
 
 
@@ -78,8 +79,16 @@ class WorldHeritageDto
         return $this->isEndangered;
     }
 
-    public function getNameJp(): ?string
-    { return $this->nameJp; }
+    public function getHeritageNameJp(): ?string
+    {
+        return $this->heritageNameJp;
+    }
+
+    public function getCountryNameJp(): ?string
+    {
+        return $this->countryNameJp;
+    }
+
     public function getStateParty(): ?string
     {
         return $this->stateParty;
@@ -176,13 +185,14 @@ class WorldHeritageDto
             'official_name' => $this->getOfficialName(),
             'name' => $this->getName(),
             'country' => $this->getCountry(),
+            'country_name_jp' => $this->getCountryNameJp(),
             'region' => $this->getRegion(),
             'category' => $this->getCategory(),
             'year_inscribed' => $this->getYearInscribed(),
             'latitude' => $this->getLatitude(),
             'longitude' => $this->getLongitude(),
             'is_endangered' => $this->isEndangered(),
-            'name_jp' => $this->getNameJp(),
+            'heritage_name_jp' => $this->getHeritageNameJp(),
             'state_party' => $this->getStateParty(),
             'criteria' => $this->getCriteria(),
             'area_hectares' => $this->getAreaHectares(),

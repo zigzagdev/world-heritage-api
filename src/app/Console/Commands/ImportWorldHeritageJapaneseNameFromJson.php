@@ -34,7 +34,13 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
      */
     public function handle(): int
     {
-        $path = base_path((string)$this->option('path'));
+        $pathOpt = (string) $this->option('path');
+
+        if ($pathOpt !== '' && ($pathOpt[0] === '/' || preg_match('/^[A-Za-z]:\\\\/', $pathOpt) === 1)) {
+            $path = $pathOpt;
+        } else {
+            $path = storage_path('app/' . ltrim($pathOpt, '/'));
+        }
         $dryRun = (bool)$this->option('dry-run');
         $onlyEmpty = (bool)$this->option('only-empty');
         $batch = max(1, (int)$this->option('batch'));
