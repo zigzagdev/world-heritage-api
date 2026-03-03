@@ -8,6 +8,7 @@ class WorldHeritageDto
         private readonly string $officialName,
         private readonly string $name,
         private readonly ?string $country = null,
+        private readonly ?string $countryNameJp = null,
         private readonly string $region,
         private readonly string $category,
         private readonly int $yearInscribed,
@@ -15,17 +16,16 @@ class WorldHeritageDto
         private readonly ?float $longitude,
         private readonly bool $isEndangered = false,
         private readonly ?string $heritageNameJp = null,
-        private readonly ?string $countryNameJp = null,
         private readonly ?string $stateParty = null,
         private readonly ?array $criteria = null,
         private readonly ?float $areaHectares = null,
         private readonly ?float $bufferZoneHectares = null,
         private readonly ?string $shortDescription = null,
         private readonly ?ImageDtoCollection $images = null,
+        private readonly ?ImageDto $imageUrl = null,
         private readonly ?string $unescoSiteUrl = null,
         private readonly array $statePartyCodes = [],
         private readonly array $statePartiesMeta = [],
-        private readonly ?ImageDto $imageUrl = null,
     ){}
 
 

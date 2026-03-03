@@ -21,7 +21,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     public function __construct(
         private readonly WorldHeritage $model,
         private readonly WorldHeritageReadQueryServiceInterface $readQueryService,
-        private WorldHeritageSearchPort $searchPort,
+        private readonly WorldHeritageSearchPort $searchPort,
     ) {}
 
     /**
@@ -29,27 +29,33 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
      */
     public function getAllHeritages(int $currentPage, int $perPage): PaginationDto
     {
-        $items = $this->model
-            ->from('world_heritage_sites')
-            ->leftJoin('countries', 'countries.state_party_code', '=', 'world_heritage_sites.country')
+        $items = WorldHeritage::query()
             ->select([
-                'id',
-                'official_name',
-                'name',
+                'world_heritage_sites.id',
+                'world_heritage_sites.official_name',
+                'world_heritage_sites.name',
                 'world_heritage_sites.name_jp as heritage_name_jp',
-                'country',
-                'countries.name_jp as country_name_jp',
                 'world_heritage_sites.region',
-                'category',
-                'criteria',
-                'year_inscribed',
-                'area_hectares',
-                'buffer_zone_hectares',
-                'is_endangered',
-                'latitude',
-                'longitude',
-                'short_description',
-                'image_url',
+                'world_heritage_sites.category',
+                'world_heritage_sites.criteria',
+                'world_heritage_sites.year_inscribed',
+                'world_heritage_sites.area_hectares',
+                'world_heritage_sites.buffer_zone_hectares',
+                'world_heritage_sites.is_endangered',
+                'world_heritage_sites.latitude',
+                'world_heritage_sites.longitude',
+                'world_heritage_sites.short_description',
+                'world_heritage_sites.image_url',
+            ])
+            ->with([
+                'countries' => function ($q) {
+                    $q->select([
+                        'countries.state_party_code',
+                        'countries.name_en',
+                        'countries.name_jp',
+                        'countries.region',
+                    ]);
+                }
             ])
             ->paginate($perPage, page: $currentPage);
 
@@ -64,6 +70,14 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'per_page' => $perPage,
                 'total' => $items->toArray()['total'],
                 'last_page' => $lastPage,
+                'from' => $items->toArray()['from'],
+                'to' => $items->toArray()['to'],
+                'path' => $items->toArray()['path'],
+                'first_page_url' => $items->toArray()['first_page_url'],
+                'last_page_url' => $items->toArray()['last_page_url'],
+                'next_page_url' => $items->toArray()['next_page_url'],
+                'prev_page_url' => $items->toArray()['prev_page_url'],
+                'links' => $items->toArray()['links'],
             ]
         );
     }
@@ -71,7 +85,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     public function getHeritageById(int $id): WorldHeritageDto
     {
         $heritage = $this->model
-            ->leftJoin('countries', 'countries.state_party_code', '=', 'world_heritage_sites.country')
             ->with([
             'countries' => function ($countriesQuery) {
                 $countriesQuery
@@ -158,15 +171,15 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
+            'heritage_name_jp' => $heritage->name_jp,
             'country' => $displayCountry,
-            'country_name_jp' => $heritage->country_name_jp,
+            'country_name_jp' => $heritage->countries->first()->name_jp,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'year_inscribed' => $heritage->year_inscribed,
             'latitude' => $heritage->latitude,
             'longitude' => $heritage->longitude,
             'is_endangered' => (bool) $heritage->is_endangered,
-            'heritage_name_jp' => $heritage->heritage_name_jp,
             'state_party' => $statePartyName,
             'criteria' => $heritage->criteria,
             'area_hectares' => $heritage->area_hectares,
@@ -226,7 +239,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 },
             ])
             ->whereIn('id', $ids)
-            ->paginate($perPage, ['*'], 'page', $currentPage)
+            ->paginate($perPage, ['*'], 'current_page', $currentPage)
             ->through(function ($heritage) {
                 $countries = $heritage->countries ?? collect();
 
@@ -303,7 +316,8 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
     public function searchHeritages(
         ?string $keyword,
-        ?string $country,
+        ?string $countryName,
+        ?string $countryIso3,
         ?string $region,
         ?string $category,
         ?int $yearInscribedFrom,
@@ -314,7 +328,8 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
         $search = new AlgoliaSearchListQuery(
             keyword: $keyword,
-            country: $country,
+            countryName: $countryName,
+            countryIso3: $countryIso3,
             region: $region,
             category: $category,
             yearFrom: $yearInscribedFrom,
@@ -331,15 +346,27 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             ->all();
 
         $dtoCollection = $this->buildDtoFromCollection($payloads);
-        $lastPage = (int) ceil($result->total / max(1, $perPage));
+        $total = (int) $result->total;
+        $lastPage = (int) ceil($total / max(1, $perPage));
+        $count = $models->count();
+        $from = $count > 0 ? (($currentPage - 1) * $perPage + 1) : null;
+        $to = $count > 0 ? ($from + $count - 1) : null;
 
         return new PaginationDto(
             collection: $dtoCollection,
             pagination: [
                 'current_page' => $currentPage,
                 'per_page' => $perPage,
-                'total' => $result->total,
+                'total' => $total,
                 'last_page' => $lastPage,
+                'from' => $from,
+                'to' => $to,
+                'path' => null,
+                'first_page_url' => null,
+                'last_page_url' => null,
+                'next_page_url' => null,
+                'prev_page_url' => null,
+                'links' => null,
             ]
         );
     }

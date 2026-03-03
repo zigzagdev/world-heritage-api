@@ -98,7 +98,8 @@ class WorldHeritageQueryService_searchHeritagesTest extends TestCase
 
         $dto = $this->queryService->searchHeritages(
             keyword: 'Japan',
-            country: null,
+            countryName: null,
+            countryIso3: null,
             region: null,
             category: null,
             yearInscribedFrom: null,

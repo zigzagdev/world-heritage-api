@@ -49,6 +49,7 @@ class WorldHeritageDetailFactory
             bufferZoneHectares: array_key_exists('buffer_zone_hectares', $data) ? (float)$data['buffer_zone_hectares'] : null,
             shortDescription: $data['short_description'] ?? null,
             images: $imageCollection,
+            imageUrl: $imageUrl ?? null,
             unescoSiteUrl: $data['unesco_site_url'] ?? null,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta,

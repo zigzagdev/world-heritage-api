@@ -26,7 +26,8 @@ interface WorldHeritageQueryServiceInterface
 
     public function searchHeritages(
         ?string $keyword,
-        ?string $country,
+        ?string $countryName,
+        ?string $countryIso3,
         ?string $region,
         ?string $category,
         ?int $yearInscribedFrom,
