@@ -94,7 +94,13 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 
         if (!$hasAnyFilter && !$hasQueryText) {
             // Prefer returning empty result rather than misleading "top hits".
-            return new HeritageSearchResult(ids: [], total: 0);
+            return new HeritageSearchResult(
+                ids: [],
+                total: 0,
+                currentPage: $currentPage,
+                perPage: $perPage,
+                lastPage: 0,
+            );
         }
 
         $response = $this->client->searchSingleIndex(
@@ -102,7 +108,7 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
             array_filter(
                 [
                     'query' => $queryString,
-                    'page' => $firstPage,         // 0-based
+                    'page' => $firstPage,
                     'hitsPerPage' => $perPage,
                     'filters' => $hasAnyFilter ? implode(' AND ', $filters) : null,
                 ],
