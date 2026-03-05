@@ -4,6 +4,8 @@ namespace App\Packages\Domains\Test\QueryService;
 
 use App\Models\Country;
 use App\Models\WorldHeritage;
+use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
+use App\Packages\Domains\Ports\WorldHeritageSearchPort;
 use App\Packages\Domains\WorldHeritageQueryService;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use Database\Seeders\DatabaseSeeder;
@@ -15,27 +17,22 @@ use Mockery;
 
 class WorldHeritageQueryService_getByIdTest extends TestCase
 {
-    private $repository;
+    private $queryService;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->refresh();
 
-        $this->app->bind(SignedUrlPort::class, function () {
-            $mock = Mockery::mock(SignedUrlPort::class);
-            $mock->shouldReceive('forGet')
-                ->andReturnUsing(fn($disk, $key, $ttl = 300) =>
-                "https://example.test/get/{$disk}/{$key}?ttl={$ttl}"
-                );
-            $mock->shouldReceive('forPut')
-                ->andReturnUsing(fn($disk, $key, $mime, $ttl = 600) =>
-                "https://example.test/put/{$disk}/{$key}?ttl={$ttl}"
-                );
-            return $mock;
+        $this->app->bind(WorldHeritageSearchPort::class, function () {
+            return new class implements WorldHeritageSearchPort {
+                public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
+                    return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
+                }
+            };
         });
 
-
-        $this->repository = app(WorldHeritageQueryService::class);
+        $this->queryService = app(WorldHeritageQueryService::class);
         $seeder = new DatabaseSeeder();
         $seeder->run();
     }
@@ -65,7 +62,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
                 'id' => 1133,
                 'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
                 'name' => "Ancient and Primeval Beech Forests",
-                'name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
+                'heritage_name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
                 'country' => 'Slovakia',
                 'region' => 'Europe',
                 'category' => 'Natural',
@@ -105,16 +102,16 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
             ];
     }
 
-    public function test_repository_check(): void
+    public function test_queryService_check(): void
     {
-        $result = $this->repository->getHeritageById($this->arrayData()['id']);
+        $result = $this->queryService->getHeritageById($this->arrayData()['id']);
 
         $this->assertInstanceOf(WorldHeritageDto::class, $result);
     }
 
     public function test_check_data_value(): void
     {
-        $result = $this->repository->getHeritageById($this->arrayData()['id']);
+        $result = $this->queryService->getHeritageById($this->arrayData()['id']);
 
         $expectedCodes = [
             'ALB','AUT','BEL','BGR','BIH','CHE','CZE','DEU','ESP','FRA',
@@ -149,7 +146,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($this->arrayData()['id'], $result->getId());
         $this->assertEquals($this->arrayData()['official_name'], $result->getOfficialName());
         $this->assertEquals($this->arrayData()['name'], $result->getName());
-        $this->assertEquals($this->arrayData()['name_jp'], $result->getNameJp());
+        $this->assertEquals($this->arrayData()['heritage_name_jp'], $result->getHeritageNameJp());
         $this->assertEquals($this->arrayData()['country'], $result->getCountry());
         $this->assertEquals($this->arrayData()['region'], $result->getRegion());
         $this->assertEquals($this->arrayData()['category'], $result->getCategory());
@@ -169,13 +166,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
             $this->assertArrayHasKey('id', $img);
             $this->assertArrayHasKey('url', $img);
             $this->assertArrayHasKey('sort_order', $img);
-            $this->assertArrayHasKey('width', $img);
-            $this->assertArrayHasKey('height', $img);
-            $this->assertArrayHasKey('format', $img);
-            $this->assertArrayHasKey('alt', $img);
-            $this->assertArrayHasKey('credit', $img);
             $this->assertArrayHasKey('is_primary', $img);
-            $this->assertArrayHasKey('checksum', $img);
             $this->assertIsBool($img['is_primary']);
             $this->assertNotEmpty($img['url']);
         }

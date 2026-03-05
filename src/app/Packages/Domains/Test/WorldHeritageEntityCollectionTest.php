@@ -3,6 +3,7 @@
 namespace App\Packages\Domains\Test;
 
 use App\Models\Country;
+use App\Models\Image;
 use App\Models\WorldHeritage;
 use App\Packages\Domains\WorldHeritageEntityCollection;
 use Database\Seeders\DatabaseSeeder;
@@ -32,6 +33,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
             WorldHeritage::truncate();
             Country::truncate();
+            Image::truncate();
             DB::table('site_state_parties')->truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
@@ -154,17 +156,18 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['region'],
                     $data['category'],
                     $data['year_inscribed'],
-                    $data['is_endangered'],
                     $data['latitude'],
                     $data['longitude'],
-                    $data['name_jp'] ?? null,
-                    $data['state_party'] ?? null,
-                    $data['criteria'] ?? null,
-                    $data['area_hectares'] ?? null,
-                    $data['buffer_zone_hectares'] ?? null,
-                    $data['short_description'] ?? null,
-                    $data['image_url'] ?? null,
-                    $data['unesco_site_url'] ?? null,
+                    $data['is_endangered'],
+                    $data['name_jp'],
+                    null,
+                    $data['state_party'],
+                    $data['criteria'],
+                    $data['area_hectares'],
+                    $data['buffer_zone_hectares'],
+                    $data['short_description'],
+                    null,
+                    $data['unesco_site_url'],
                     $data['state_parties'] ?? [],
                     $data['state_parties_meta'] ?? []
                 );
@@ -192,17 +195,18 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['region'],
                     $data['category'],
                     $data['year_inscribed'],
-                    $data['is_endangered'],
                     $data['latitude'],
                     $data['longitude'],
-                    $data['name_jp'] ?? null,
-                    $data['state_party'] ?? null,
-                    $data['criteria'] ?? null,
-                    $data['area_hectares'] ?? null,
-                    $data['buffer_zone_hectares'] ?? null,
-                    $data['short_description'] ?? null,
-                    $data['image_url'] ?? null,
-                    $data['unesco_site_url'] ?? null,
+                    $data['is_endangered'],
+                    $data['name_jp'],
+                    null,
+                    $data['state_party'],
+                    $data['criteria'],
+                    $data['area_hectares'],
+                    $data['buffer_zone_hectares'],
+                    $data['short_description'],
+                    null,
+                    $data['unesco_site_url'],
                     $data['state_parties'] ?? [],
                     $data['state_parties_meta'] ?? []
                 );
@@ -224,17 +228,18 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['region'],
                     $data['category'],
                     $data['year_inscribed'],
-                    $data['latitude'] ?? null,
-                    $data['longitude'] ?? null,
-                    $data['is_endangered'] ?? false,
-                    $data['name_jp'] ?? null,
-                    $data['state_party'] ?? null,
-                    $data['criteria'] ?? null,
-                    $data['area_hectares'] ?? null,
-                    $data['buffer_zone_hectares'] ?? null,
-                    $data['short_description'] ?? null,
-                    $data['image_url'] ?? null,
-                    $data['unesco_site_url'] ?? null,
+                    $data['latitude'],
+                    $data['longitude'],
+                    $data['is_endangered'],
+                    $data['name_jp'],
+                    null,
+                    $data['state_party'],
+                    $data['criteria'],
+                    $data['area_hectares'],
+                    $data['buffer_zone_hectares'],
+                    $data['short_description'],
+                    null,
+                    $data['unesco_site_url'],
                     $data['state_parties'] ?? [],
                     $data['state_parties_meta'] ?? []
                 );
@@ -256,17 +261,18 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['region'],
                     $data['category'],
                     $data['year_inscribed'],
-                    $data['latitude'] ?? null,
-                    $data['longitude'] ?? null,
-                    $data['is_endangered'] ?? false,
-                    $data['name_jp'] ?? null,
-                    $data['state_party'] ?? null,
-                    $data['criteria'] ?? null,
-                    $data['area_hectares'] ?? null,
-                    $data['buffer_zone_hectares'] ?? null,
-                    $data['short_description'] ?? null,
-                    $data['image_url'] ?? null,
-                    $data['unesco_site_url'] ?? null,
+                    $data['latitude'],
+                    $data['longitude'],
+                    $data['is_endangered'],
+                    $data['name_jp'],
+                    null,
+                    $data['state_party'],
+                    $data['criteria'],
+                    $data['area_hectares'],
+                    $data['buffer_zone_hectares'],
+                    $data['short_description'],
+                    null,
+                    $data['unesco_site_url'],
                     $data['state_parties'] ?? [],
                     $data['state_parties_meta'] ?? []
                 );

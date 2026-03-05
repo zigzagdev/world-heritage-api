@@ -57,6 +57,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                     ]);
                 }
             ])
+            ->orderBy('world_heritage_sites.id', 'asc')
             ->paginate($perPage, page: $currentPage);
 
         $array = $items->map(fn($heritage) => $this->buildWorldHeritagePayload($heritage))->all();
@@ -86,31 +87,27 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     {
         $heritage = $this->model
             ->with([
-            'countries' => function ($countriesQuery) {
-                $countriesQuery
-                    ->withPivot(['is_primary', 'inscription_year'])
-                    ->orderBy('countries.state_party_code', 'asc')
-                    ->orderBy('site_state_parties.inscription_year', 'asc');
-            },
-            'images' => function ($imagesQuery) {
-                $imagesQuery->orderBy('sort_order', 'asc');
-            },
-        ])->findOrFail($id);
+                'countries' => function ($countriesQuery) {
+                    $countriesQuery
+                        ->withPivot(['is_primary', 'inscription_year'])
+                        ->orderBy('countries.state_party_code', 'asc')
+                        ->orderBy('site_state_parties.inscription_year', 'asc');
+                },
+                'images' => function ($imagesQuery) {
+                    $imagesQuery->orderBy('sort_order', 'asc');
+                },
+            ])
+            ->findOrFail($id);
 
         $imageCollection = new ImageDtoCollection();
+        $images = ($heritage->images ?? collect())->values();
 
-        foreach ($heritage->images ?? collect() as $idx => $img) {
+        foreach ($images as $idx => $img) {
             $imageCollection->add(new ImageDto(
                 id: $img->id,
                 url: $img->url,
                 sortOrder: $img->sort_order,
-                width: $img->width,
-                height: $img->height,
-                format: $img->format,
-                alt: $img->alt,
-                credit: $img->credit,
                 isPrimary: $idx === 0,
-                checksum: $img->checksum,
             ));
         }
 
@@ -128,20 +125,14 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         if ($codes->count() === 1) {
             $onlyCode = $codes->first();
             $countryModel = $heritage->countries->first(
-                fn($country) => $this->statePartyCodeNormalize($country->state_party_code) === $onlyCode,
+                fn ($country) => $this->statePartyCodeNormalize($country->state_party_code) === $onlyCode,
             );
             $statePartyName = $countryModel?->name;
-            $statePartyCodes = null;
         } elseif ($codes->count() > 1) {
-            $statePartyName = null;
             $statePartyCodes = $codes->all();
-        } else {
-            $statePartyName = null;
-            $statePartyCodes = null;
         }
 
         $statePartiesMeta = [];
-
         foreach ($heritage->countries as $country) {
             $code = $this->statePartyCodeNormalize($country->state_party_code);
             if ($code === null) {
@@ -152,28 +143,28 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'is_primary' => (bool) data_get($country, 'pivot.is_primary', false),
             ];
         }
-
         $statePartyCodesCompat = $codes->all();
-        $displayCountry = null;
 
+        $displayCountry = null;
         if ($codes->count() === 1) {
             $displayCountry = $heritage->countries->first()?->name_en;
         } elseif ($codes->count() > 1) {
             $primary = $heritage->countries->first(
-                fn($c) => (bool) data_get($c, 'pivot.is_primary', false),
+                fn ($c) => (bool) data_get($c, 'pivot.is_primary', false),
             );
             $displayCountry = $primary?->name_en;
         }
 
         $displayCountry = $displayCountry ?? $heritage->country;
+        $countryNameJp = $heritage->countries->first()?->name_jp;
 
-        return WorldHeritageDetailFactory::build([
+         return WorldHeritageDetailFactory::build([
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
             'heritage_name_jp' => $heritage->name_jp,
             'country' => $displayCountry,
-            'country_name_jp' => $heritage->countries->first()->name_jp,
+            'country_name_jp' => $countryNameJp,
             'region' => $heritage->region,
             'category' => $heritage->category,
             'year_inscribed' => $heritage->year_inscribed,
@@ -451,7 +442,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     private function statePartyCodeNormalize($code): ?string
     {
         $normalise = static function ($code): ?string {
-            $code = strtoupper(trim((string) ($code ?? '')));
+            $code = strtoupper(trim((string)($code ?? '')));
             return $code === '' ? null : $code;
         };
 

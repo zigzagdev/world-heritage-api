@@ -25,34 +25,34 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
 
     public function test_search_builds_algolia_params_with_filters_and_paging(): void
     {
-        // Arrange: Algolia expects 0-based page indexing, so currentPage=2 becomes page=1.
-        // Also ensure filters are combined with AND in the correct syntax.
-
         $indexName = 'world_heritage';
         $adapter = new AlgoliaWorldHeritageSearchAdapter($this->client, $indexName);
 
-        $query = new AlgoliaSearchListQuery(
+        $q = new AlgoliaSearchListQuery(
             keyword: 'galapagos',
-            country: 'Ecuador',
+            countryName: 'Ecuador',
+            countryIso3: 'ECU',
             region: 'LAC',
             category: 'Natural',
             yearFrom: 1978,
             yearTo: 1980,
-            currentPage: null,
-            perPage: null,
+            currentPage: 2,
+            perPage: 30,
         );
 
+        // Arrange: Algolia expects 0-based page indexing, so currentPage=2 becomes page=1.
         $expectedParams = [
-            'query' => 'galapagos',
+            'query' => '',
             'page' => 1,
             'hitsPerPage' => 30,
             'filters' =>
-                'country:"Ecuador" AND region:"LAC" AND category:"Natural" ' .
+                'state_party_codes:ECU AND region:"LAC" AND category:"Natural" ' .
                 'AND year_inscribed >= 1978 AND year_inscribed <= 1980',
         ];
 
         $this->client
             ->shouldReceive('searchSingleIndex')
+            ->once()
             ->with($indexName, $expectedParams)
             ->andReturn([
                 'hits' => [
@@ -60,11 +60,16 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
                     ['objectID' => '11'],
                 ],
                 'nbHits' => 2,
+                'nbPages' => 1,
+                'page' => 1,
+                'hitsPerPage' => 30,
             ]);
 
-        $result = $adapter->search($query, currentPage: 2, perPage: 30);
+        $result = $adapter->search($q, currentPage: 2, perPage: 30);
 
         $this->assertSame([10, 11], $result->ids);
         $this->assertSame(2, $result->total);
+        $this->assertSame(2, $result->currentPage);
+        $this->assertSame(1, $result->lastPage);
     }
 }

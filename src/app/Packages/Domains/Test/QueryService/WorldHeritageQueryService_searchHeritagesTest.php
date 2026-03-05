@@ -5,28 +5,26 @@ namespace App\Packages\Domains\Test\QueryService;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
-use Tests\TestCase;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
-use Mockery;
-use App\Packages\Domains\WorldHeritageQueryService;
-use App\Packages\Domains\WorldHeritageReadQueryService;
-use Database\Seeders\DatabaseSeeder;
-use App\Packages\Domains\Ports\WorldHeritageSearchPort;
-use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
 use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
+use App\Packages\Domains\Ports\WorldHeritageSearchPort;
+use App\Packages\Domains\WorldHeritageQueryService;
+use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
+use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageReadQueryServiceInterface;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Support\Facades\DB;
+use Mockery;
+use Tests\TestCase;
 
-class WorldHeritageQueryService_searchHeritagesTest extends TestCase
+final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
 {
-    private WorldHeritageQueryService $queryService;
-
     protected function setUp(): void
     {
         parent::setUp();
         $this->refresh();
 
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        (new DatabaseSeeder())->run();
+
+        $this->queryService = app(WorldHeritageQueryService::class);
     }
 
     protected function tearDown(): void
@@ -57,46 +55,45 @@ class WorldHeritageQueryService_searchHeritagesTest extends TestCase
         $total = 2;
 
         $searchPort = Mockery::mock(WorldHeritageSearchPort::class);
-
         $searchPort
             ->shouldReceive('search')
-            ->withArgs(function ($query, $currentPage, $perPage) use ($hitIds) {
+            ->once()
+            ->withArgs(function ($query, $currentPage, $perPage) {
                 $this->assertInstanceOf(AlgoliaSearchListQuery::class, $query);
-
                 $this->assertSame(1, $currentPage);
                 $this->assertSame(10, $perPage);
                 return true;
             })
             ->andReturn(new HeritageSearchResult(
                 ids: $hitIds,
-                total: $total
+                total: $total,
+                currentPage: 1,
+                perPage: 10,
+                lastPage: 1
             ));
 
-        $readQueryService = Mockery::mock(WorldHeritageReadQueryService::class);
+        $this->app->instance(WorldHeritageSearchPort::class, $searchPort);
 
-        $models = WorldHeritage::query()
+        $modelsById = WorldHeritage::query()
             ->whereIn('id', $hitIds)
             ->get()
             ->keyBy('id');
 
-        $ordered = new Collection();
-        foreach ($hitIds as $id) {
-            $ordered->push($models->get($id));
-        }
+        $ordered = collect($hitIds)
+            ->map(fn ($id) => $modelsById->get($id))
+            ->filter();
 
+        $readQueryService = Mockery::mock(WorldHeritageReadQueryServiceInterface::class);
         $readQueryService
             ->shouldReceive('findByIdsPreserveOrder')
             ->once()
             ->with($hitIds)
             ->andReturn($ordered);
 
-        $this->queryService = new WorldHeritageQueryService(
-            model: new WorldHeritage(),
-            readQueryService: $readQueryService,
-            searchPort: $searchPort,
-        );
+        $this->app->instance(WorldHeritageReadQueryServiceInterface::class, $readQueryService);
+        $queryService = app(WorldHeritageQueryService::class);
 
-        $dto = $this->queryService->searchHeritages(
+        $dto = $queryService->searchHeritages(
             keyword: 'Japan',
             countryName: null,
             countryIso3: null,
@@ -114,7 +111,7 @@ class WorldHeritageQueryService_searchHeritagesTest extends TestCase
         $this->assertSame(1, $dto->getLastPage());
 
         $heritageIds = collect($dto->getCollection()->getHeritages())
-            ->map(fn($h) => $h->getId())
+            ->map(fn ($h) => $h->getId())
             ->all();
 
         $this->assertCount(2, $heritageIds);

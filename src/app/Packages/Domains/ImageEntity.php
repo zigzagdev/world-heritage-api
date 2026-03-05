@@ -5,17 +5,10 @@ namespace App\Packages\Domains;
 class ImageEntity
 {
     public function __construct(
-        readonly public ?int $id,
-        readonly public ?int $worldHeritageId,
-        readonly public string $disk,
-        readonly public string $path,
-        readonly public ?int $width,
-        readonly public ?int $height,
-        readonly public ?string $format,
-        readonly public ?string $checksum,
-        readonly public int $sortOrder,
-        readonly public ?string $alt,
-        readonly public ?string $credit,
+        public readonly ?int $id,
+        public readonly string $url,
+        public readonly int $sortOrder,
+        public readonly bool $isPrimary,
     ) {}
 
     public function getId(): ?int
@@ -23,39 +16,9 @@ class ImageEntity
         return $this->id;
     }
 
-    public function getWorldHeritageId(): ?int
+    public function getUrl(): string
     {
-        return $this->worldHeritageId;
-    }
-
-    public function getDisk(): string
-    {
-        return $this->disk;
-    }
-
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    public function getWidth(): ?int
-    {
-        return $this->width;
-    }
-
-    public function getHeight(): ?int
-    {
-        return $this->height;
-    }
-
-    public function getFormat(): ?string
-    {
-        return $this->format;
-    }
-
-    public function getChecksum(): ?string
-    {
-        return $this->checksum;
+        return $this->url;
     }
 
     public function getSortOrder(): int
@@ -63,13 +26,8 @@ class ImageEntity
         return $this->sortOrder;
     }
 
-    public function getAlt(): ?string
+    public function getIsPrimary(): bool
     {
-        return $this->alt;
-    }
-
-    public function getCredit(): ?string
-    {
-        return $this->credit;
+        return $this->isPrimary;
     }
 }
