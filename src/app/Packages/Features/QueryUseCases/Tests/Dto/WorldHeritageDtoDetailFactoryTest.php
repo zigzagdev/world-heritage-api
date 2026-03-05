@@ -24,7 +24,7 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
             'id' => 1133,
             'official_name' => 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe',
             'name' => 'Ancient and Primeval Beech Forests',
-            'name_jp' => 'カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林',
+            'heritage_name_jp' => 'カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林',
             'country' => 'Slovakia',
             'region' => 'Europe',
             'category' => 'Natural',
@@ -84,24 +84,12 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
                     'url' => 'https://cdn.example.com/a.jpg',
                     'sort_order' => 1,
                     'is_primary' => true,
-                    'width' => 1600,
-                    'height' => 900,
-                    'format' => 'jpeg',
-                    'alt' => 'a',
-                    'credit' => 'photog A',
-                    'checksum' => 'aaa',
                 ],
                 [
                     'id' => 11,
                     'url' => 'https://cdn.example.com/b.jpg',
                     'sort_order' => 5,
-                    'width' => 1200,
-                    'height' => 800,
-                    'format' => 'jpeg',
-                    'alt' => 'b',
-                    'credit' => 'photog B',
                     'is_primary' => false,
-                    'checksum' => 'bbb',
                 ],
             ],
         ];
@@ -122,7 +110,7 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
         $this->assertSame($input['id'], $result->getId());
         $this->assertSame($input['official_name'], $result->getOfficialName());
         $this->assertSame($input['name'], $result->getName());
-        $this->assertSame($input['name_jp'], $result->getNameJp());
+        $this->assertSame($input['heritage_name_jp'], $result->getHeritageNameJp());
         $this->assertSame($input['country'], $result->getCountry());
         $this->assertSame($input['region'], $result->getRegion());
         $this->assertSame($input['category'], $result->getCategory());
@@ -136,9 +124,7 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
         $this->assertSame($input['longitude'], $result->getLongitude());
         $this->assertSame($input['short_description'], $result->getShortDescription());
         $this->assertSame($input['unesco_site_url'], $result->getUnescoSiteUrl());
-
         $this->assertSame($input['state_party_codes'], $result->getStatePartyCodes());
-
         $this->assertSame($input['state_parties_meta'], $result->getStatePartiesMeta());
 
         $images = $result->getImages();
@@ -147,20 +133,10 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
         $this->assertSame($input['images'][0]['id'], $images[0]['id']);
         $this->assertSame($input['images'][0]['url'], $images[0]['url']);
         $this->assertSame($input['images'][0]['sort_order'], $images[0]['sort_order']);
-        $this->assertSame($input['images'][0]['width'], $images[0]['width']);
-        $this->assertSame($input['images'][0]['height'], $images[0]['height']);
-        $this->assertSame($input['images'][0]['format'], $images[0]['format']);
-        $this->assertSame($input['images'][0]['alt'], $images[0]['alt']);
-        $this->assertSame($input['images'][0]['credit'], $images[0]['credit']);
-        $this->assertSame($input['images'][0]['checksum'], $images[0]['checksum']);
+        $this->assertSame($input['images'][0]['is_primary'], $images[0]['is_primary']);
         $this->assertSame($input['images'][1]['id'], $images[1]['id']);
         $this->assertSame($input['images'][1]['url'], $images[1]['url']);
         $this->assertSame($input['images'][1]['sort_order'], $images[1]['sort_order']);
-        $this->assertSame($input['images'][1]['width'], $images[1]['width']);
-        $this->assertSame($input['images'][1]['height'], $images[1]['height']);
-        $this->assertSame($input['images'][1]['format'], $images[1]['format']);
-        $this->assertSame($input['images'][1]['alt'], $images[1]['alt']);
-        $this->assertSame($input['images'][1]['credit'], $images[1]['credit']);
-        $this->assertSame($input['images'][1]['checksum'], $images[1]['checksum']);
+        $this->assertSame($input['images'][1]['is_primary'], $images[1]['is_primary']);
     }
 }
