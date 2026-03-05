@@ -10,6 +10,9 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageQueryService;
+use App\Packages\Domains\Ports\WorldHeritageSearchPort;
+use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
+
 
 class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
 {
@@ -25,6 +28,15 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
         $this->refresh();
         $seeder = new DatabaseSeeder();
         $seeder->run();
+
+        $this->app->bind(WorldHeritageSearchPort::class, function () {
+            return new class implements WorldHeritageSearchPort {
+                public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
+                    return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
+                }
+            };
+        });
+
         $this->queryService = app(WorldHeritageQueryService::class);
     }
 

@@ -17,13 +17,7 @@ class WorldHeritageDetailFactory
                 id: (int)($imageData['id'] ?? 0),
                 url: (string)($imageData['url'] ?? ''),
                 sortOrder: (int)($imageData['sort_order'] ?? $index),
-                width: array_key_exists('width', $imageData) ? (int)$imageData['width'] : null,
-                height: array_key_exists('height', $imageData) ? (int)$imageData['height'] : null,
-                format: $imageData['format'] ?? null,
-                alt: $imageData['alt'] ?? null,
-                credit: $imageData['credit'] ?? null,
                 isPrimary: (bool)($imageData['is_primary'] ?? ($index === 0)),
-                checksum: $imageData['checksum'] ?? null,
             ));
         }
 

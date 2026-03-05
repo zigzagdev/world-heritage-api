@@ -15,7 +15,8 @@ class WorldHeritageEntity
         public ?float $latitude,
         public ?float $longitude,
         public bool $isEndangered = false,
-        public ?string $nameJp = null,
+        public ?string $heritageNameJp = null,
+        public ?string $countryNameJp = null,
         public ?string $stateParty = null,
         public ?array $criteria = null,
         public ?float $areaHectares = null,
@@ -110,6 +111,16 @@ class WorldHeritageEntity
     public function getImageCollection(): ?ImageEntityCollection
     {
         return $this->collection;
+    }
+
+    public function getHeritageNameJp(): ?string
+    {
+        return $this->heritageNameJp;
+    }
+
+    public function getCountryNameJp(): ?string
+    {
+        return $this->countryNameJp;
     }
 
     public function getUnescoSiteUrl(): ?string

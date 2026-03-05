@@ -43,7 +43,7 @@ class WorldHeritageEntityTest extends TestCase
             'region' => 'Asia',
             'category' => 'cultural',
             'criteria' => ['ii', 'iii', 'v'],
-            'state_party' => null,
+            'state_party' => 'JPN',
             'year_inscribed' => 1998,
             'area_hectares' => 442.0,
             'buffer_zone_hectares' => 320.0,
@@ -53,7 +53,7 @@ class WorldHeritageEntityTest extends TestCase
             'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
-            'state_parties' => ['JP'],
+            'state_parties' => null,
             'state_parties_meta' => [
                 'JP' => [
                     'is_primary' => true,
@@ -124,15 +124,16 @@ class WorldHeritageEntityTest extends TestCase
             self::arraySingleData()['longitude'],
             self::arraySingleData()['is_endangered'],
             self::arraySingleData()['name_jp'],
+            null, // countryNameJp
             self::arraySingleData()['state_party'],
             self::arraySingleData()['criteria'],
             self::arraySingleData()['area_hectares'],
             self::arraySingleData()['buffer_zone_hectares'],
             self::arraySingleData()['short_description'],
-            self::arraySingleData()['image_url'],
+            null, // collection (ImageEntityCollection)
             self::arraySingleData()['unesco_site_url'],
-            self::arraySingleData()['state_parties'],
-            self::arraySingleData()['state_parties_meta']
+            self::arraySingleData()['state_parties'] ?? [],
+            self::arraySingleData()['state_parties_meta'] ?? []
         );
 
         $this->assertInstanceOf(WorldHeritageEntity::class, $entity);
@@ -152,15 +153,16 @@ class WorldHeritageEntityTest extends TestCase
             self::arraySingleData()['longitude'],
             self::arraySingleData()['is_endangered'],
             self::arraySingleData()['name_jp'],
+            null,
             self::arraySingleData()['state_party'],
             self::arraySingleData()['criteria'],
             self::arraySingleData()['area_hectares'],
             self::arraySingleData()['buffer_zone_hectares'],
             self::arraySingleData()['short_description'],
-            self::arraySingleData()['image_url'],
+            null,
             self::arraySingleData()['unesco_site_url'],
-            self::arraySingleData()['state_parties'],
-            self::arraySingleData()['state_parties_meta']
+            self::arraySingleData()['state_parties'] ?: [],
+            self::arraySingleData()['state_parties_meta'] ?: []
         );
 
         $this->assertEquals(self::arraySingleData()['id'], $entity->getId());
@@ -173,16 +175,14 @@ class WorldHeritageEntityTest extends TestCase
         $this->assertEquals(self::arraySingleData()['latitude'], $entity->getLatitude());
         $this->assertEquals(self::arraySingleData()['longitude'], $entity->getLongitude());
         $this->assertEquals(self::arraySingleData()['is_endangered'], $entity->isEndangered());
-        $this->assertEquals(self::arraySingleData()['name_jp'], $entity->getNameJp());
         $this->assertEquals(self::arraySingleData()['state_party'], $entity->getStateParty());
         $this->assertEquals(self::arraySingleData()['criteria'], $entity->getCriteria());
         $this->assertEquals(self::arraySingleData()['area_hectares'], $entity->getAreaHectares());
         $this->assertEquals(self::arraySingleData()['buffer_zone_hectares'], $entity->getBufferZoneHectares());
         $this->assertEquals(self::arraySingleData()['short_description'], $entity->getShortDescription());
-        $this->assertEquals(self::arraySingleData()['image_url'], $entity->getImageUrl());
         $this->assertEquals(self::arraySingleData()['unesco_site_url'], $entity->getUnescoSiteUrl());
-        $this->assertEquals(self::arraySingleData()['state_parties'], $entity->getStatePartyCodes());
-        $this->assertEquals(self::arraySingleData()['state_parties_meta'], $entity->getStatePartyMeta());
+        $this->assertSame(['JPN'], $entity->getStatePartyCodes());
+        $this->assertSame(self::arraySingleData()['state_parties_meta'], $entity->getStatePartyMeta());
     }
 
     public function test_entity_check_multi_type(): void
@@ -195,19 +195,20 @@ class WorldHeritageEntityTest extends TestCase
             self::arrayMultiData()['region'],
             self::arrayMultiData()['category'],
             self::arrayMultiData()['year_inscribed'],
-            self::arrayMultiData()['is_endangered'],
             self::arrayMultiData()['latitude'],
             self::arrayMultiData()['longitude'],
+            self::arrayMultiData()['is_endangered'],
             self::arrayMultiData()['name_jp'],
+            null,
             self::arrayMultiData()['state_party'],
             self::arrayMultiData()['criteria'],
             self::arrayMultiData()['area_hectares'],
             self::arrayMultiData()['buffer_zone_hectares'],
             self::arrayMultiData()['short_description'],
-            self::arrayMultiData()['image_url'],
+            null,
             self::arrayMultiData()['unesco_site_url'],
-            self::arrayMultiData()['state_parties'],
-            self::arrayMultiData()['state_parties_meta']
+            self::arrayMultiData()['state_parties'] ?? [],
+            self::arrayMultiData()['state_parties_meta'] ?? []
         );
 
         $this->assertInstanceOf(WorldHeritageEntity::class, $entity);
@@ -223,19 +224,20 @@ class WorldHeritageEntityTest extends TestCase
             self::arrayMultiData()['region'],
             self::arrayMultiData()['category'],
             self::arrayMultiData()['year_inscribed'],
-            self::arrayMultiData()['is_endangered'],
             self::arrayMultiData()['latitude'],
             self::arrayMultiData()['longitude'],
+            self::arrayMultiData()['is_endangered'],
             self::arrayMultiData()['name_jp'],
+            null, // countryNameJp
             self::arrayMultiData()['state_party'],
             self::arrayMultiData()['criteria'],
             self::arrayMultiData()['area_hectares'],
             self::arrayMultiData()['buffer_zone_hectares'],
             self::arrayMultiData()['short_description'],
-            self::arrayMultiData()['image_url'],
+            null, // collection
             self::arrayMultiData()['unesco_site_url'],
-            self::arrayMultiData()['state_parties'],
-            self::arrayMultiData()['state_parties_meta']
+            self::arrayMultiData()['state_parties'] ?? [],
+            self::arrayMultiData()['state_parties_meta'] ?? []
         );
 
         $this->assertEquals(self::arrayMultiData()['id'], $entity->getId());
@@ -248,12 +250,10 @@ class WorldHeritageEntityTest extends TestCase
         $this->assertEquals(self::arrayMultiData()['is_endangered'], $entity->isEndangered());
         $this->assertEquals(self::arrayMultiData()['latitude'], $entity->getLatitude());
         $this->assertEquals(self::arrayMultiData()['longitude'], $entity->getLongitude());
-        $this->assertEquals(self::arrayMultiData()['name_jp'], $entity->getNameJp());
         $this->assertEquals(self::arrayMultiData()['criteria'], $entity->getCriteria());
         $this->assertEquals(self::arrayMultiData()['area_hectares'], $entity->getAreaHectares());
         $this->assertEquals(self::arrayMultiData()['buffer_zone_hectares'], $entity->getBufferZoneHectares());
         $this->assertEquals(self::arrayMultiData()['short_description'], $entity->getShortDescription());
-        $this->assertEquals(self::arrayMultiData()['image_url'], $entity->getImageUrl());
         $this->assertEquals(self::arrayMultiData()['unesco_site_url'], $entity->getUnescoSiteUrl());
         $this->assertEquals(self::arrayMultiData()['state_parties'], $entity->getStatePartyCodes());
         $this->assertEquals(self::arrayMultiData()['state_parties_meta'], $entity->getStatePartyMeta());

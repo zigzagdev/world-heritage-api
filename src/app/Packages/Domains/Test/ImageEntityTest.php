@@ -17,36 +17,45 @@ class ImageEntityTest extends TestCase
         parent::tearDown();
     }
 
-    private static function arrayData(): array
+    private static function arrayNoIdData(): array
     {
         return [
-            'worldHeritageId' => 1133,
-            'disk' => 'public',
-            'path' => 'images/sample.jpg',
-            'width' => 800,
-            'height' => 600,
-            'format' => 'jpg',
-            'checksum'  => str_repeat('a', 64),
+            'id' => null,
+            'url' => 'public/images/sample.jpg',
             'sortOrder' => 0,
-            'alt' => 'Sample Image',
-            'credit' => 'John Doe',
+            'isPrimary' => true,
         ];
     }
 
-    public function test_entity_check_type(): void
+    private static function arrayData(): array
+    {
+        return [
+            'id' => 1,
+            'url' => 'public/images/sample.jpg',
+            'sortOrder' => 0,
+            'isPrimary' => true,
+        ];
+    }
+
+    public function test_entity_check_type_with_no_id_entity(): void
     {
         $entity = new ImageEntity(
-            id: null,
-            worldHeritageId: self::arrayData()['worldHeritageId'],
-            disk: self::arrayData()['disk'],
-            path: self::arrayData()['path'],
-            width: self::arrayData()['width'],
-            height: self::arrayData()['height'],
-            format: self::arrayData()['format'],
-            checksum: self::arrayData()['checksum'],
-            sortOrder: self::arrayData()['sortOrder'],
-            alt: self::arrayData()['alt'],
-            credit: self::arrayData()['credit'],
+            self::arrayNoIdData()['id'],
+            self::arrayNoIdData()['url'],
+            self::arrayNoIdData()['sortOrder'],
+            self::arrayNoIdData()['isPrimary'],
+        );
+
+        $this->assertInstanceOf(ImageEntity::class, $entity);
+    }
+
+    public function test_entity_check_type_with_id_entity(): void
+    {
+        $entity = new ImageEntity(
+            self::arrayData()['id'],
+            self::arrayData()['url'],
+            self::arrayData()['sortOrder'],
+            self::arrayData()['isPrimary'],
         );
 
         $this->assertInstanceOf(ImageEntity::class, $entity);
@@ -56,28 +65,29 @@ class ImageEntityTest extends TestCase
     {
         $entity = new ImageEntity(
             id: null,
-            worldHeritageId: self::arrayData()['worldHeritageId'],
-            disk: self::arrayData()['disk'],
-            path: self::arrayData()['path'],
-            width: self::arrayData()['width'],
-            height: self::arrayData()['height'],
-            format: self::arrayData()['format'],
-            checksum: self::arrayData()['checksum'],
+            url: self::arrayData()['url'],
             sortOrder: self::arrayData()['sortOrder'],
-            alt: self::arrayData()['alt'],
-            credit: self::arrayData()['credit'],
+            isPrimary: self::arrayData()['isPrimary'],
         );
 
         $this->assertSame(null, $entity->getId());
-        $this->assertSame(self::arrayData()['worldHeritageId'], $entity->getWorldHeritageId());
-        $this->assertSame(self::arrayData()['disk'], $entity->getDisk());
-        $this->assertSame(self::arrayData()['path'], $entity->getPath());
-        $this->assertSame(self::arrayData()['width'], $entity->getWidth());
-        $this->assertSame(self::arrayData()['height'], $entity->getHeight());
-        $this->assertSame(self::arrayData()['format'], $entity->getFormat());
-        $this->assertSame(self::arrayData()['checksum'], $entity->getChecksum());
+        $this->assertSame(self::arrayData()['url'], $entity->getUrl());
         $this->assertSame(self::arrayData()['sortOrder'], $entity->getSortOrder());
-        $this->assertSame(self::arrayData()['alt'], $entity->getAlt());
-        $this->assertSame(self::arrayData()['credit'], $entity->getCredit());
+        $this->assertSame(self::arrayData()['isPrimary'], $entity->getIsPrimary());
+    }
+
+    public function test_entity_check_value_with_no_id(): void
+    {
+        $entity = new ImageEntity(
+            id: self::arrayNoIdData()['id'],
+            url: self::arrayNoIdData()['url'],
+            sortOrder: self::arrayNoIdData()['sortOrder'],
+            isPrimary: self::arrayNoIdData()['isPrimary'],
+        );
+
+        $this->assertSame(null, $entity->getId());
+        $this->assertSame(self::arrayNoIdData()['url'], $entity->getUrl());
+        $this->assertSame(self::arrayNoIdData()['sortOrder'], $entity->getSortOrder());
+        $this->assertSame(self::arrayNoIdData()['isPrimary'], $entity->getIsPrimary());
     }
 }

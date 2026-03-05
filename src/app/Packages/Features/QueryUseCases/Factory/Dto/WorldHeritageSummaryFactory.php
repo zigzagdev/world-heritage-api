@@ -32,17 +32,7 @@ class WorldHeritageSummaryFactory
                 id: (int)($thumbnailId ?? 0),
                 url: (string)$thumbnailUrl,
                 sortOrder: (int)($data['image_sort_order'] ?? $imageRow['sort_order'] ?? 0),
-                width: array_key_exists('image_width', $data)
-                    ? (int)$data['image_width']
-                    : ($imageRow['width'] ?? null),
-                height: array_key_exists('image_height', $data)
-                    ? (int)$data['image_height']
-                    : ($imageRow['height'] ?? null),
-                format: $data['image_format'] ?? ($imageRow['format'] ?? null),
-                alt: $data['image_alt'] ?? ($imageRow['alt'] ?? ($data['name'] ?? null)),
-                credit: $data['image_credit'] ?? ($imageRow['credit'] ?? null),
                 isPrimary: (bool)($data['image_is_primary'] ?? $imageRow['is_primary'] ?? true),
-                checksum: $data['image_checksum'] ?? ($imageRow['checksum'] ?? null),
             );
         }
 
