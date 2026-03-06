@@ -28,5 +28,8 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="ALGOLIA_APP_ID" value="dummy"/>
+        <env name="ALGOLIA_SEARCH_API_KEY" value="dummy"/>
+        <env name="ALGOLIA_INDEX" value="dummy_index"/>
     </php>
 </phpunit>
