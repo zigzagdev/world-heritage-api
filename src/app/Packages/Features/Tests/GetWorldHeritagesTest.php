@@ -3,6 +3,8 @@
 namespace App\Packages\Features\Tests;
 
 use App\Models\Image;
+use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
+use App\Packages\Domains\Ports\WorldHeritageSearchPort;
 use Database\Seeders\DatabaseSeeder;
 use Tests\TestCase;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +17,15 @@ class GetWorldHeritagesTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
+
+        $this->app->bind(WorldHeritageSearchPort::class, function () {
+            return new class implements WorldHeritageSearchPort {
+                public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
+                    return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
+                }
+            };
+        });
+
         $seeder = new DatabaseSeeder();
         $seeder->run();
     }
@@ -37,6 +48,7 @@ class GetWorldHeritagesTest extends TestCase
         }
     }
 
+
     private static function arrayData(): array
     {
         return [
@@ -44,8 +56,9 @@ class GetWorldHeritagesTest extends TestCase
                 'id' => '661',
                 'official_name' => 'Himeji-jo',
                 'name' => 'Himeji-jo',
-                'name_jp' => '姫路城',
+                'heritage_name_jp' => '姫路城',
                 'country' => 'Japan',
+                'country_name_jp' => '日本',
                 'region' => 'Asia',
                 'state_party' => 'JPN',
                 'category' => 'Cultural',
@@ -63,8 +76,9 @@ class GetWorldHeritagesTest extends TestCase
                 'id' => '662',
                 'official_name' => 'Yakushima',
                 'name' => 'Yakushima',
-                'name_jp' => '屋久島',
+                'heritage_name_jp' => '屋久島',
                 'country' => 'Japan',
+                'country_name_jp' => '日本',
                 'region' => 'Asia',
                 'state_party' => 'JPN',
                 'category' => 'Natural',
@@ -82,8 +96,9 @@ class GetWorldHeritagesTest extends TestCase
                 'id' => '663',
                 'official_name' => 'Shirakami-Sanchi',
                 'name' => 'Shirakami-Sanchi',
-                'name_jp' => '白神山地',
+                'heritage_name_jp' => '白神山地',
                 'country' => 'Japan',
+                'country_name_jp' => '日本',
                 'region' => 'Asia',
                 'state_party' => 'JPN',
                 'category' => 'Natural',
@@ -101,8 +116,9 @@ class GetWorldHeritagesTest extends TestCase
                 'id' => '1442',
                 'official_name' => "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor",
                 'name' => "Silk·Roads:·Chang'an–Tianshan·Corridor",
-                'name_jp' => 'シルクロード：長安－天山回廊の交易路網',
+                'heritage_name_jp' => 'シルクロード：長安－天山回廊の交易路網',
                 'country' => 'China',
+                'country_name_jp' => '中国',
                 'region' => 'Asia',
                 'state_party' => null,
                 'category' => 'Cultural',
@@ -128,18 +144,20 @@ class GetWorldHeritagesTest extends TestCase
             ->assertJsonStructure([
                 'status',
                 'data' => [
-                    '*' => [
+                    'items' => [
+                        '*' => [
                         'id',
                         'official_name',
                         'name',
+                        'heritage_name_jp',
                         'country',
+                        'country_name_jp',
                         'region',
                         'category',
                         'year_inscribed',
                         'latitude',
                         'longitude',
                         'is_endangered',
-                        'name_jp',
                         'state_party',
                         'criteria',
                         'area_hectares',
@@ -148,7 +166,13 @@ class GetWorldHeritagesTest extends TestCase
                         'unesco_site_url',
                         'state_party_codes',
                         'state_parties_meta',
-                        'primary_state_party_code',
+                        ],
+                    ],
+                    'pagination' => [
+                        'current_page',
+                        'per_page',
+                        'total',
+                        'last_page',
                     ],
                 ],
             ]);

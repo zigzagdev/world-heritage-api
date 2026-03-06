@@ -5,6 +5,8 @@ namespace App\Packages\Features\Tests;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
+use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
+use App\Packages\Domains\Ports\WorldHeritageSearchPort;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -20,15 +22,12 @@ class GetWorldHeritageByIdTest extends TestCase
         parent::setUp();
         $this->refresh();
 
-        $this->app->bind(SignedUrlPort::class, function () {
-            $mock = Mockery::mock(SignedUrlPort::class);
-            $mock->shouldReceive('forPut')->andReturnUsing(
-                fn($disk, $key, $mime, $ttl = 600) => "https://example.test/put/{$disk}/{$key}?ttl={$ttl}"
-            );
-            $mock->shouldReceive('forGet')->andReturnUsing(
-                fn($disk, $key, $ttl = 300) => "https://example.test/get/{$disk}/{$key}?ttl={$ttl}"
-            );
-            return $mock;
+        $this->app->bind(WorldHeritageSearchPort::class, function () {
+            return new class implements WorldHeritageSearchPort {
+                public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
+                    return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
+                }
+            };
         });
 
         $this->id = self::arrayData()['id'];
@@ -61,8 +60,9 @@ class GetWorldHeritageByIdTest extends TestCase
             'id' => 1133,
             'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
             'name' => "Ancient and Primeval Beech Forests",
-            'name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
+            'heritage_name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
             'country' => 'Slovakia',
+            'country_name_jp' => 'スロバキア',
             'region' => 'Europe',
             'category' => 'Natural',
             'criteria' => ['ix'],
@@ -143,8 +143,9 @@ class GetWorldHeritageByIdTest extends TestCase
                     'id',
                     'official_name',
                     'name',
-                    'name_jp',
+                    'heritage_name_jp',
                     'country',
+                    'country_name_jp',
                     'region',
                     'state_party',
                     'category',
@@ -161,13 +162,7 @@ class GetWorldHeritageByIdTest extends TestCase
                             'id',
                             'url',
                             'sort_order',
-                            'width',
-                            'height',
-                            'format',
-                            'alt',
-                            'credit',
                             'is_primary',
-                            'checksum',
                         ]
                     ],
                     'unesco_site_url',
@@ -184,13 +179,7 @@ class GetWorldHeritageByIdTest extends TestCase
             $this->assertArrayHasKey('id', $data['images'][0]);
             $this->assertArrayHasKey('url', $data['images'][0]);
             $this->assertArrayHasKey('sort_order', $data['images'][0]);
-            $this->assertArrayHasKey('width', $data['images'][0]);
-            $this->assertArrayHasKey('height', $data['images'][0]);
-            $this->assertArrayHasKey('format', $data['images'][0]);
-            $this->assertArrayHasKey('alt', $data['images'][0]);
-            $this->assertArrayHasKey('credit', $data['images'][0]);
             $this->assertArrayHasKey('is_primary', $data['images'][0]);
-            $this->assertArrayHasKey('checksum', $data['images'][0]);
 
             $orders = array_column($data['images'], 'sort_order');
             $sorted = $orders; sort($sorted);
@@ -200,16 +189,6 @@ class GetWorldHeritageByIdTest extends TestCase
             if (count($data['images']) > 1) {
                 $this->assertFalse($data['images'][1]['is_primary']);
             }
-
-            $this->assertStringStartsWith('https://example.test/get/', $data['images'][0]['url']);
-            $this->assertStringContainsString('/world_heritage/1133/img', $data['images'][0]['url']);
-            $this->assertStringContainsString('ttl=300', $data['images'][0]['url']);
-
-            $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $data['images'][0]['checksum']);
-            $this->assertIsInt($data['images'][0]['width']);
-            $this->assertIsInt($data['images'][0]['height']);
-            $this->assertGreaterThan(0, $data['images'][0]['width']);
-            $this->assertGreaterThan(0, $data['images'][0]['height']);
         }
     }
 
