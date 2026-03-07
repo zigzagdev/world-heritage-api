@@ -14,6 +14,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
+use Illuminate\Support\Collection;
 
 final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
 {
@@ -21,9 +22,32 @@ final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
-
         (new DatabaseSeeder())->run();
 
+        $fakeSearchPort = new class implements WorldHeritageSearchPort {
+            public function search($query, int $currentPage, int $perPage): HeritageSearchResult
+            {
+                return new HeritageSearchResult(
+                    ids: [],
+                    total: 0,
+                    currentPage: $currentPage,
+                    perPage: $perPage,
+                    lastPage: 0
+                );
+            }
+        };
+
+        $this->app->instance(WorldHeritageSearchPort::class, $fakeSearchPort);
+
+        $fakeReadService = new class implements WorldHeritageReadQueryServiceInterface {
+            public function findByIdsPreserveOrder(array $ids):
+            Collection
+            {
+                return collect();
+            }
+        };
+
+        $this->app->instance(WorldHeritageReadQueryServiceInterface::class, $fakeReadService);
         $this->queryService = app(WorldHeritageQueryService::class);
     }
 
