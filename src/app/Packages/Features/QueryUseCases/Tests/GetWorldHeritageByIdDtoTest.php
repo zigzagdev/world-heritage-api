@@ -2,12 +2,15 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests;
 
+use App\Models\Image;
+use App\Packages\Features\QueryUseCases\Dto\ImageDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use Database\Seeders\DatabaseSeeder;
 use Tests\TestCase;
 use App\Models\WorldHeritage;
 use App\Models\Country;
 use Illuminate\Support\Facades\DB;
+use Mockery;
 
 class GetWorldHeritageByIdDtoTest extends TestCase
 {
@@ -31,20 +34,41 @@ class GetWorldHeritageByIdDtoTest extends TestCase
              DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
              WorldHeritage::truncate();
              Country::truncate();
+             Image::truncate();
              DB::table('site_state_parties')->truncate();
              DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
 
-    private static function arrayData(): array
+    private function mockImageDto(): ImageDto
+    {
+        $mock = Mockery::mock(ImageDto::class);
+
+        $mock->shouldReceive('getUrl')
+            ->andReturn('https://example.com/image.jpg');
+
+        $mock->shouldReceive('getId')
+            ->andReturn(1);
+
+        $mock->shouldReceive('getIsPrimary')
+            ->andReturn(true);
+
+        $mock->shouldReceive('getSortOrder')
+            ->andReturn(1);
+
+        return $mock;
+    }
+
+    private function arrayData(): array
     {
         return
             [
                 'id' => 1133,
                 'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
                 'name' => "Ancient and Primeval Beech Forests",
-                'name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
+                'heritage_name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
                 'country' => 'Slovakia',
+                'country_name_jp' => 'スロバキア',
                 'region' => 'Europe',
                 'category' => 'Natural',
                 'criteria' => ['ix'],
@@ -56,7 +80,7 @@ class GetWorldHeritageByIdDtoTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
-                'image_url' => '',
+                'image_url' => $this->mockImageDto(),
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
                 'state_parties_codes' => [
                     'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -91,13 +115,14 @@ class GetWorldHeritageByIdDtoTest extends TestCase
             officialName: self::arrayData()['official_name'],
             name: self::arrayData()['name'],
             country: self::arrayData()['country'],
+            countryNameJp: self::arrayData()['country_name_jp'],
             region: self::arrayData()['region'],
             category: self::arrayData()['category'],
             yearInscribed: self::arrayData()['year_inscribed'],
             latitude: self::arrayData()['latitude'],
             longitude: self::arrayData()['longitude'],
             isEndangered: self::arrayData()['is_endangered'],
-            nameJp: self::arrayData()['name_jp'],
+            heritageNameJp: self::arrayData()['heritage_name_jp'],
             stateParty: self::arrayData()['state_party'],
             criteria: self::arrayData()['criteria'],
             areaHectares: self::arrayData()['area_hectares'],
@@ -119,13 +144,14 @@ class GetWorldHeritageByIdDtoTest extends TestCase
             officialName: self::arrayData()['official_name'],
             name: self::arrayData()['name'],
             country: self::arrayData()['country'],
+            countryNameJp: self::arrayData()['country_name_jp'],
             region: self::arrayData()['region'],
             category: self::arrayData()['category'],
             yearInscribed: self::arrayData()['year_inscribed'],
             latitude: self::arrayData()['latitude'],
             longitude: self::arrayData()['longitude'],
             isEndangered: self::arrayData()['is_endangered'],
-            nameJp: self::arrayData()['name_jp'],
+            heritageNameJp: self::arrayData()['heritage_name_jp'],
             stateParty: self::arrayData()['state_party'],
             criteria: self::arrayData()['criteria'],
             areaHectares: self::arrayData()['area_hectares'],
@@ -147,12 +173,12 @@ class GetWorldHeritageByIdDtoTest extends TestCase
         $this->assertIsBool($heritageDto->isEndangered());
         $this->assertIsFloat($heritageDto->getLatitude());
         $this->assertIsFloat($heritageDto->getLongitude());
-        $this->assertIsString($heritageDto->getNameJp());
+        $this->assertIsString($heritageDto->getHeritageNameJp());
+        $this->assertIsString($heritageDto->getCountryNameJp());
         $this->assertIsArray($heritageDto->getCriteria());
         $this->assertIsFloat($heritageDto->getAreaHectares());
         $this->assertIsFloat($heritageDto->getBufferZoneHectares());
         $this->assertIsString($heritageDto->getShortDescription());
-        $this->assertIsString($heritageDto->getImageUrl());
         $this->assertIsString($heritageDto->getUnescoSiteUrl());
         $this->assertIsArray($heritageDto->getStatePartyCodes());
         $this->assertIsArray($heritageDto->getStatePartiesMeta());

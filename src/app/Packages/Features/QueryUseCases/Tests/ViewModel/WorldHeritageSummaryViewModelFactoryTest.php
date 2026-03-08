@@ -4,6 +4,7 @@ namespace App\Packages\Features\QueryUseCases\Tests\ViewModel;
 
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
 use Tests\TestCase;
 use Mockery;
 use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageSummaryViewModelFactory;
@@ -26,8 +27,9 @@ class WorldHeritageSummaryViewModelFactoryTest extends TestCase
                 'id' => 1133,
                 'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
                 'name' => "Ancient and Primeval Beech Forests",
-                'name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
+                'heritage_name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
                 'country' => 'Slovakia',
+                'country_name_jp' => 'スロバキア',
                 'region' => 'Europe',
                 'category' => 'Natural',
                 'criteria' => ['ix'],
@@ -111,8 +113,8 @@ class WorldHeritageSummaryViewModelFactoryTest extends TestCase
         $mock->shouldReceive('isEndangered')
             ->andReturn(self::arrayData()['is_endangered']);
 
-        $mock->shouldReceive('getNameJp')
-            ->andReturn(self::arrayData()['name_jp']);
+        $mock->shouldReceive('getHeritageNameJp')
+            ->andReturn(self::arrayData()['heritage_name_jp']);
 
         $mock->shouldReceive('getStateParty')
             ->andReturn(self::arrayData()['state_party']);
@@ -141,6 +143,28 @@ class WorldHeritageSummaryViewModelFactoryTest extends TestCase
         $mock->shouldReceive('getThumbnailUrl')
             ->andReturn(self::arrayData()['thumbnail_url']);
 
+        $mock->shouldReceive('getCountryNameJp')
+            ->andReturn(self::arrayData()['country_name_jp']);
+
+        $mock->shouldReceive('getPrimaryStatePartyCode')
+            ->andReturn(self::arrayData()['state_parties_codes'][4]);
+
+        $mock->shouldReceive('getImages')
+            ->andReturn([
+                [
+                    'id' => 10,
+                    'url' => 'https://cdn.example.com/a.jpg',
+                    'sort_order' => 1,
+                    'is_primary' => true,
+                ],
+                [
+                    'id' => 11,
+                    'url' => 'https://cdn.example.com/b.jpg',
+                    'sort_order' => 5,
+                    'is_primary' => false,
+                ],
+            ]);
+
         return $mock;
     }
 
@@ -148,32 +172,35 @@ class WorldHeritageSummaryViewModelFactoryTest extends TestCase
     {
         $result = WorldHeritageSummaryViewModelFactory::build($this->mockDto());
 
-        $this->assertIsArray($result);
+        $this->assertInstanceOf(WorldHeritageViewModel::class, $result);
     }
 
     public function test_check_view_model_value(): void
     {
         $result = WorldHeritageSummaryViewModelFactory::build($this->mockDto());
 
-        $this->assertEquals(self::arrayData()['id'], $result['id']);
-        $this->assertEquals(self::arrayData()['official_name'], $result['official_name']);
-        $this->assertEquals(self::arrayData()['name'], $result['name']);
-        $this->assertEquals(self::arrayData()['country'], $result['country']);
-        $this->assertEquals(self::arrayData()['region'], $result['region']);
-        $this->assertEquals(self::arrayData()['category'], $result['category']);
-        $this->assertEquals(self::arrayData()['year_inscribed'], $result['year_inscribed']);
-        $this->assertEquals(self::arrayData()['latitude'], $result['latitude']);
-        $this->assertEquals(self::arrayData()['longitude'], $result['longitude']);
-        $this->assertEquals(self::arrayData()['is_endangered'], $result['is_endangered']);
-        $this->assertEquals(self::arrayData()['name_jp'], $result['name_jp']);
-        $this->assertEquals(self::arrayData()['state_party'], $result['state_party']);
-        $this->assertEquals(self::arrayData()['criteria'], $result['criteria']);
-        $this->assertEquals(self::arrayData()['unesco_site_url'], $result['unesco_site_url']);
-        $this->assertEquals(self::arrayData()['area_hectares'], $result['area_hectares']);
-        $this->assertEquals(self::arrayData()['buffer_zone_hectares'], $result['buffer_zone_hectares']);
-        $this->assertEquals(self::arrayData()['short_description'], $result['short_description']);
-        $this->assertEquals(self::arrayData()['state_parties_codes'], $result['state_party_codes']);
-        $this->assertEquals(self::arrayData()['state_parties_meta'], $result['state_parties_meta']);
-        $this->assertEquals(self::arrayData()['thumbnail_url'], $result['thumbnail_url']);
+        $resultArray = $result->toArray();
+
+        $this->assertEquals(self::arrayData()['id'], $resultArray['id']);
+        $this->assertEquals(self::arrayData()['official_name'], $resultArray['official_name']);
+        $this->assertEquals(self::arrayData()['name'], $resultArray['name']);
+        $this->assertEquals(self::arrayData()['country'], $resultArray['country']);
+        $this->assertEquals(self::arrayData()['region'], $resultArray['region']);
+        $this->assertEquals(self::arrayData()['category'], $resultArray['category']);
+        $this->assertEquals(self::arrayData()['year_inscribed'], $resultArray['year_inscribed']);
+        $this->assertEquals(self::arrayData()['latitude'], $resultArray['latitude']);
+        $this->assertEquals(self::arrayData()['longitude'], $resultArray['longitude']);
+        $this->assertEquals(self::arrayData()['is_endangered'], $resultArray['is_endangered']);
+        $this->assertEquals(self::arrayData()['heritage_name_jp'], $resultArray['heritage_name_jp']);
+        $this->assertEquals(self::arrayData()['state_party'], $resultArray['state_party']);
+        $this->assertEquals(self::arrayData()['criteria'], $resultArray['criteria']);
+        $this->assertEquals(self::arrayData()['unesco_site_url'], $resultArray['unesco_site_url']);
+        $this->assertEquals(self::arrayData()['area_hectares'], $resultArray['area_hectares']);
+        $this->assertEquals(self::arrayData()['buffer_zone_hectares'], $resultArray['buffer_zone_hectares']);
+        $this->assertEquals(self::arrayData()['short_description'], $resultArray['short_description']);
+        $this->assertEquals(self::arrayData()['state_parties_codes'], $resultArray['state_party_codes']);
+        $this->assertEquals(self::arrayData()['state_parties_meta'], $resultArray['state_parties_meta']);
+        $this->assertEquals(self::arrayData()['thumbnail_url'], $resultArray['thumbnail_url']);
+        $this->assertEquals(self::arrayData()['country_name_jp'], $resultArray['country_name_jp']);
     }
 }

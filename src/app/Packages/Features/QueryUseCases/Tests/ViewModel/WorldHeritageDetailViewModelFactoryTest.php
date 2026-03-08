@@ -25,7 +25,7 @@ class WorldHeritageDetailViewModelFactoryTest extends TestCase
             'id' => 1133,
             'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
             'name' => "Ancient and Primeval Beech Forests",
-            'name_jp' => null,
+            'heritage_name_jp' => null,
             'country' => 'Slovakia',
             'region' => 'Europe',
             'category' => 'natural',
@@ -98,8 +98,8 @@ class WorldHeritageDetailViewModelFactoryTest extends TestCase
             ->andReturn(self::arrayData()['name']);
 
         $dto
-            ->shouldReceive('getNameJp')
-            ->andReturn(self::arrayData()['name_jp']);
+            ->shouldReceive('getHeritageNameJp')
+            ->andReturn(self::arrayData()['heritage_name_jp']);
 
         $dto
             ->shouldReceive('getCountry')
