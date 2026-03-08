@@ -455,7 +455,7 @@ class DumpUnescoWorldHeritageJson extends Command
             'region_code' => $row['region_code'] ?? null,
             'transboundary' => $toBool($row['transboundary'] ?? null),
 
-            'main_image_url' => $row['main_image_url'] ?? null,
+            'image_url' => $row['image_url'] ?? null,
             'images_urls' => $images,
 
             'uuid' => $row['uuid'] ?? null,

@@ -156,7 +156,7 @@ class ImportWorldHeritageFromJson extends Command
             'latitude' => $this->toNullableFloat($lat),
             'longitude' => $this->toNullableFloat($lon),
             'short_description' => $row['short_description'] ?? $row['description'] ?? null,
-            'image_url' => null,
+            'image_url' => $row['image_url'] ?? $row['image'] ?? null,
             'thumbnail_image_id' => null,
             'unesco_site_url' => $row['url'] ?? null,
         ];
