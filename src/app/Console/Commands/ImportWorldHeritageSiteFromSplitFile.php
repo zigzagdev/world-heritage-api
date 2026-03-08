@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ImportWorldHeritageSiteFromSplitFile extends Command
 {
@@ -14,7 +15,7 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
      * @var string
      */
     protected $signature = 'world-heritage:import-sites-split
-        {--in=storage/app/private/unesco/normalized/world_heritage_sites.json : Input split JSON file path}
+        {--in=unesco/normalized/world_heritage_sites.json : Input split JSON file path (local disk relative)}
         {--batch=200 : Upsert batch size}
         {--max=0 : 0 means no limit}
         {--dry-run : No DB writes}
@@ -63,7 +64,7 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
             if (!is_int($id) && !(is_string($id) && is_numeric($id))) {
                 $skipped++;
                 if ($strict) {
-                    $this->error("Strict: missing/invalid id: " . json_encode($row, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+                    $this->error("Strict: missing/invalid id: " . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                     return self::FAILURE;
                 }
                 continue;
@@ -79,7 +80,7 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
                 'region' => $this->toNullableString($row['region'] ?? null),
                 'state_party' => $this->toNullableString($row['state_party'] ?? null),
                 'category' => $this->toNullableString($row['category'] ?? null),
-                'criteria' => isset($row['criteria']) ? json_encode($row['criteria'], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) : json_encode([]),
+                'criteria' => isset($row['criteria']) ? json_encode($row['criteria'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : json_encode([]),
                 'year_inscribed' => $this->toNullableInt($row['year_inscribed'] ?? null),
                 'area_hectares' => $this->toNullableFloat($row['area_hectares'] ?? null),
                 'buffer_zone_hectares' => $this->toNullableFloat($row['buffer_zone_hectares'] ?? null),
@@ -105,7 +106,7 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
             $imported += $this->flush($batch, $dryRun);
         }
 
-        $this->info("world_heritage_sites upserted: {$imported}, skipped: {$skipped}" . ($dryRun ? " (dry-run)" : ""));
+        $this->info("world_heritage_sites upserted: {$imported}, skipped: {$skipped}" . ($dryRun ? ' (dry-run)' : ''));
         return self::SUCCESS;
     }
 
@@ -142,8 +143,20 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
     {
         $path = trim($path);
         if ($path === '') return $path;
-        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
-        return base_path($path);
+
+        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
+
+        $path = ltrim($path, '/');
+        if (str_starts_with($path, 'storage/app/')) {
+            $path = substr($path, strlen('storage/app/'));
+        }
+        if (str_starts_with($path, 'private/')) {
+            $path = substr($path, strlen('private/'));
+        }
+
+        return Storage::disk('local')->path($path);
     }
 
     private function toNullableString(mixed $v): ?string
@@ -170,11 +183,11 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
     {
         if ($v === null || $v === '') return null;
         if (is_bool($v)) return $v ? 1 : 0;
-        if (is_int($v) || is_float($v)) return ((int)$v) === 1 ? 1 : 0;
+        if (is_int($v) || is_float($v)) return ((int) $v) === 1 ? 1 : 0;
         if (is_string($v)) {
             $s = strtolower(trim($v));
-            if (in_array($s, ['1','true','t','yes','y','on'], true)) return 1;
-            if (in_array($s, ['0','false','f','no','n','off'], true)) return 0;
+            if (in_array($s, ['1', 'true', 't', 'yes', 'y', 'on'], true)) return 1;
+            if (in_array($s, ['0', 'false', 'f', 'no', 'n', 'off'], true)) return 0;
         }
         return null;
     }

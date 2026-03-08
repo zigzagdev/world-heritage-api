@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
@@ -14,7 +15,7 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
      * @var string
      */
     protected $signature = 'world-heritage:import-site-country-exceptions
-        {--in=storage/app/private/country/normalized/exceptions-missing-codes.json : Input exceptions JSON file path}
+        {--in=unesco/normalized/exceptions-missing-iso-codes.json : Input exceptions JSON file path (local disk relative)}
         {--batch=200 : Upsert batch size}
         {--max=0 : 0 means no limit}
         {--dry-run : No DB writes}
@@ -63,21 +64,22 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
                 ?? $row['world_heritage_site_id']
                 ?? $row['site_id']
                 ?? null;
+
             if (!(is_int($idNo) || (is_string($idNo) && is_numeric($idNo)))) {
                 $skipped++;
                 if ($strict) {
-                    $this->error('Strict: missing/invalid id_no: ' . json_encode($row, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+                    $this->error('Strict: missing/invalid id_no: ' . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                     return self::FAILURE;
                 }
                 continue;
             }
             $siteId = (int) $idNo;
 
-            $reason = trim((string)($row['exception_type'] ?? $row['reason'] ?? ''));
+            $reason = trim((string) ($row['exception_type'] ?? $row['reason'] ?? ''));
             if ($reason === '') {
                 $skipped++;
                 if ($strict) {
-                    $this->error('Strict: missing reason/exception_type: ' . json_encode($row, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+                    $this->error('Strict: missing reason/exception_type: ' . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                     return self::FAILURE;
                 }
                 continue;
@@ -94,7 +96,7 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
             $batch[] = [
                 'world_heritage_site_id' => $siteId,
                 'reason' => $reason,
-                'raw' => json_encode($row, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+                'raw' => json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
@@ -109,7 +111,7 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
             $imported += $this->flush($batch, $dryRun);
         }
 
-        $this->info("world_heritage_site_country_exceptions upserted: {$imported}, skipped: {$skipped}" . ($dryRun ? " (dry-run)" : ""));
+        $this->info("world_heritage_site_country_exceptions upserted: {$imported}, skipped: {$skipped}" . ($dryRun ? ' (dry-run)' : ''));
         return self::SUCCESS;
     }
 
@@ -137,6 +139,7 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
         if (array_key_exists('results', $json)) {
             return is_array($json['results']) ? $json['results'] : null;
         }
+
         return array_is_list($json) ? $json : null;
     }
 
@@ -144,7 +147,21 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
     {
         $path = trim($path);
         if ($path === '') return $path;
-        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
-        return base_path($path);
+
+        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
+
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'storage/app/')) {
+            $path = substr($path, strlen('storage/app/'));
+        }
+
+        if (str_starts_with($path, 'private/')) {
+            $path = substr($path, strlen('private/'));
+        }
+
+        return Storage::disk('local')->path($path);
     }
 }

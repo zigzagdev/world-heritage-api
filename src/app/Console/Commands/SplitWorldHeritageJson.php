@@ -4,19 +4,20 @@ namespace App\Console\Commands;
 
 use App\Support\CountryCodeNormalizer;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
 class SplitWorldHeritageJson extends Command
 {
     protected $signature = 'world-heritage:split-json
-    {--in=private/unesco/world-heritage-sites.json : Input raw UNESCO JSON file (dump output) in storage/app/...}
-    {--out=private/unesco/normalized : Output dir in storage/app/... (directory)}
-    {--site-judgements-out=private/unesco/normalized/site-country-judgements.json : Per-site judgement output (all rows)}
-    {--exceptions-out=private/unesco/normalized/exceptions-missing-iso-codes.json : Missing/invalid iso_codes rows (subset)}
+    {--in=unesco/world-heritage-sites.json : Input raw UNESCO JSON file (dump output) in local disk root}
+    {--out=unesco/normalized : Output dir in local disk root (directory)}
+    {--site-judgements-out=unesco/normalized/site-country-judgements.json : Per-site judgement output (all rows)}
+    {--exceptions-out=unesco/normalized/exceptions-missing-iso-codes.json : Missing/invalid iso_codes rows (subset)}
     {--exceptions-limit=2000 : Max number of exception rows to store}
     {--pretty : Pretty print JSON}
     {--log-limit=50 : Max number of skipped/invalid log lines}
-    {--summary-file= : Optional summary JSON file path (in storage/app/...)}
+    {--summary-file= : Optional summary JSON file path (in local disk root)}
     {--strict : Fail if any invalid/unknown rows exist}
     {--clean : Delete existing *.json in output dir before writing}
     {--dry-run : Do not write files (only logs/summary)}';
@@ -25,19 +26,19 @@ class SplitWorldHeritageJson extends Command
 
     public function handle(): int
     {
-        $in = trim((string)$this->option('in'));
-        $out = trim((string)$this->option('out'));
+        $in = $this->normalizeLocalDiskPath((string) $this->option('in'));
+        $out = $this->normalizeLocalDiskPath((string) $this->option('out'));
 
-        $pretty = (bool)$this->option('pretty');
-        $logLimit = max(0, (int)$this->option('log-limit'));
-        $summaryFile = trim((string)$this->option('summary-file'));
-        $strict = (bool)$this->option('strict');
-        $clean = (bool)$this->option('clean');
-        $dryRun = (bool)$this->option('dry-run');
+        $pretty = (bool) $this->option('pretty');
+        $logLimit = max(0, (int) $this->option('log-limit'));
+        $summaryFile = $this->normalizeLocalDiskPath((string) $this->option('summary-file'));
+        $strict = (bool) $this->option('strict');
+        $clean = (bool) $this->option('clean');
+        $dryRun = (bool) $this->option('dry-run');
 
-        $siteJudgementsOut = trim((string)$this->option('site-judgements-out'));
-        $exceptionsOut = trim((string)$this->option('exceptions-out'));
-        $exceptionsLimit = max(0, (int)$this->option('exceptions-limit'));
+        $siteJudgementsOut = $this->normalizeLocalDiskPath((string) $this->option('site-judgements-out'));
+        $exceptionsOut = $this->normalizeLocalDiskPath((string) $this->option('exceptions-out'));
+        $exceptionsLimit = max(0, (int) $this->option('exceptions-limit'));
 
         if ($in === '') {
             $this->error('Missing required option: --in');
@@ -88,14 +89,20 @@ class SplitWorldHeritageJson extends Command
         $this->info("Input: {$inPath}");
         $this->info('Rows (raw results): ' . count($results));
         $this->info("Output dir: {$outDir}");
-        if ($dryRun) $this->warn('Dry-run enabled: will NOT write any files.');
+        if ($dryRun) {
+            $this->warn('Dry-run enabled: will NOT write any files.');
+        }
 
         $normalizer = app(CountryCodeNormalizer::class);
 
         $logged = 0;
         $logSkip = function (string $reason, int $index, mixed $idNo = null, array $extra = []) use ($logLimit, &$logged): void {
-            if ($logLimit <= 0) return;
-            if ($logged >= $logLimit) return;
+            if ($logLimit <= 0) {
+                return;
+            }
+            if ($logged >= $logLimit) {
+                return;
+            }
 
             $idPart = ($idNo !== null && $idNo !== '') ? " id_no={$idNo}" : '';
             $extraPart = $extra !== [] ? ' extra=' . json_encode($extra, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '';
@@ -121,7 +128,7 @@ class SplitWorldHeritageJson extends Command
         $transnationalExampleLimit = 25;
 
         foreach ($results as $index => $row) {
-            $index = (int)$index;
+            $index = (int) $index;
 
             if (!is_array($row)) {
                 $invalid++;
@@ -140,7 +147,7 @@ class SplitWorldHeritageJson extends Command
                 continue;
             }
 
-            $idNoRaw = trim((string)($row['id_no'] ?? ($row['id'] ?? '')));
+            $idNoRaw = trim((string) ($row['id_no'] ?? ($row['id'] ?? '')));
             if ($idNoRaw === '') {
                 $rowsMissingId++;
                 $logSkip('id_no_missing', $index, null);
@@ -199,9 +206,8 @@ class SplitWorldHeritageJson extends Command
                 continue;
             }
 
-            $siteId = (int)$idNoRaw;
+            $siteId = (int) $idNoRaw;
 
-            // site 本体は常に作る
             if (!isset($sites[$siteId])) {
                 $sites[$siteId] = $this->normalizeSiteRowImportReady($row, $siteId);
             } else {
@@ -210,7 +216,6 @@ class SplitWorldHeritageJson extends Command
 
             $region = $this->normalizeRegionCodeOrFallback($row['region_code'] ?? null);
 
-            // Country judgement (iso2 -> iso3 list)
             $iso2 = $this->extractIsoCodes($row['iso_codes'] ?? null);
             $iso3 = [];
             $reason = null;
@@ -236,7 +241,9 @@ class SplitWorldHeritageJson extends Command
                     $status = 'unresolved';
                     $reason = 'iso_codes_unknown';
                     $logSkip('iso_codes_unknown', $index, $siteId, ['codes' => $iso2, 'msg' => $e->getMessage()]);
-                    if ($strict) throw $e;
+                    if ($strict) {
+                        throw $e;
+                    }
 
                     if (count($exceptions) < $exceptionsLimit) {
                         $exceptions[] = [
@@ -265,12 +272,8 @@ class SplitWorldHeritageJson extends Command
                 $reason
             );
 
-            /**
-             * ✅ ここが修正点：images は国コード判定に依存させない
-             * - iso_codes が null でも images_urls は入ってくる (148 がそれ)
-             */
             $imageUrls = $this->extractImageUrls($row);
-            if (count($imageUrls) >= 2) { // rule: only_sites_with_multiple_images
+            if (count($imageUrls) >= 2) {
                 foreach ($imageUrls as $idx => $url) {
                     $images[] = [
                         'world_heritage_site_id' => $siteId,
@@ -281,7 +284,6 @@ class SplitWorldHeritageJson extends Command
                 }
             }
 
-            // unresolved の場合は countries/pivot だけ作らない
             if ($status !== 'ok') {
                 if (count($exceptions) < $exceptionsLimit) {
                     $exceptions[] = [
@@ -299,7 +301,6 @@ class SplitWorldHeritageJson extends Command
                 continue;
             }
 
-            // Country rows and pivot rows
             $names = $this->normalizeStatesNames($row['states_names'] ?? null);
 
             if (count($iso3) > 1) {
@@ -315,7 +316,6 @@ class SplitWorldHeritageJson extends Command
             }
 
             foreach ($iso3 as $idx => $code3) {
-                // countries.json row
                 if (!isset($countries[$code3])) {
                     $countries[$code3] = [
                         'state_party_code' => $code3,
@@ -335,14 +335,13 @@ class SplitWorldHeritageJson extends Command
                     }
                 }
 
-                // pivot
                 $key = "{$siteId}|{$code3}";
                 if (!isset($pivot[$key])) {
                     $pivot[$key] = [
                         'world_heritage_site_id' => $siteId,
                         'state_party_code' => $code3,
                         'is_primary' => ($idx === 0) ? 1 : 0,
-                        'inscription_year' => isset($row['date_inscribed']) ? (int)$row['date_inscribed'] : null,
+                        'inscription_year' => isset($row['date_inscribed']) ? (int) $row['date_inscribed'] : null,
                     ];
                 }
             }
@@ -365,7 +364,6 @@ class SplitWorldHeritageJson extends Command
         ksort($countries, SORT_STRING);
         ksort($pivot, SORT_STRING);
 
-        // Payloads (import-ready)
         $sitesPayload = [
             'meta' => [
                 'schema' => 'world_heritage_sites.import.v1',
@@ -440,7 +438,6 @@ class SplitWorldHeritageJson extends Command
             'results' => $exceptions,
         ];
 
-        // Write files that are meant to be imported directly
         $written = [
             'world_heritage_sites.json' => $sitesPayload,
             'countries.json' => $countriesPayload,
@@ -471,7 +468,6 @@ class SplitWorldHeritageJson extends Command
             $this->info("Wrote {$filePath} (" . count($payload['results'] ?? []) . " records)");
         }
 
-        // Judgements + exceptions (diagnostics)
         $judgementsPath = $this->resolvePathToFile($siteJudgementsOut);
         $exceptionsPath = $this->resolvePathToFile($exceptionsOut);
 
@@ -563,8 +559,11 @@ class SplitWorldHeritageJson extends Command
             } else {
                 if (!$dryRun) {
                     $ok = @file_put_contents($summaryPath, $encodedSummary);
-                    if ($ok === false) $this->warn("Failed to write summary: {$summaryPath}");
-                    else $this->info("Wrote summary: {$summaryPath}");
+                    if ($ok === false) {
+                        $this->warn("Failed to write summary: {$summaryPath}");
+                    } else {
+                        $this->info("Wrote summary: {$summaryPath}");
+                    }
                 } else {
                     $this->info("[dry] would write summary: {$summaryPath}");
                 }
@@ -588,8 +587,8 @@ class SplitWorldHeritageJson extends Command
         return [
             'index' => $index,
             'site_id' => $siteId,
-            'name_en' => is_scalar($nameEn) ? (string)$nameEn : null,
-            'region_code' => is_scalar($regionCode) ? (string)$regionCode : null,
+            'name_en' => is_scalar($nameEn) ? (string) $nameEn : null,
+            'region_code' => is_scalar($regionCode) ? (string) $regionCode : null,
             'iso_codes_raw' => $isoCodesRaw,
             'iso2' => $iso2,
             'iso3' => $iso3,
@@ -600,37 +599,53 @@ class SplitWorldHeritageJson extends Command
 
     private function extractIsoCodes(mixed $v): array
     {
-        if (!is_string($v)) return [];
+        if (!is_string($v)) {
+            return [];
+        }
+
         $s = trim($v);
-        if ($s === '') return [];
+        if ($s === '') {
+            return [];
+        }
 
         $parts = array_map('trim', explode(',', $s));
         $out = [];
         $seen = [];
+
         foreach ($parts as $p) {
             $p = strtoupper($p);
-            if ($p === '') continue;
+            if ($p === '') {
+                continue;
+            }
             if (!isset($seen[$p])) {
                 $seen[$p] = true;
                 $out[] = $p;
             }
         }
+
         return $out;
     }
 
     private function normalizeStatesNames(mixed $statesNames): array
     {
-        if (!is_array($statesNames)) return [];
+        if (!is_array($statesNames)) {
+            return [];
+        }
+
         $seen = [];
         $out = [];
+
         foreach ($statesNames as $v) {
-            $name = trim((string)$v);
-            if ($name === '') continue;
+            $name = trim((string) $v);
+            if ($name === '') {
+                continue;
+            }
             if (!isset($seen[$name])) {
                 $seen[$name] = true;
                 $out[] = $name;
             }
         }
+
         return $out;
     }
 
@@ -641,7 +656,9 @@ class SplitWorldHeritageJson extends Command
         $main = $row['main_image_url']['url'] ?? null;
         if (is_string($main)) {
             $main = trim($main);
-            if ($main !== '') $urls[] = $main;
+            if ($main !== '') {
+                $urls[] = $main;
+            }
         }
 
         $images = $row['images_urls'] ?? null;
@@ -650,25 +667,34 @@ class SplitWorldHeritageJson extends Command
             $parts = preg_split('/\s*,\s*/', trim($images)) ?: [];
             foreach ($parts as $p) {
                 $p = trim($p);
-                if ($p !== '') $urls[] = $p;
+                if ($p !== '') {
+                    $urls[] = $p;
+                }
             }
         }
 
         if (is_array($images)) {
             foreach ($images as $p) {
-                if (!is_string($p)) continue;
+                if (!is_string($p)) {
+                    continue;
+                }
                 $p = trim($p);
-                if ($p !== '') $urls[] = $p;
+                if ($p !== '') {
+                    $urls[] = $p;
+                }
             }
         }
 
         $seen = [];
         $out = [];
         foreach ($urls as $u) {
-            if (isset($seen[$u])) continue;
+            if (isset($seen[$u])) {
+                continue;
+            }
             $seen[$u] = true;
             $out[] = $u;
         }
+
         return $out;
     }
 
@@ -682,10 +708,14 @@ class SplitWorldHeritageJson extends Command
         $criteria = $this->resolveCriteriaList($row);
 
         $toBool = function ($v): bool {
-            if (is_bool($v)) return $v;
-            if (is_int($v) || is_float($v)) return ((int)$v) === 1;
+            if (is_bool($v)) {
+                return $v;
+            }
+            if (is_int($v) || is_float($v)) {
+                return ((int) $v) === 1;
+            }
 
-            $s = strtolower(trim((string)$v));
+            $s = strtolower(trim((string) $v));
             return in_array($s, ['1', 'true', 't', 'yes', 'y', 'on'], true);
         };
         $toTinyInt = fn($v) => $toBool($v) ? 1 : 0;
@@ -713,13 +743,13 @@ class SplitWorldHeritageJson extends Command
         $primaryImageUrl = null;
 
         $year = isset($row['date_inscribed']) && is_numeric($row['date_inscribed'])
-            ? (int)$row['date_inscribed']
+            ? (int) $row['date_inscribed']
             : 0;
 
         return [
             'id' => $siteId,
-            'official_name' => $this->stringOrFallback($row['official_name'] ?? ($row['name_en'] ?? null), (string)$siteId),
-            'name' => $this->stringOrFallback($row['name_en'] ?? null, (string)$siteId),
+            'official_name' => $this->stringOrFallback($row['official_name'] ?? ($row['name_en'] ?? null), (string) $siteId),
+            'name' => $this->stringOrFallback($row['name_en'] ?? null, (string) $siteId),
             'name_jp' => $this->stringOrNull($row['name_jp'] ?? null),
             'country' => $country,
             'region' => $region,
@@ -727,13 +757,11 @@ class SplitWorldHeritageJson extends Command
             'category' => $category,
             'criteria' => $criteria,
             'year_inscribed' => $year,
-            'area_hectares' => isset($row['area_hectares']) && is_numeric($row['area_hectares']) ? (float)$row['area_hectares'] : null,
-            'buffer_zone_hectares' => isset($row['buffer_zone_hectares']) && is_numeric($row['buffer_zone_hectares']) ? (float)$row['buffer_zone_hectares'] : null,
-            'is_endangered' => $toTinyInt(
-                $row['danger'] ?? $row['is_endangered'] ?? false
-            ),
-            'latitude' => is_numeric($lat) ? (float)$lat : null,
-            'longitude' => is_numeric($lon) ? (float)$lon : null,
+            'area_hectares' => isset($row['area_hectares']) && is_numeric($row['area_hectares']) ? (float) $row['area_hectares'] : null,
+            'buffer_zone_hectares' => isset($row['buffer_zone_hectares']) && is_numeric($row['buffer_zone_hectares']) ? (float) $row['buffer_zone_hectares'] : null,
+            'is_endangered' => $toTinyInt($row['danger'] ?? $row['is_endangered'] ?? false),
+            'latitude' => is_numeric($lat) ? (float) $lat : null,
+            'longitude' => is_numeric($lon) ? (float) $lon : null,
             'short_description' => $this->stringOrNull($row['short_description_en'] ?? null),
             'image_url' => $imageUrl,
             'primary_image_url' => $primaryImageUrl,
@@ -749,7 +777,9 @@ class SplitWorldHeritageJson extends Command
     {
         $fill = function (string $key, mixed $value) use (&$existing): void {
             if (!array_key_exists($key, $existing) || $existing[$key] === null || $existing[$key] === '') {
-                if ($value !== null && $value !== '') $existing[$key] = $value;
+                if ($value !== null && $value !== '') {
+                    $existing[$key] = $value;
+                }
             }
         };
 
@@ -770,7 +800,7 @@ class SplitWorldHeritageJson extends Command
 
         if (!isset($existing['year_inscribed']) || !is_numeric($existing['year_inscribed'])) {
             $existing['year_inscribed'] = (isset($incoming['date_inscribed']) && is_numeric($incoming['date_inscribed']))
-                ? (int)$incoming['date_inscribed']
+                ? (int) $incoming['date_inscribed']
                 : 0;
         }
 
@@ -780,19 +810,21 @@ class SplitWorldHeritageJson extends Command
                 $sp = $this->toIso3OrNull($iso2List[0]);
                 if ($sp !== null) {
                     $existing['state_party'] = $sp;
-                    if (($existing['country'] ?? null) === null) $existing['country'] = $sp;
+                    if (($existing['country'] ?? null) === null) {
+                        $existing['country'] = $sp;
+                    }
                 }
             }
         }
 
-        $fill('area_hectares', isset($incoming['area_hectares']) ? (is_numeric($incoming['area_hectares']) ? (float)$incoming['area_hectares'] : null) : null);
-        $fill('buffer_zone_hectares', isset($incoming['buffer_zone_hectares']) ? (is_numeric($incoming['buffer_zone_hectares']) ? (float)$incoming['buffer_zone_hectares'] : null) : null);
+        $fill('area_hectares', isset($incoming['area_hectares']) ? (is_numeric($incoming['area_hectares']) ? (float) $incoming['area_hectares'] : null) : null);
+        $fill('buffer_zone_hectares', isset($incoming['buffer_zone_hectares']) ? (is_numeric($incoming['buffer_zone_hectares']) ? (float) $incoming['buffer_zone_hectares'] : null) : null);
 
         if (isset($incoming['coordinates']['lat']) && ($existing['latitude'] ?? null) === null) {
-            $existing['latitude'] = is_numeric($incoming['coordinates']['lat']) ? (float)$incoming['coordinates']['lat'] : null;
+            $existing['latitude'] = is_numeric($incoming['coordinates']['lat']) ? (float) $incoming['coordinates']['lat'] : null;
         }
         if (isset($incoming['coordinates']['lon']) && ($existing['longitude'] ?? null) === null) {
-            $existing['longitude'] = is_numeric($incoming['coordinates']['lon']) ? (float)$incoming['coordinates']['lon'] : null;
+            $existing['longitude'] = is_numeric($incoming['coordinates']['lon']) ? (float) $incoming['coordinates']['lon'] : null;
         }
 
         $fill('short_description', $incoming['short_description_en'] ?? null);
@@ -807,14 +839,15 @@ class SplitWorldHeritageJson extends Command
             }
         }
 
-        // ここは元コード通り：常に null に戻す挙動（意味が薄いが、そのまま）
         if (($existing['primary_image_url'] ?? null) !== null) {
             $existing['primary_image_url'] = null;
         }
 
         if (($existing['unesco_site_url'] ?? null) === null) {
             $u = $incoming['unesco_site_url'] ?? ($incoming['url'] ?? null);
-            if ($u) $existing['unesco_site_url'] = $u;
+            if ($u) {
+                $existing['unesco_site_url'] = $u;
+            }
         }
 
         return $existing;
@@ -822,9 +855,14 @@ class SplitWorldHeritageJson extends Command
 
     private function normalizeRegionCodeOrFallback(mixed $v): string
     {
-        if (!is_string($v)) return 'UNK';
+        if (!is_string($v)) {
+            return 'UNK';
+        }
+
         $code = strtoupper(trim($v));
-        if ($code === '') return 'UNK';
+        if ($code === '') {
+            return 'UNK';
+        }
 
         $allowed = ['EUR', 'AFR', 'APA', 'ARB', 'LAC'];
         return in_array($code, $allowed, true) ? $code : 'UNK';
@@ -832,9 +870,14 @@ class SplitWorldHeritageJson extends Command
 
     private function normalizeCategoryOrFallback(mixed $v): string
     {
-        if (!is_string($v)) return 'Cultural';
+        if (!is_string($v)) {
+            return 'Cultural';
+        }
+
         $s = trim($v);
-        if ($s === '') return 'Cultural';
+        if ($s === '') {
+            return 'Cultural';
+        }
 
         $allowed = ['Cultural', 'Natural', 'Mixed'];
         return in_array($s, $allowed, true) ? $s : 'Cultural';
@@ -842,50 +885,80 @@ class SplitWorldHeritageJson extends Command
 
     private function stringOrNull(mixed $v): ?string
     {
-        if (!is_scalar($v)) return null;
-        $s = trim((string)$v);
+        if (!is_scalar($v)) {
+            return null;
+        }
+
+        $s = trim((string) $v);
         return $s === '' ? null : $s;
     }
 
     private function stringOrFallback(mixed $v, string $fallback): string
     {
-        if (!is_scalar($v)) return $fallback;
-        $s = trim((string)$v);
+        if (!is_scalar($v)) {
+            return $fallback;
+        }
+
+        $s = trim((string) $v);
         return $s === '' ? $fallback : $s;
+    }
+
+    private function normalizeLocalDiskPath(string $path): string
+    {
+        $path = trim($path);
+        if ($path === '') {
+            return '';
+        }
+
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'storage/app/')) {
+            $path = substr($path, strlen('storage/app/'));
+        }
+
+        if (str_starts_with($path, 'private/')) {
+            $path = substr($path, strlen('private/'));
+        }
+
+        return $path;
     }
 
     private function resolvePathToDir(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return storage_path('app');
-
-        if (str_starts_with($path, '/')) return $path;
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
-
-        if (str_starts_with($path, 'storage/app/')) {
-            $path = substr($path, strlen('storage/app/'));
+        if ($path === '') {
+            return Storage::disk('local')->path('');
         }
-        return storage_path('app/' . ltrim($path, '/'));
+
+        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
+
+        $path = $this->normalizeLocalDiskPath($path);
+        return Storage::disk('local')->path($path);
     }
 
     private function resolvePathToFile(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return $path;
-
-        if (str_starts_with($path, '/')) return $path;
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
-
-        if (str_starts_with($path, 'storage/app/')) {
-            $path = substr($path, strlen('storage/app/'));
+        if ($path === '') {
+            return $path;
         }
-        return storage_path('app/' . ltrim($path, '/'));
+
+        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
+
+        $path = $this->normalizeLocalDiskPath($path);
+        return Storage::disk('local')->path($path);
     }
 
     private function encodeJson(mixed $payload, bool $pretty): ?string
     {
         $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-        if ($pretty) $flags |= JSON_PRETTY_PRINT;
+        if ($pretty) {
+            $flags |= JSON_PRETTY_PRINT;
+        }
 
         $json = json_encode($payload, $flags);
         return $json === false ? null : $json;
@@ -898,8 +971,12 @@ class SplitWorldHeritageJson extends Command
         $deleted = 0;
 
         foreach ($files as $f) {
-            if (!is_file($f)) continue;
-            if (@unlink($f)) $deleted++;
+            if (!is_file($f)) {
+                continue;
+            }
+            if (@unlink($f)) {
+                $deleted++;
+            }
         }
 
         $this->warn("Cleaned output dir: deleted {$deleted} json files");
@@ -907,60 +984,89 @@ class SplitWorldHeritageJson extends Command
 
     private function extractCriteriaList(mixed $criteriaTxt): array
     {
-        if (!is_string($criteriaTxt)) return [];
+        if (!is_string($criteriaTxt)) {
+            return [];
+        }
+
         $s = trim($criteriaTxt);
-        if ($s === '') return [];
+        if ($s === '') {
+            return [];
+        }
 
         preg_match_all('/\(([ivx]+)\)/i', $s, $m);
-        if (!isset($m[1]) || !is_array($m[1])) return [];
+        if (!isset($m[1]) || !is_array($m[1])) {
+            return [];
+        }
 
         $out = [];
         $seen = [];
         foreach ($m[1] as $v) {
-            $v = strtolower(trim((string)$v));
-            if ($v === '') continue;
+            $v = strtolower(trim((string) $v));
+            if ($v === '') {
+                continue;
+            }
             if (!isset($seen[$v])) {
                 $seen[$v] = true;
                 $out[] = $v;
             }
         }
+
         return $out;
     }
 
     private function resolveCriteriaList(array $row): array
     {
         $criteria = $this->extractCriteriaList($row['criteria_txt'] ?? null);
-        if ($criteria !== []) return $criteria;
+        if ($criteria !== []) {
+            return $criteria;
+        }
 
         $criteria = $this->extractCriteriaList($row['criteria'] ?? null);
-        if ($criteria !== []) return $criteria;
+        if ($criteria !== []) {
+            return $criteria;
+        }
 
         $criteria = $this->extractCriteriaFromJustification($row['justification_en'] ?? null);
-        if ($criteria !== []) return $criteria;
+        if ($criteria !== []) {
+            return $criteria;
+        }
 
         return [];
     }
 
     private function extractCriteriaFromJustification(mixed $justificationEn): array
     {
-        if (!is_string($justificationEn)) return [];
+        if (!is_string($justificationEn)) {
+            return [];
+        }
+
         $s = trim($justificationEn);
-        if ($s === '') return [];
+        if ($s === '') {
+            return [];
+        }
 
         $pos = stripos($s, 'criterion');
-        if ($pos === false) $pos = stripos($s, 'criteria');
-        if ($pos === false) return [];
+        if ($pos === false) {
+            $pos = stripos($s, 'criteria');
+        }
+        if ($pos === false) {
+            return [];
+        }
 
         $slice = substr($s, $pos, 600);
 
         preg_match_all('/\(([ivx]+)\)/i', $slice, $m);
-        if (!isset($m[1]) || !is_array($m[1]) || $m[1] === []) return [];
+        if (!isset($m[1]) || !is_array($m[1]) || $m[1] === []) {
+            return [];
+        }
 
         $out = [];
         $seen = [];
         foreach ($m[1] as $v) {
-            $v = strtolower(trim((string)$v));
-            if ($v === '') continue;
+            $v = strtolower(trim((string) $v));
+            if ($v === '') {
+                continue;
+            }
             if (!isset($seen[$v])) {
                 $seen[$v] = true;
                 $out[] = $v;
@@ -973,14 +1079,16 @@ class SplitWorldHeritageJson extends Command
     private function toIso3OrNull(string $code): ?string
     {
         $code = strtoupper(trim($code));
-        if ($code === '') return null;
+        if ($code === '') {
+            return null;
+        }
 
         if (strlen($code) === 3 && ctype_alpha($code)) {
             return $code;
         }
 
         if (!(strlen($code) === 2 && ctype_alpha($code))) {
-            if ((bool)$this->option('strict')) {
+            if ((bool) $this->option('strict')) {
                 throw new InvalidArgumentException("Unknown country code format: {$code}");
             }
             return null;
@@ -992,7 +1100,9 @@ class SplitWorldHeritageJson extends Command
             $list = $normalizer->toIso3List([$code]);
             return $list[0] ?? null;
         } catch (InvalidArgumentException $e) {
-            if ((bool)$this->option('strict')) throw $e;
+            if ((bool) $this->option('strict')) {
+                throw $e;
+            }
             return null;
         }
     }

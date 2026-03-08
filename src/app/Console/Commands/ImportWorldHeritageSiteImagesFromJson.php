@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -17,7 +18,7 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
      * @var string
      */
     protected $signature = 'world-heritage:import-images-json
-        {--path=storage/app/private/unesco/normalized/world_heritage_site_images.json : File or directory}
+        {--path=unesco/normalized/world_heritage_site_images.json : File or directory (local disk relative)}
         {--max=0 : 0 means no limit}
         {--batch=1000}';
 
@@ -93,7 +94,7 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
 
     private function mapRow(array $row): ?array
     {
-        $siteId = $row['world_heritage_site_id'] ?? $row['world_heritage_site_id'] ?? null;
+        $siteId = $row['world_heritage_site_id'] ?? null;
         $url = $row['url'] ?? null;
 
         if (!is_numeric($siteId)) return null;
@@ -137,10 +138,17 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
         if (str_starts_with($path, '/')) return $path;
         if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
 
+        $path = ltrim($path, '/');
+
         if (str_starts_with($path, 'storage/app/')) {
             $path = substr($path, strlen('storage/app/'));
         }
-        return storage_path('app/' . ltrim($path, '/'));
+
+        if (str_starts_with($path, 'private/')) {
+            $path = substr($path, strlen('private/'));
+        }
+
+        return Storage::disk('local')->path($path);
     }
 
     private function collectJsonFiles(string $fullPath): array

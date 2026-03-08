@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use App\Models\WorldHeritage;
 
 class ImportWorldHeritageJapaneseNameFromJson extends Command
@@ -14,12 +15,12 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
      * @var string
      */
     protected $signature = 'world-heritage:import-japanese-names
-        {--path=storage/app/private/unesco/world-heritage-japanese-name-sorted.json : Path to JSON file}
+        {--path=unesco/world-heritage-japanese-name-sorted.json : Path to JSON file (local disk relative)}
         {--dry-run : Do not write to DB}
         {--strict : Fail if any id_no does not exist in DB}
         {--only-empty : Update only when DB name_jp is NULL/empty}
         {--batch=500 : Chunk size}
-        {--missing-out= : Write missing id_no list to this path (e.g. storage/app/private/unesco/missing_ids.txt)}
+        {--missing-out= : Write missing id_no list to this path (e.g. unesco/missing_ids.txt)}
         {--missing-limit=200 : Max missing ids to print to console}';
 
     /**
@@ -27,7 +28,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
      *
      * @var string
      */
-    protected $description = 'Import Japanese names (id_no -> name_jp) into local DB (world_heritage_sites).';
+    protected $description = 'Import Japanese names (id_no -> name_jp) into world_heritage_sites.';
 
     /**
      * Execute the console command.
@@ -35,15 +36,12 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
     public function handle(): int
     {
         $pathOpt = (string) $this->option('path');
+        $path = $this->resolvePath($pathOpt);
 
-        if ($pathOpt !== '' && ($pathOpt[0] === '/' || preg_match('/^[A-Za-z]:\\\\/', $pathOpt) === 1)) {
-            $path = $pathOpt;
-        } else {
-            $path = storage_path('app/' . ltrim($pathOpt, '/'));
-        }
-        $dryRun = (bool)$this->option('dry-run');
-        $onlyEmpty = (bool)$this->option('only-empty');
-        $batch = max(1, (int)$this->option('batch'));
+        $dryRun = (bool) $this->option('dry-run');
+        $strict = (bool) $this->option('strict');
+        $onlyEmpty = (bool) $this->option('only-empty');
+        $batch = max(1, (int) $this->option('batch'));
 
         if (!File::exists($path)) {
             $this->error("File not found: {$path}");
@@ -61,27 +59,41 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
         $map = [];
         $invalid = 0;
 
-        foreach ($data as $i => $row) {
-            if (!is_array($row)) { $invalid++; continue; }
+        foreach ($data as $row) {
+            if (!is_array($row)) {
+                $invalid++;
+                continue;
+            }
 
-            $idNo  = $row['id_no'] ?? $row['id'] ?? null;
-            $nameJp= $row['name_jp'] ?? $row['name_ja'] ?? null;
+            $idNo = $row['id_no'] ?? $row['id'] ?? null;
+            $nameJp = $row['name_jp'] ?? $row['name_ja'] ?? null;
 
-            if (is_string($idNo)) $idNo = trim($idNo);
-            if (is_string($nameJp)) $nameJp = trim($nameJp);
+            if (is_string($idNo)) {
+                $idNo = trim($idNo);
+            }
+            if (is_string($nameJp)) {
+                $nameJp = trim($nameJp);
+            }
 
-            if ($idNo === null || $idNo === '' || !is_numeric($idNo)) { $invalid++; continue; }
-            if ($nameJp === null || !is_string($nameJp) || $nameJp === '') { $invalid++; continue; }
+            if ($idNo === null || $idNo === '' || !is_numeric($idNo)) {
+                $invalid++;
+                continue;
+            }
 
-            $map[(int)$idNo] = $nameJp;
+            if ($nameJp === null || !is_string($nameJp) || $nameJp === '') {
+                $invalid++;
+                continue;
+            }
+
+            $map[(int) $idNo] = $nameJp;
         }
 
-        if (empty($map)) {
+        if ($map === []) {
             $this->error("No valid rows found. invalid/skipped={$invalid}");
             return self::FAILURE;
         }
 
-        $this->info("Loaded: " . count($map) . " id_no->name_jp pairs (invalid/skipped={$invalid})");
+        $this->info('Loaded: ' . count($map) . " id_no->name_jp pairs (invalid/skipped={$invalid})");
 
         $ids = array_keys($map);
         $existingIds = [];
@@ -93,38 +105,46 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
                 ->all();
 
             foreach ($found as $fid) {
-                $existingIds[(int)$fid] = true;
+                $existingIds[(int) $fid] = true;
             }
         }
 
         $missing = array_values(array_diff($ids, array_keys($existingIds)));
-        if (!empty($missing)) {
-            $missingLimit = max(0, (int)$this->option('missing-limit'));
-            $missingOut   = (string)($this->option('missing-out') ?? '');
+
+        if ($missing !== []) {
+            $missingLimit = max(0, (int) $this->option('missing-limit'));
+            $missingOut = (string) ($this->option('missing-out') ?? '');
 
             if ($missingLimit > 0) {
                 $preview = array_slice($missing, 0, $missingLimit);
-                $this->line("Missing id_no (first {$missingLimit}): " . implode(', ', $preview) . (count($missing) > $missingLimit ? ' ...' : ''));
+                $suffix = count($missing) > $missingLimit ? ' ...' : '';
+                $this->line("Missing id_no (first {$missingLimit}): " . implode(', ', $preview) . $suffix);
             }
 
             if ($missingOut !== '') {
-                $fullOut = base_path($missingOut);
+                $fullOut = $this->resolvePath($missingOut);
                 $dir = dirname($fullOut);
+
                 if (!is_dir($dir)) {
                     @mkdir($dir, 0777, true);
                 }
 
                 $content = implode(PHP_EOL, $missing) . PHP_EOL;
                 File::put($fullOut, $content);
-                $this->info("Wrote missing id_no list: {$fullOut} (count=" . count($missing) . ")");
+                $this->info("Wrote missing id_no list: {$fullOut} (count=" . count($missing) . ')');
+            }
+
+            if ($strict) {
+                $this->error('Strict: some id_no values do not exist in DB.');
+                return self::FAILURE;
             }
         }
 
         $targets = array_values(array_diff($ids, $missing));
-        $this->info("Targets in DB: " . count($targets));
+        $this->info('Targets in DB: ' . count($targets));
 
         if ($dryRun) {
-            $this->info("Dry-run: would update name_jp for " . count($targets) . " rows" . ($onlyEmpty ? " (only empty)" : ""));
+            $this->info('Dry-run: would update name_jp for ' . count($targets) . ' rows' . ($onlyEmpty ? ' (only empty)' : ''));
             return self::SUCCESS;
         }
 
@@ -138,11 +158,11 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
                 ->get();
 
             foreach ($rows as $row) {
-                $id = (int)$row->id;
+                $id = (int) $row->id;
 
                 if ($onlyEmpty) {
-                    $cur = is_string($row->name_jp) ? trim($row->name_jp) : '';
-                    if ($cur !== '') {
+                    $current = is_string($row->name_jp) ? trim($row->name_jp) : '';
+                    if ($current !== '') {
                         $skippedAlreadySet++;
                         continue;
                     }
@@ -150,7 +170,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
 
                 $row->name_jp = $map[$id];
                 $row->save();
-                $updated ++;
+                $updated++;
             }
         }
 
@@ -160,5 +180,29 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
         );
 
         return self::SUCCESS;
+    }
+
+    private function resolvePath(string $path): string
+    {
+        $path = trim($path);
+        if ($path === '') {
+            return $path;
+        }
+
+        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
+
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'storage/app/')) {
+            $path = substr($path, strlen('storage/app/'));
+        }
+
+        if (str_starts_with($path, 'private/')) {
+            $path = substr($path, strlen('private/'));
+        }
+
+        return Storage::disk('local')->path($path);
     }
 }

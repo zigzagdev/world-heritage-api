@@ -11,13 +11,13 @@ class DumpUnescoWorldHeritageJson extends Command
     protected $signature = 'world-heritage:dump-unesco
         {--country= : single country}
         {--countries= : comma-separated countries (Japan,France,Canada)}
-        {--countries-file= : storage/app/... file containing country names (one per line)}
+        {--countries-file= : local disk relative file containing country names (one per line)}
         {--all : fetch All records (no country refine)}
         {--generate-countries-file= : generate country list file (e.g. unesco/state_names.txt) from fetched results}
         {--limit=100}
         {--max=0 : 0 means no limit (per country / all)}
-        {--out=unesco/world-heritage-sites.json : output file for single country mode or --all}
-        {--out-dir=unesco/by-country : output dir for multi country mode}
+        {--out=unesco/world-heritage-sites.json : output file for single country mode or --all (local disk relative)}
+        {--out-dir=unesco/by-country : output dir for multi country mode (local disk relative)}
         {--pretty : pretty print JSON}
         {--dry-run : do not write files, only show counts and validation}';
 
@@ -30,7 +30,7 @@ class DumpUnescoWorldHeritageJson extends Command
         $pretty = (bool) $this->option('pretty');
         $dryRun = (bool) $this->option('dry-run');
         $allMode = (bool) $this->option('all');
-        $countriesFileOut = trim((string) $this->option('generate-countries-file'));
+        $countriesFileOut = $this->normalizeLocalDiskPath((string) $this->option('generate-countries-file'));
 
         $baseUrl = 'https://data.unesco.org/api/explore/v2.1/catalog/datasets/whc001/records';
 
@@ -39,7 +39,7 @@ class DumpUnescoWorldHeritageJson extends Command
                 $this->warn('Ignoring --country/--countries/--countries-file because --all was specified.');
             }
 
-            $outPath = (string) $this->option('out');
+            $outPath = $this->normalizeLocalDiskPath((string) $this->option('out'));
 
             $result = $this->dumpAll(
                 baseUrl: $baseUrl,
@@ -50,7 +50,9 @@ class DumpUnescoWorldHeritageJson extends Command
                 dryRun: $dryRun,
             );
 
-            if ($result['ok'] === false) return 1;
+            if ($result['ok'] === false) {
+                return 1;
+            }
 
             if ($countriesFileOut !== '') {
                 $this->generateCountriesFileFromResults(
@@ -71,7 +73,7 @@ class DumpUnescoWorldHeritageJson extends Command
 
         if (count($countries) === 1) {
             $country = $countries[0];
-            $outPath = (string) $this->option('out');
+            $outPath = $this->normalizeLocalDiskPath((string) $this->option('out'));
 
             return $this->dumpOneCountry(
                 baseUrl: $baseUrl,
@@ -84,7 +86,7 @@ class DumpUnescoWorldHeritageJson extends Command
             );
         }
 
-        $outDir = (string) $this->option('out-dir');
+        $outDir = $this->normalizeLocalDiskPath((string) $this->option('out-dir'));
         $ok = 0;
         $ng = 0;
 
@@ -95,8 +97,8 @@ class DumpUnescoWorldHeritageJson extends Command
             $this->line('----');
             $this->info("Target country: {$country}");
             $this->line($dryRun
-                ? "Dry-run: will NOT write file (planned path: storage/app/{$outPath})"
-                : "Will write: storage/app/{$outPath}"
+                ? 'Dry-run: will NOT write file (planned path: ' . Storage::disk('local')->path($outPath) . ')'
+                : 'Will write: ' . Storage::disk('local')->path($outPath)
             );
 
             $code = $this->dumpOneCountry(
@@ -109,8 +111,11 @@ class DumpUnescoWorldHeritageJson extends Command
                 dryRun: $dryRun,
             );
 
-            if ($code === 0) $ok++;
-            else $ng++;
+            if ($code === 0) {
+                $ok++;
+            } else {
+                $ng++;
+            }
         }
 
         $this->info("Done. ok={$ok}, ng={$ng}");
@@ -194,7 +199,7 @@ class DumpUnescoWorldHeritageJson extends Command
         }
 
         Storage::disk('local')->put($outPath, $json);
-        $this->info("Dumped {$fetched} records to storage/app/{$outPath}");
+        $this->info("Dumped {$fetched} records to " . Storage::disk('local')->path($outPath));
 
         return ['ok' => true, 'results' => $resultsAll, 'results_raw' => $resultsRawAll];
     }
@@ -284,7 +289,7 @@ class DumpUnescoWorldHeritageJson extends Command
         }
 
         Storage::disk('local')->put($outPath, $json);
-        $this->info("Dumped {$fetched} records to storage/app/{$outPath}");
+        $this->info("Dumped {$fetched} records to " . Storage::disk('local')->path($outPath));
 
         return 0;
     }
@@ -314,13 +319,13 @@ class DumpUnescoWorldHeritageJson extends Command
         }
 
         if ($dryRun) {
-            $this->info("Dry-run enabled: skipping countries-file write (planned path: storage/app/{$outPath}).");
+            $this->info('Dry-run enabled: skipping countries-file write (planned path: ' . Storage::disk('local')->path($outPath) . ').');
             return;
         }
 
         $content = implode("\n", $countries) . "\n";
         Storage::disk('local')->put($outPath, $content);
-        $this->info("Generated countries file: storage/app/{$outPath}");
+        $this->info('Generated countries file: ' . Storage::disk('local')->path($outPath));
     }
 
     private function fetch(string $baseUrl, ?string $country, int $limit, int $offset): ?array
@@ -357,7 +362,7 @@ class DumpUnescoWorldHeritageJson extends Command
     {
         $single = trim((string) $this->option('country'));
         $csv = trim((string) $this->option('countries'));
-        $file = trim((string) $this->option('countries-file'));
+        $file = $this->normalizeLocalDiskPath((string) $this->option('countries-file'));
 
         if ($csv !== '') {
             $items = array_map('trim', explode(',', $csv));
@@ -366,7 +371,7 @@ class DumpUnescoWorldHeritageJson extends Command
 
         if ($file !== '') {
             if (!Storage::disk('local')->exists($file)) {
-                $this->error("countries-file not found: storage/app/{$file}");
+                $this->error('countries-file not found: ' . Storage::disk('local')->path($file));
                 return [];
             }
             $lines = preg_split('/\R/u', (string) Storage::disk('local')->get($file)) ?: [];
@@ -375,6 +380,26 @@ class DumpUnescoWorldHeritageJson extends Command
         }
 
         return $single !== '' ? [$single] : [];
+    }
+
+    private function normalizeLocalDiskPath(string $path): string
+    {
+        $path = trim($path);
+        if ($path === '') {
+            return '';
+        }
+
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'storage/app/')) {
+            $path = substr($path, strlen('storage/app/'));
+        }
+
+        if (str_starts_with($path, 'private/')) {
+            $path = substr($path, strlen('private/'));
+        }
+
+        return $path;
     }
 
     private function slugifyCountry(string $country): string
@@ -445,17 +470,13 @@ class DumpUnescoWorldHeritageJson extends Command
     {
         $raw = $row['criteria_txt'] ?? null;
 
-        // null / 非文字列 / 空は []（要件通り）
         if (!is_string($raw)) return [];
         $raw = trim($raw);
         if ($raw === '') return [];
 
-        // 1) "(ii) (vi)" のような括弧形式
         preg_match_all('/\(\s*([ivxlcdm]+)\s*\)/i', $raw, $m1);
         $vals = $m1[1] ?? [];
 
-        // 2) 括弧が無い "ii, vi" "ii;vi" みたいな形式にも一応対応
-        //    （UNESCO 側が揺れても死なないように）
         if (!is_array($vals) || $vals === []) {
             preg_match_all('/\b([ivxlcdm]{1,6})\b/i', $raw, $m2);
             $vals = $m2[1] ?? [];
@@ -463,15 +484,12 @@ class DumpUnescoWorldHeritageJson extends Command
 
         if (!is_array($vals) || $vals === []) return [];
 
-        // 正規化 + 重複排除（順序維持）
         $out = [];
         $seen = [];
 
         foreach ($vals as $v) {
             $v = strtolower(trim((string) $v));
             if ($v === '') continue;
-
-            // ローマ数字として妥当なものだけに限定
             if (!preg_match('/^[ivxlcdm]+$/', $v)) continue;
 
             if (!isset($seen[$v])) {

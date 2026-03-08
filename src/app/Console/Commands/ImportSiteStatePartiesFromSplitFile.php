@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Console\Concerns\LoadsJsonRows;
+use Illuminate\Support\Facades\Storage;
 
 class ImportSiteStatePartiesFromSplitFile extends Command
 {
@@ -17,12 +18,11 @@ class ImportSiteStatePartiesFromSplitFile extends Command
      * @var string
      */
     protected $signature = 'world-heritage:import-site-state-parties-split
-        {--in=storage/app/private/unesco/normalized/site_state_parties.json : Input split JSON file path}
+        {--in=unesco/normalized/site_state_parties.json : Input split JSON file path (local disk relative)}
         {--batch=500 : Upsert batch size}
         {--max=0 : 0 means no limit}
         {--dry-run : No DB writes}
         {--strict : Fail if any required mapping is missing (and optionally FK missing)}';
-
     /**
      * The console command description.
      *
@@ -63,12 +63,12 @@ class ImportSiteStatePartiesFromSplitFile extends Command
             if (!is_array($row)) { $skipped++; continue; }
 
             $siteId = $row['world_heritage_site_id'] ?? null;
-            $code = strtoupper(trim((string)($row['state_party_code'] ?? '')));
+            $code = strtoupper(trim((string) ($row['state_party_code'] ?? '')));
 
             if (!(is_int($siteId) || (is_string($siteId) && is_numeric($siteId)))) {
                 $skipped++;
                 if ($strict) {
-                    $this->error("Strict: missing/invalid world_heritage_site_id: " . json_encode($row, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+                    $this->error("Strict: missing/invalid world_heritage_site_id: " . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                     return self::FAILURE;
                 }
                 continue;
@@ -78,7 +78,7 @@ class ImportSiteStatePartiesFromSplitFile extends Command
             if ($code === '' || strlen($code) !== 3) {
                 $skipped++;
                 if ($strict) {
-                    $this->error("Strict: missing/invalid state_party_code: " . json_encode($row, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+                    $this->error("Strict: missing/invalid state_party_code: " . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                     return self::FAILURE;
                 }
                 continue;
@@ -115,7 +115,7 @@ class ImportSiteStatePartiesFromSplitFile extends Command
             $imported += $this->flush($batch, $dryRun);
         }
 
-        $this->info("site_state_parties upserted: {$imported}, skipped: {$skipped}" . ($dryRun ? " (dry-run)" : ""));
+        $this->info("site_state_parties upserted: {$imported}, skipped: {$skipped}" . ($dryRun ? ' (dry-run)' : ''));
         return self::SUCCESS;
     }
 
@@ -147,10 +147,16 @@ class ImportSiteStatePartiesFromSplitFile extends Command
             return $path;
         }
 
+        $path = ltrim($path, '/');
+
         if (str_starts_with($path, 'storage/app/')) {
             $path = substr($path, strlen('storage/app/'));
         }
 
-        return storage_path('app/' . ltrim($path, '/'));
+        if (str_starts_with($path, 'private/')) {
+            $path = substr($path, strlen('private/'));
+        }
+
+        return Storage::disk('local')->path($path);
     }
 }
