@@ -24,6 +24,12 @@ jobs:
           coverage: none
           tools: composer
 
+      - name: Debug files
+        run: |
+          pwd
+          ls -la
+          find . -maxdepth 4 -name composer.json
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
