@@ -5,7 +5,11 @@ on:
     types: [opened, synchronize]
     paths:
       - "src/**/*.php"
-      - "server/composer.lock"
+      - "src/composer.lock"
+  push:
+    paths:
+      - "src/**/*.php"
+      - "src/composer.lock"
   workflow_dispatch: {}
 
 jobs:
@@ -16,8 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [ '7.4', '8.0', '8.1', '8.2' ]
-        Laravel: [ '8.*', '9.*', '10.*' ]
+        php: ['7.4', '8.0', '8.1', '8.2']
+        Laravel: ['8.*', '9.*', '10.*']
 
     services:
       mysql:
@@ -35,6 +39,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -49,7 +54,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/composer
-          key: ${{ runner.os }}-composer-${{ hashFiles('server/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('src/composer.lock') }}
 
       - name: Install dependencies
         run: |
@@ -68,7 +73,7 @@ jobs:
       - name: Set environment variables
         run: |
           {
-            echo "DB_CONNECTION=mysql" 
+            echo "DB_CONNECTION=mysql"
             echo "DB_HOST=127.0.0.1"
             echo "DB_PORT=${{ secrets.DB_PORT }}"
             echo "DB_DATABASE=${{ secrets.DB_DATABASE }}"
@@ -80,7 +85,6 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate --env=testing
         working-directory: ./src
-
         env:
           APP_ENV: testing
 
@@ -89,18 +93,15 @@ jobs:
           php artisan config:clear
           php artisan config:cache
         working-directory: ./src
-
         env:
           APP_ENV: testing
 
       - name: Run migrations
         run: php artisan migrate --env=testing
         working-directory: ./src
-
         env:
           APP_ENV: testing
 
       - name: Run tests
-        run: |
-          ./vendor/bin/phpunit --stop-on-failure --testdox
+        run: ./vendor/bin/phpunit --stop-on-failure --testdox
         working-directory: ./src
