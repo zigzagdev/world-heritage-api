@@ -41,13 +41,11 @@
         }
     },
     "scripts": {
-        "ci:rector": "vendor/bin/rector process --dry-run",
-        "ci:phpunit": "php artisan test",
-        "ci:mago": "mago analyze --reporting-format=github",
-        "ci:quality": [
-            "@ci:rector",
-            "@ci:phpunit",
-            "@ci:mago"
+        "mago:analyze": "mago analyze",
+        "rector:maintenance": "vendor/bin/rector process --config rector-maintenance.php",
+        "maintenance:weekly": [
+            "@mago:analyze",
+            "@rector:maintenance"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
