@@ -185,7 +185,7 @@ class ImportWorldHeritageFromJson extends Command
 
         dd([
             'row_image_url' => $row['image_url'] ?? null,
-            'mapped_image_url' => $this->toNullableString($row['image_url'] ?? null),
+            'mapped_image_url' => $this->toNullableString($row['image_url'] ?? null)
         ]);
 
         WorldHeritage::query()->upsert(
