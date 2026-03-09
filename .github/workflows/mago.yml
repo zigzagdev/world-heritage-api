@@ -1,0 +1,34 @@
+name: Mago
+
+on:
+  workflow_run:
+    workflows: ["PHPUnit"]
+    types:
+      - completed
+
+jobs:
+  mago:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Setup Mago
+        uses: nhedger/setup-mago@v1
+
+      - name: Run Mago
+        run: mago analyze --reporting-format=github

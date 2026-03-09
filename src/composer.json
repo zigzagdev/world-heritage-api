@@ -41,6 +41,14 @@
         }
     },
     "scripts": {
+        "ci:rector": "vendor/bin/rector process --dry-run",
+        "ci:phpunit": "php artisan test",
+        "ci:mago": "mago analyze --reporting-format=github",
+        "ci:quality": [
+            "@ci:rector",
+            "@ci:phpunit",
+            "@ci:mago"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

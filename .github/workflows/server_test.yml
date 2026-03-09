@@ -1,107 +1,31 @@
-name: server tests
+name: PHPUnit
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    paths:
-      - "src/**/*.php"
-      - "src/composer.lock"
-  push:
-    paths:
-      - "src/**/*.php"
-      - "src/composer.lock"
-  workflow_dispatch: {}
+  workflow_run:
+    workflows: ["Rector"]
+    types:
+      - completed
 
 jobs:
-  laravel:
+  phpunit:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 11
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php: ['7.4', '8.0', '8.1', '8.2']
-        Laravel: ['8.*', '9.*', '10.*']
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
-          MYSQL_USER: ${{ secrets.DB_USERNAME }}
-          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          TZ: Asia/Tokyo
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd "mysqladmin ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
-          tools: composer:v2
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/composer
-          key: ${{ runner.os }}-composer-${{ hashFiles('src/composer.lock') }}
+          coverage: none
+          tools: composer
 
       - name: Install dependencies
-        run: |
-          composer install --prefer-dist --no-progress --no-suggest
-          composer dump-autoload -o
-        working-directory: ./src
+        run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Copy .env.ci to .env.testing
-        run: cp .env.ci .env.testing
-        working-directory: ./src
-
-      - name: Ensure newline at end of .env.testing
-        run: printf '\n' >> .env.testing
-        working-directory: ./src
-
-      - name: Set environment variables
-        run: |
-          {
-            echo "DB_CONNECTION=mysql"
-            echo "DB_HOST=127.0.0.1"
-            echo "DB_PORT=${{ secrets.DB_PORT }}"
-            echo "DB_DATABASE=${{ secrets.DB_DATABASE }}"
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}"
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
-          } >> .env.testing
-        working-directory: ./src
-
-      - name: Generate application key
-        run: php artisan key:generate --env=testing
-        working-directory: ./src
-        env:
-          APP_ENV: testing
-
-      - name: Cache config and routes
-        run: |
-          php artisan config:clear
-          php artisan config:cache
-        working-directory: ./src
-        env:
-          APP_ENV: testing
-
-      - name: Run migrations
-        run: php artisan migrate --env=testing
-        working-directory: ./src
-        env:
-          APP_ENV: testing
-
-      - name: Run tests
-        run: ./vendor/bin/phpunit --stop-on-failure --testdox
-        working-directory: ./src
+      - name: Run PHPUnit
+        run: php artisan test
