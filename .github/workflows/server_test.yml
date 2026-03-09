@@ -35,7 +35,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -76,7 +75,6 @@ jobs:
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}"
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
           } >> .env.testing
-
         working-directory: ./src
 
       - name: Generate application key
