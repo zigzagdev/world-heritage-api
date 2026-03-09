@@ -183,6 +183,11 @@ class ImportWorldHeritageFromJson extends Command
     {
         $updateColumns = array_values(array_diff(array_keys($batch[0]), ['id']));
 
+        dd([
+            'row_image_url' => $row['image_url'] ?? null,
+            'mapped_image_url' => $this->toNullableString($row['image_url'] ?? null),
+        ]);
+
         WorldHeritage::query()->upsert(
             $batch,
             ['id'],
