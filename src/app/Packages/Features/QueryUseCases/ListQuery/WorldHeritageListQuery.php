@@ -124,11 +124,13 @@ class  WorldHeritageListQuery
 
     public function getStatePartyCodesOrFallback(): array
     {
-        if ($this->state_parties_codes)
+        if ($this->state_parties_codes) {
             return $this->state_parties_codes;
+        }
 
-        if (!$this->state_party)
+        if (!$this->state_party) {
             return [];
+        }
 
         $parts = preg_split('/[;,\s]+/', strtoupper($this->state_party));
         $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{2}$/', $country));

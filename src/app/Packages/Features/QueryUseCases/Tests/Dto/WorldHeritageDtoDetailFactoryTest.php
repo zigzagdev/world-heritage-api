@@ -18,7 +18,7 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
         parent::tearDown();
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             'id' => 1133,
@@ -97,15 +97,15 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
 
     public function test_check_return_data_type(): void
     {
-        $result = WorldHeritageDetailFactory::build(self::arrayData());
+        $result = WorldHeritageDetailFactory::build($this->arrayData());
 
         $this->assertInstanceOf(WorldHeritageDto::class, $result);
     }
 
     public function test_check_return_data_value(): void
     {
-        $result = WorldHeritageDetailFactory::build(self::arrayData());
-        $input = self::arrayData();
+        $result = WorldHeritageDetailFactory::build($this->arrayData());
+        $input = $this->arrayData();
 
         $this->assertSame($input['id'], $result->getId());
         $this->assertSame($input['official_name'], $result->getOfficialName());

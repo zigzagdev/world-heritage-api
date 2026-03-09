@@ -75,7 +75,7 @@ class GcsSignedUrlAdapter implements SignedUrlPort
         $prefix = rtrim($cfg['root'] ?? $cfg['path_prefix'] ?? '', '/');
 
         $objectPath = ltrim(
-            ($prefix ? "{$prefix}/" : '') . ltrim($key, '/'),
+            ($prefix !== '' && $prefix !== '0' ? "{$prefix}/" : '') . ltrim($key, '/'),
             '/'
         );
 

@@ -263,7 +263,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
                 foreach ($countries as $country) {
                     $code = strtoupper($country->state_party_code);
-                    if (!$code) {
+                    if ($code === '' || $code === '0') {
                         continue;
                     }
 
@@ -396,7 +396,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         $statePartiesMeta = [];
         foreach ($countryRelations as $country) {
             $code = strtoupper($country->state_party_code);
-            if (!$code) {
+            if ($code === '' || $code === '0') {
                 continue;
             }
 

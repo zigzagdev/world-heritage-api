@@ -39,7 +39,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
         }
     }
 
-    private static function arraySingleData(): array
+    private function arraySingleData(): array
     {
         return [
             [
@@ -69,7 +69,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
         ];
     }
 
-    private static function arrayMultiData(): array
+    private function arrayMultiData(): array
     {
         return [
             [
@@ -243,7 +243,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['state_parties'] ?? [],
                     $data['state_parties_meta'] ?? []
                 );
-            }, self::arrayMultiData())
+            }, $this->arrayMultiData())
         );
 
         $this->assertInstanceOf(WorldHeritageEntityCollection::class, $collection);
@@ -276,7 +276,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['state_parties'] ?? [],
                     $data['state_parties_meta'] ?? []
                 );
-            }, self::arrayMultiData())
+            }, $this->arrayMultiData())
         );
 
         $this->assertCount(2, $collection->getAllHeritages());

@@ -40,7 +40,9 @@ class ImportWorldHeritageFromJson extends Command
         $now = Carbon::now();
 
         foreach ($files as $filePath) {
-            if ($max > 0 && $imported >= $max) break;
+            if ($max > 0 && $imported >= $max) {
+                break;
+            }
 
             $results = $this->loadResultsFromJsonFile($filePath);
             if ($results === null) {
@@ -49,7 +51,9 @@ class ImportWorldHeritageFromJson extends Command
             }
 
             foreach ($results as $row) {
-                if ($max > 0 && $imported >= $max) break;
+                if ($max > 0 && $imported >= $max) {
+                    break;
+                }
                 if (!is_array($row)) { $skipped++; continue; }
 
                 $mapped = $this->mapFromUnescoApiRow($row);
@@ -68,7 +72,7 @@ class ImportWorldHeritageFromJson extends Command
             }
         }
 
-        if ($batch) {
+        if ($batch !== []) {
             $imported += $this->flushBatch($batch);
         }
 
@@ -136,7 +140,9 @@ class ImportWorldHeritageFromJson extends Command
         }
 
         $stateParty = is_string($stateParty) ? strtoupper(trim($stateParty)) : null;
-        if ($stateParty === '') $stateParty = null;
+        if ($stateParty === '') {
+            $stateParty = null;
+        }
         if ($stateParty !== null && !preg_match('/^[A-Z]{3}$/', $stateParty)) {
             $stateParty = null;
         }
@@ -156,7 +162,7 @@ class ImportWorldHeritageFromJson extends Command
             'latitude' => $this->toNullableFloat($lat),
             'longitude' => $this->toNullableFloat($lon),
             'short_description' => $row['short_description'] ?? $row['description'] ?? null,
-            'image_url' => $row['image_url'] ?? $row['image'] ?? null,
+            'image_url' => $row['image_url'] ?? null,
             'thumbnail_image_id' => null,
             'unesco_site_url' => $row['url'] ?? null,
         ];
@@ -164,29 +170,30 @@ class ImportWorldHeritageFromJson extends Command
 
     private function criteriaFromTxt(mixed $raw): array
     {
-        if ($raw === null) return [];
+        if ($raw === null) {
+            return [];
+        }
 
         $s = trim((string) $raw);
-        if ($s === '') return [];
+        if ($s === '') {
+            return [];
+        }
 
         preg_match_all('/\(([^)]+)\)/', $s, $m);
-        if (!empty($m[1])) {
+        if (isset($m[1]) && $m[1] !== []) {
             return array_values(array_filter(array_map(fn($v) => trim((string) $v), $m[1])));
         }
 
         $s = trim($s, " \t\n\r\0\x0B()");
-        if ($s === '') return [];
+        if ($s === '') {
+            return [];
+        }
         return [$s];
     }
 
     private function flushBatch(array $batch): int
     {
         $updateColumns = array_values(array_diff(array_keys($batch[0]), ['id']));
-
-        dd([
-            'row_image_url' => $row['image_url'] ?? null,
-            'mapped_image_url' => $this->toNullableString($row['image_url'] ?? null)
-        ]);
 
         WorldHeritage::query()->upsert(
             $batch,
@@ -214,11 +221,17 @@ class ImportWorldHeritageFromJson extends Command
         }
 
         $states = $row['states'] ?? $row['state_party'] ?? null;
-        if (is_string($states)) $candidates[] = $states;
-        if (is_array($states))  $candidates[] = $states[0] ?? null;
+        if (is_string($states)) {
+            $candidates[] = $states;
+        }
+        if (is_array($states)) {
+            $candidates[] = $states[0] ?? null;
+        }
 
         foreach ($candidates as $c) {
-            if (!is_string($c)) continue;
+            if (!is_string($c)) {
+                continue;
+            }
             $c = strtoupper(trim($c));
             if ($c !== '' && preg_match('/^[A-Z]{3}$/', $c)) {
                 return $c;
@@ -230,17 +243,23 @@ class ImportWorldHeritageFromJson extends Command
 
     private function toNullableInt(mixed $v): ?int
     {
-        if ($v === null || $v === '') return null;
+        if ($v === null || $v === '') {
+            return null;
+        }
         return is_numeric($v) ? (int) $v : null;
     }
 
     private function toNullableFloat(mixed $value): ?float
     {
-        if ($value === null || $value === '') return null;
+        if ($value === null || $value === '') {
+            return null;
+        }
 
         if (is_string($value)) {
             $value = str_replace(',', '', trim($value));
-            if ($value === '') return null;
+            if ($value === '') {
+                return null;
+            }
         }
 
         return is_numeric($value) ? (float) $value : null;
@@ -248,9 +267,13 @@ class ImportWorldHeritageFromJson extends Command
 
     private function toNullableBool(mixed $value): ?bool
     {
-        if ($value === null || $value === '') return null;
+        if ($value === null || $value === '') {
+            return null;
+        }
 
-        if (is_bool($value)) return $value;
+        if (is_bool($value)) {
+            return $value;
+        }
 
         if (is_int($value) || is_float($value)) {
             return ((int) $value) === 1;
@@ -258,13 +281,19 @@ class ImportWorldHeritageFromJson extends Command
 
         if (is_string($value)) {
             $v = strtolower(trim($value));
-            if ($v === '') return null;
+            if ($v === '') {
+                return null;
+            }
 
             $true  = ['1', 'true', 't', 'yes', 'y', 'on'];
             $false = ['0', 'false', 'f', 'no', 'n', 'off'];
 
-            if (in_array($v, $true, true))  return true;
-            if (in_array($v, $false, true)) return false;
+            if (in_array($v, $true, true)) {
+                return true;
+            }
+            if (in_array($v, $false, true)) {
+                return false;
+            }
         }
 
         return null;

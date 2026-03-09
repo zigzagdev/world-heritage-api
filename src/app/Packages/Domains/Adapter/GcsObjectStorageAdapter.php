@@ -89,7 +89,7 @@ class GcsObjectStorageAdapter implements ObjectStoragePort
         $prefix = rtrim($config['root'] ?? $config['path_prefix'] ?? '', '/');
 
         $objectPath = ltrim(
-            ($prefix ? "{$prefix}/" : '') . ltrim($key, '/'),
+            ($prefix !== '' && $prefix !== '0' ? "{$prefix}/" : '') . ltrim($key, '/'),
             '/'
         );
 
@@ -106,7 +106,7 @@ class GcsObjectStorageAdapter implements ObjectStoragePort
         $prefix = rtrim($cfg['root'] ?? $cfg['path_prefix'] ?? '', '/');
 
         $objectPath = ltrim(
-            ($prefix ? "{$prefix}/" : '') . ltrim($key, '/'),
+            ($prefix !== '' && $prefix !== '0' ? "{$prefix}/" : '') . ltrim($key, '/'),
             '/'
         );
 

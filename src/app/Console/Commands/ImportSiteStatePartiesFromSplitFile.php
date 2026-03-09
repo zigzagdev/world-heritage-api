@@ -59,13 +59,15 @@ class ImportSiteStatePartiesFromSplitFile extends Command
         $now = Carbon::now();
 
         foreach ($rows as $row) {
-            if ($max > 0 && $imported >= $max) break;
+            if ($max > 0 && $imported >= $max) {
+                break;
+            }
             if (!is_array($row)) { $skipped++; continue; }
 
             $siteId = $row['world_heritage_site_id'] ?? null;
             $code = strtoupper(trim((string) ($row['state_party_code'] ?? '')));
 
-            if (!(is_int($siteId) || (is_string($siteId) && is_numeric($siteId)))) {
+            if (!is_int($siteId) && !(is_string($siteId) && is_numeric($siteId))) {
                 $skipped++;
                 if ($strict) {
                     $this->error("Strict: missing/invalid world_heritage_site_id: " . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
@@ -111,7 +113,7 @@ class ImportSiteStatePartiesFromSplitFile extends Command
             }
         }
 
-        if ($batch) {
+        if ($batch !== []) {
             $imported += $this->flush($batch, $dryRun);
         }
 
@@ -121,7 +123,9 @@ class ImportSiteStatePartiesFromSplitFile extends Command
 
     private function flush(array $rows, bool $dryRun): int
     {
-        if ($dryRun) return count($rows);
+        if ($dryRun) {
+            return count($rows);
+        }
 
         DB::table('site_state_parties')->upsert(
             $rows,
@@ -134,14 +138,18 @@ class ImportSiteStatePartiesFromSplitFile extends Command
 
     private function toNullableInt(mixed $v): ?int
     {
-        if ($v === null || $v === '') return null;
+        if ($v === null || $v === '') {
+            return null;
+        }
         return is_numeric($v) ? (int) $v : null;
     }
 
     private function resolvePath(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return $path;
+        if ($path === '') {
+            return $path;
+        }
 
         if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
             return $path;

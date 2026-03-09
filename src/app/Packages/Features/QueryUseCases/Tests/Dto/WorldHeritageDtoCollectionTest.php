@@ -39,7 +39,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
         }
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             [
@@ -133,7 +133,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
 
     public function test_collection_check_type(): void
     {
-        $data = self::arrayData();
+        $data = $this->arrayData();
         $dtoCollection = WorldHeritageDtoCollectionFactory::build($data);
 
         $this->assertInstanceOf(WorldHeritageDtoCollection::class, $dtoCollection);
@@ -141,7 +141,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
 
     public function test_collection_check_value_without_thumbnail(): void
     {
-        $data = self::arrayData();
+        $data = $this->arrayData();
         $dtoCollection = WorldHeritageDtoCollectionFactory::build($data);
 
         $expectFirstCode = [
@@ -172,7 +172,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
         ];
 
         foreach ($dtoCollection->getHeritages() as $index => $dto) {
-            $eachData = self::arrayData()[$index];
+            $eachData = $this->arrayData()[$index];
 
             $this->assertSame($eachData['id'], $dto->getId());
             $this->assertSame($eachData['official_name'], $dto->getOfficialName());
@@ -200,7 +200,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
 
     public function test_summary_array_matches_expected_with_thumbnail(): void
     {
-        $data = self::arrayData();
+        $data = $this->arrayData();
         $dtoCollection = WorldHeritageDtoCollectionFactory::build($data);
 
         $summary = $dtoCollection->toSummaryArray();

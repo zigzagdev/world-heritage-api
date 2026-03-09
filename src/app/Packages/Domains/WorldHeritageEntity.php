@@ -4,6 +4,7 @@ namespace App\Packages\Domains;
 
 class WorldHeritageEntity
 {
+    public $nameJp;
     public function __construct(
         public int $id,
         public string $officialName,
@@ -22,7 +23,7 @@ class WorldHeritageEntity
         public ?float $areaHectares = null,
         public ?float $bufferZoneHectares = null,
         public ?string $shortDescription = null,
-        public ?ImageEntityCollection $collection,
+        public ?ImageEntityCollection $collection = null,
         public ?string $unescoSiteUrl = null,
         private array $statePartyCodes = [],
         private array $statePartyMeta = []
@@ -146,18 +147,22 @@ class WorldHeritageEntity
     public function getPrimaryStatePartyCode(): ?string
     {
         foreach ($this->statePartyMeta as $code => $meta) {
-            if (!empty($meta['is_primary'])) return $code;
+            if (!empty($meta['is_primary'])) {
+                return $code;
+            }
         }
         return $this->statePartyCodes[0] ?? null;
     }
 
     public function getStatePartyCodesOrFallback(): array
     {
-        if ($this->statePartyCodes)
+        if ($this->statePartyCodes) {
             return $this->statePartyCodes;
+        }
 
-        if (!$this->stateParty)
+        if (!$this->stateParty) {
             return [];
+        }
 
         $parts = preg_split('/[;,\s]+/', strtoupper($this->stateParty));
         $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{3}$/', $country));

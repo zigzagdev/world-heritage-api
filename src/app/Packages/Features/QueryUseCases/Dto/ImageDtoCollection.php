@@ -34,7 +34,9 @@ class ImageDtoCollection
     public function primary(): ?ImageDto
     {
         foreach ($this->images as $img) {
-            if ($img->isPrimary) return $img;
+            if ($img->isPrimary) {
+                return $img;
+            }
         }
         return $this->first();
     }

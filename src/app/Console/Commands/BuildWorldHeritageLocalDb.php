@@ -55,8 +55,12 @@ class BuildWorldHeritageLocalDb extends Command
             '--site-judgements-out' => $siteJudgementsOut,
             '--exceptions-out' => $exceptionsOut,
         ];
-        if ($pretty) $splitArgs['--pretty'] = true;
-        if ($clean)  $splitArgs['--clean'] = true;
+        if ($pretty) {
+            $splitArgs['--pretty'] = true;
+        }
+        if ($clean) {
+            $splitArgs['--clean'] = true;
+        }
         $this->mustRun('world-heritage:split-json', $splitArgs);
 
         $this->info('Running: import-countries-split');

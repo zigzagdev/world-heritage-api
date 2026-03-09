@@ -17,7 +17,7 @@ class ImageDtoTest extends TestCase
         parent::tearDown();
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             'id' => 9,
@@ -30,10 +30,10 @@ class ImageDtoTest extends TestCase
     public function test_image_dto_check_type(): void
     {
         $dto = new ImageDto(
-            self::arrayData()['id'],
-            self::arrayData()['url'],
-            self::arrayData()['sortOrder'],
-            self::arrayData()['isPrimary'],
+            $this->arrayData()['id'],
+            $this->arrayData()['url'],
+            $this->arrayData()['sortOrder'],
+            $this->arrayData()['isPrimary'],
         );
 
         $this->assertInstanceOf(ImageDto::class, $dto);
@@ -42,15 +42,15 @@ class ImageDtoTest extends TestCase
     public function test_image_dto_check_value(): void
     {
         $dto = new ImageDto(
-            self::arrayData()['id'],
-            self::arrayData()['url'],
-            self::arrayData()['sortOrder'],
-            self::arrayData()['isPrimary'],
+            $this->arrayData()['id'],
+            $this->arrayData()['url'],
+            $this->arrayData()['sortOrder'],
+            $this->arrayData()['isPrimary'],
         );
 
-        $this->assertSame(self::arrayData()['id'], $dto->getId());
-        $this->assertSame(self::arrayData()['url'], $dto->getUrl());
-        $this->assertSame(self::arrayData()['sortOrder'], $dto->getSortOrder());
-        $this->assertSame(self::arrayData()['isPrimary'], $dto->getIsPrimary());
+        $this->assertSame($this->arrayData()['id'], $dto->getId());
+        $this->assertSame($this->arrayData()['url'], $dto->getUrl());
+        $this->assertSame($this->arrayData()['sortOrder'], $dto->getSortOrder());
+        $this->assertSame($this->arrayData()['isPrimary'], $dto->getIsPrimary());
     }
 }

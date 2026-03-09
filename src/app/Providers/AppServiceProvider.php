@@ -37,10 +37,12 @@ class AppServiceProvider extends ServiceProvider
     {
         Storage::extend('gcs', function ($app, $config) {
             $clientConfig = [];
-            if (!empty($config['project_id']))
+            if (!empty($config['project_id'])) {
                 $clientConfig['projectId'] = $config['project_id'];
-            if (!empty($config['key_file']))
+            }
+            if (!empty($config['key_file'])) {
                 $clientConfig['keyFilePath'] = $config['key_file'];
+            }
 
             $storageClient = new StorageClient($clientConfig);
             $bucket = $storageClient->bucket($config['bucket']);

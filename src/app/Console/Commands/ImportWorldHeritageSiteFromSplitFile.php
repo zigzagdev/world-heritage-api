@@ -57,7 +57,9 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
         $now = Carbon::now();
 
         foreach ($rows as $row) {
-            if ($max > 0 && $imported >= $max) break;
+            if ($max > 0 && $imported >= $max) {
+                break;
+            }
             if (!is_array($row)) { $skipped++; continue; }
 
             $id = $row['id'] ?? null;
@@ -102,7 +104,7 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
             }
         }
 
-        if ($batch) {
+        if ($batch !== []) {
             $imported += $this->flush($batch, $dryRun);
         }
 
@@ -112,7 +114,9 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
 
     private function flush(array $rows, bool $dryRun): int
     {
-        if ($dryRun) return count($rows);
+        if ($dryRun) {
+            return count($rows);
+        }
 
         $update = array_values(array_diff(array_keys($rows[0]), ['id', 'created_at']));
 
@@ -128,10 +132,14 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
     private function loadRows(string $path): ?array
     {
         $raw = @file_get_contents($path);
-        if ($raw === false) return null;
+        if ($raw === false) {
+            return null;
+        }
 
         $json = json_decode($raw, true);
-        if (!is_array($json)) return null;
+        if (!is_array($json)) {
+            return null;
+        }
 
         if (array_key_exists('results', $json)) {
             return is_array($json['results']) ? $json['results'] : null;
@@ -142,7 +150,9 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
     private function resolvePath(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return $path;
+        if ($path === '') {
+            return $path;
+        }
 
         if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
             return $path;
@@ -161,33 +171,51 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
 
     private function toNullableString(mixed $v): ?string
     {
-        if (!is_string($v)) return null;
+        if (!is_string($v)) {
+            return null;
+        }
         $s = trim($v);
         return $s === '' ? null : $s;
     }
 
     private function toNullableInt(mixed $v): ?int
     {
-        if ($v === null || $v === '') return null;
+        if ($v === null || $v === '') {
+            return null;
+        }
         return is_numeric($v) ? (int) $v : null;
     }
 
     private function toNullableFloat(mixed $v): ?float
     {
-        if ($v === null || $v === '') return null;
-        if (is_string($v)) $v = str_replace(',', '', trim($v));
+        if ($v === null || $v === '') {
+            return null;
+        }
+        if (is_string($v)) {
+            $v = str_replace(',', '', trim($v));
+        }
         return is_numeric($v) ? (float) $v : null;
     }
 
     private function toNullableBoolInt(mixed $v): ?int
     {
-        if ($v === null || $v === '') return null;
-        if (is_bool($v)) return $v ? 1 : 0;
-        if (is_int($v) || is_float($v)) return ((int) $v) === 1 ? 1 : 0;
+        if ($v === null || $v === '') {
+            return null;
+        }
+        if (is_bool($v)) {
+            return $v ? 1 : 0;
+        }
+        if (is_int($v) || is_float($v)) {
+            return ((int) $v) === 1 ? 1 : 0;
+        }
         if (is_string($v)) {
             $s = strtolower(trim($v));
-            if (in_array($s, ['1', 'true', 't', 'yes', 'y', 'on'], true)) return 1;
-            if (in_array($s, ['0', 'false', 'f', 'no', 'n', 'off'], true)) return 0;
+            if (in_array($s, ['1', 'true', 't', 'yes', 'y', 'on'], true)) {
+                return 1;
+            }
+            if (in_array($s, ['0', 'false', 'f', 'no', 'n', 'off'], true)) {
+                return 0;
+            }
         }
         return null;
     }

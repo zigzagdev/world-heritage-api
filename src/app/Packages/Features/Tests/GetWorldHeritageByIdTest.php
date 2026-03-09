@@ -30,7 +30,7 @@ class GetWorldHeritageByIdTest extends TestCase
             };
         });
 
-        $this->id = self::arrayData()['id'];
+        $this->id = $this->arrayData()['id'];
 
         $seeder = new DatabaseSeeder();
         $seeder->run();
@@ -54,7 +54,7 @@ class GetWorldHeritageByIdTest extends TestCase
         }
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             'id' => 1133,
@@ -175,7 +175,7 @@ class GetWorldHeritageByIdTest extends TestCase
 
         $this->assertIsArray($data['images']);
 
-        if (!empty($data['images'])) {
+        if (isset($data['images']) && $data['images'] !== []) {
             $this->assertArrayHasKey('id', $data['images'][0]);
             $this->assertArrayHasKey('url', $data['images'][0]);
             $this->assertArrayHasKey('sort_order', $data['images'][0]);

@@ -161,7 +161,7 @@ class UpdateWorldHeritageListQueryCollectionFactoryTest extends TestCase
         ];
     }
 
-    private static function wrongData(): array
+    private function wrongData(): array
     {
         return [
             [
@@ -270,6 +270,6 @@ class UpdateWorldHeritageListQueryCollectionFactoryTest extends TestCase
     public function test_wrong_data(): void
     {
         $this->expectException(DomainException::class);
-        UpdateWorldHeritageListQueryCollectionFactory::build(self::wrongData());
+        UpdateWorldHeritageListQueryCollectionFactory::build($this->wrongData());
     }
 }

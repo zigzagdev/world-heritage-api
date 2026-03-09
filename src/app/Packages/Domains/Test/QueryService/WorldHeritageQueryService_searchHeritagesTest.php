@@ -18,6 +18,7 @@ use Illuminate\Support\Collection;
 
 final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
 {
+    private \App\Packages\Domains\WorldHeritageQueryService $queryService;
     protected function setUp(): void
     {
         parent::setUp();

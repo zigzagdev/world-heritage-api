@@ -14,7 +14,7 @@ class PaginationViewModel
     public function toArray(): array
     {
         $items = [];
-        if ($this->viewModelCollection) {
+        if ($this->viewModelCollection instanceof \App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModelCollection) {
             $items = $this->viewModelCollection->toArray();
         } else {
             $dtoCollection = $this->pagination->getCollection();

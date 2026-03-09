@@ -32,7 +32,7 @@ class WorldHeritageEntityTest extends TestCase
         }
     }
 
-    private static function arraySingleData(): array
+    private function arraySingleData(): array
     {
         return [
             'id' => 668,
@@ -63,7 +63,7 @@ class WorldHeritageEntityTest extends TestCase
         ];
     }
 
-    private static function arrayMultiData(): array
+    private function arrayMultiData(): array
     {
         return [
             'id' => 1133,
@@ -113,27 +113,27 @@ class WorldHeritageEntityTest extends TestCase
     public function test_entity_check_single_type(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arraySingleData()['id'],
-            self::arraySingleData()['official_name'],
-            self::arraySingleData()['name'],
-            self::arraySingleData()['country'],
-            self::arraySingleData()['region'],
-            self::arraySingleData()['category'],
-            self::arraySingleData()['year_inscribed'],
-            self::arraySingleData()['latitude'],
-            self::arraySingleData()['longitude'],
-            self::arraySingleData()['is_endangered'],
-            self::arraySingleData()['name_jp'],
+            $this->arraySingleData()['id'],
+            $this->arraySingleData()['official_name'],
+            $this->arraySingleData()['name'],
+            $this->arraySingleData()['country'],
+            $this->arraySingleData()['region'],
+            $this->arraySingleData()['category'],
+            $this->arraySingleData()['year_inscribed'],
+            $this->arraySingleData()['latitude'],
+            $this->arraySingleData()['longitude'],
+            $this->arraySingleData()['is_endangered'],
+            $this->arraySingleData()['name_jp'],
             null, // countryNameJp
-            self::arraySingleData()['state_party'],
-            self::arraySingleData()['criteria'],
-            self::arraySingleData()['area_hectares'],
-            self::arraySingleData()['buffer_zone_hectares'],
-            self::arraySingleData()['short_description'],
+            $this->arraySingleData()['state_party'],
+            $this->arraySingleData()['criteria'],
+            $this->arraySingleData()['area_hectares'],
+            $this->arraySingleData()['buffer_zone_hectares'],
+            $this->arraySingleData()['short_description'],
             null, // collection (ImageEntityCollection)
-            self::arraySingleData()['unesco_site_url'],
-            self::arraySingleData()['state_parties'] ?? [],
-            self::arraySingleData()['state_parties_meta'] ?? []
+            $this->arraySingleData()['unesco_site_url'],
+            $this->arraySingleData()['state_parties'] ?? [],
+            $this->arraySingleData()['state_parties_meta'] ?? []
         );
 
         $this->assertInstanceOf(WorldHeritageEntity::class, $entity);
@@ -142,73 +142,73 @@ class WorldHeritageEntityTest extends TestCase
     public function test_entity_check_single_value(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arraySingleData()['id'],
-            self::arraySingleData()['official_name'],
-            self::arraySingleData()['name'],
-            self::arraySingleData()['country'],
-            self::arraySingleData()['region'],
-            self::arraySingleData()['category'],
-            self::arraySingleData()['year_inscribed'],
-            self::arraySingleData()['latitude'],
-            self::arraySingleData()['longitude'],
-            self::arraySingleData()['is_endangered'],
-            self::arraySingleData()['name_jp'],
+            $this->arraySingleData()['id'],
+            $this->arraySingleData()['official_name'],
+            $this->arraySingleData()['name'],
+            $this->arraySingleData()['country'],
+            $this->arraySingleData()['region'],
+            $this->arraySingleData()['category'],
+            $this->arraySingleData()['year_inscribed'],
+            $this->arraySingleData()['latitude'],
+            $this->arraySingleData()['longitude'],
+            $this->arraySingleData()['is_endangered'],
+            $this->arraySingleData()['name_jp'],
             null,
-            self::arraySingleData()['state_party'],
-            self::arraySingleData()['criteria'],
-            self::arraySingleData()['area_hectares'],
-            self::arraySingleData()['buffer_zone_hectares'],
-            self::arraySingleData()['short_description'],
+            $this->arraySingleData()['state_party'],
+            $this->arraySingleData()['criteria'],
+            $this->arraySingleData()['area_hectares'],
+            $this->arraySingleData()['buffer_zone_hectares'],
+            $this->arraySingleData()['short_description'],
             null,
-            self::arraySingleData()['unesco_site_url'],
-            self::arraySingleData()['state_parties'] ?: [],
-            self::arraySingleData()['state_parties_meta'] ?: []
+            $this->arraySingleData()['unesco_site_url'],
+            $this->arraySingleData()['state_parties'] ?: [],
+            $this->arraySingleData()['state_parties_meta'] ?: []
         );
 
-        $this->assertEquals(self::arraySingleData()['id'], $entity->getId());
-        $this->assertEquals(self::arraySingleData()['official_name'], $entity->getOfficialName());
-        $this->assertEquals(self::arraySingleData()['name'], $entity->getName());
-        $this->assertEquals(self::arraySingleData()['country'], $entity->getCountry());
-        $this->assertEquals(self::arraySingleData()['region'], $entity->getRegion());
-        $this->assertEquals(self::arraySingleData()['category'], $entity->getCategory());
-        $this->assertEquals(self::arraySingleData()['year_inscribed'], $entity->getYearInscribed());
-        $this->assertEquals(self::arraySingleData()['latitude'], $entity->getLatitude());
-        $this->assertEquals(self::arraySingleData()['longitude'], $entity->getLongitude());
-        $this->assertEquals(self::arraySingleData()['is_endangered'], $entity->isEndangered());
-        $this->assertEquals(self::arraySingleData()['state_party'], $entity->getStateParty());
-        $this->assertEquals(self::arraySingleData()['criteria'], $entity->getCriteria());
-        $this->assertEquals(self::arraySingleData()['area_hectares'], $entity->getAreaHectares());
-        $this->assertEquals(self::arraySingleData()['buffer_zone_hectares'], $entity->getBufferZoneHectares());
-        $this->assertEquals(self::arraySingleData()['short_description'], $entity->getShortDescription());
-        $this->assertEquals(self::arraySingleData()['unesco_site_url'], $entity->getUnescoSiteUrl());
+        $this->assertEquals($this->arraySingleData()['id'], $entity->getId());
+        $this->assertEquals($this->arraySingleData()['official_name'], $entity->getOfficialName());
+        $this->assertEquals($this->arraySingleData()['name'], $entity->getName());
+        $this->assertEquals($this->arraySingleData()['country'], $entity->getCountry());
+        $this->assertEquals($this->arraySingleData()['region'], $entity->getRegion());
+        $this->assertEquals($this->arraySingleData()['category'], $entity->getCategory());
+        $this->assertEquals($this->arraySingleData()['year_inscribed'], $entity->getYearInscribed());
+        $this->assertEquals($this->arraySingleData()['latitude'], $entity->getLatitude());
+        $this->assertEquals($this->arraySingleData()['longitude'], $entity->getLongitude());
+        $this->assertEquals($this->arraySingleData()['is_endangered'], $entity->isEndangered());
+        $this->assertEquals($this->arraySingleData()['state_party'], $entity->getStateParty());
+        $this->assertEquals($this->arraySingleData()['criteria'], $entity->getCriteria());
+        $this->assertEquals($this->arraySingleData()['area_hectares'], $entity->getAreaHectares());
+        $this->assertEquals($this->arraySingleData()['buffer_zone_hectares'], $entity->getBufferZoneHectares());
+        $this->assertEquals($this->arraySingleData()['short_description'], $entity->getShortDescription());
+        $this->assertEquals($this->arraySingleData()['unesco_site_url'], $entity->getUnescoSiteUrl());
         $this->assertSame(['JPN'], $entity->getStatePartyCodes());
-        $this->assertSame(self::arraySingleData()['state_parties_meta'], $entity->getStatePartyMeta());
+        $this->assertSame($this->arraySingleData()['state_parties_meta'], $entity->getStatePartyMeta());
     }
 
     public function test_entity_check_multi_type(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arrayMultiData()['id'],
-            self::arrayMultiData()['official_name'],
-            self::arrayMultiData()['name'],
-            self::arrayMultiData()['country'],
-            self::arrayMultiData()['region'],
-            self::arrayMultiData()['category'],
-            self::arrayMultiData()['year_inscribed'],
-            self::arrayMultiData()['latitude'],
-            self::arrayMultiData()['longitude'],
-            self::arrayMultiData()['is_endangered'],
-            self::arrayMultiData()['name_jp'],
+            $this->arrayMultiData()['id'],
+            $this->arrayMultiData()['official_name'],
+            $this->arrayMultiData()['name'],
+            $this->arrayMultiData()['country'],
+            $this->arrayMultiData()['region'],
+            $this->arrayMultiData()['category'],
+            $this->arrayMultiData()['year_inscribed'],
+            $this->arrayMultiData()['latitude'],
+            $this->arrayMultiData()['longitude'],
+            $this->arrayMultiData()['is_endangered'],
+            $this->arrayMultiData()['name_jp'],
             null,
-            self::arrayMultiData()['state_party'],
-            self::arrayMultiData()['criteria'],
-            self::arrayMultiData()['area_hectares'],
-            self::arrayMultiData()['buffer_zone_hectares'],
-            self::arrayMultiData()['short_description'],
+            $this->arrayMultiData()['state_party'],
+            $this->arrayMultiData()['criteria'],
+            $this->arrayMultiData()['area_hectares'],
+            $this->arrayMultiData()['buffer_zone_hectares'],
+            $this->arrayMultiData()['short_description'],
             null,
-            self::arrayMultiData()['unesco_site_url'],
-            self::arrayMultiData()['state_parties'] ?? [],
-            self::arrayMultiData()['state_parties_meta'] ?? []
+            $this->arrayMultiData()['unesco_site_url'],
+            $this->arrayMultiData()['state_parties'] ?? [],
+            $this->arrayMultiData()['state_parties_meta'] ?? []
         );
 
         $this->assertInstanceOf(WorldHeritageEntity::class, $entity);
@@ -217,48 +217,48 @@ class WorldHeritageEntityTest extends TestCase
     public function test_entity_check_multi_value(): void
     {
         $entity = new WorldHeritageEntity(
-            self::arrayMultiData()['id'],
-            self::arrayMultiData()['official_name'],
-            self::arrayMultiData()['name'],
-            self::arrayMultiData()['country'],
-            self::arrayMultiData()['region'],
-            self::arrayMultiData()['category'],
-            self::arrayMultiData()['year_inscribed'],
-            self::arrayMultiData()['latitude'],
-            self::arrayMultiData()['longitude'],
-            self::arrayMultiData()['is_endangered'],
-            self::arrayMultiData()['name_jp'],
+            $this->arrayMultiData()['id'],
+            $this->arrayMultiData()['official_name'],
+            $this->arrayMultiData()['name'],
+            $this->arrayMultiData()['country'],
+            $this->arrayMultiData()['region'],
+            $this->arrayMultiData()['category'],
+            $this->arrayMultiData()['year_inscribed'],
+            $this->arrayMultiData()['latitude'],
+            $this->arrayMultiData()['longitude'],
+            $this->arrayMultiData()['is_endangered'],
+            $this->arrayMultiData()['name_jp'],
             null, // countryNameJp
-            self::arrayMultiData()['state_party'],
-            self::arrayMultiData()['criteria'],
-            self::arrayMultiData()['area_hectares'],
-            self::arrayMultiData()['buffer_zone_hectares'],
-            self::arrayMultiData()['short_description'],
+            $this->arrayMultiData()['state_party'],
+            $this->arrayMultiData()['criteria'],
+            $this->arrayMultiData()['area_hectares'],
+            $this->arrayMultiData()['buffer_zone_hectares'],
+            $this->arrayMultiData()['short_description'],
             null, // collection
-            self::arrayMultiData()['unesco_site_url'],
-            self::arrayMultiData()['state_parties'] ?? [],
-            self::arrayMultiData()['state_parties_meta'] ?? []
+            $this->arrayMultiData()['unesco_site_url'],
+            $this->arrayMultiData()['state_parties'] ?? [],
+            $this->arrayMultiData()['state_parties_meta'] ?? []
         );
 
-        $this->assertEquals(self::arrayMultiData()['id'], $entity->getId());
-        $this->assertEquals(self::arrayMultiData()['official_name'], $entity->getOfficialName());
-        $this->assertEquals(self::arrayMultiData()['name'], $entity->getName());
-        $this->assertEquals(self::arrayMultiData()['country'], $entity->getCountry());
-        $this->assertEquals(self::arrayMultiData()['region'], $entity->getRegion());
-        $this->assertEquals(self::arrayMultiData()['category'], $entity->getCategory());
-        $this->assertEquals(self::arrayMultiData()['year_inscribed'], $entity->getYearInscribed());
-        $this->assertEquals(self::arrayMultiData()['is_endangered'], $entity->isEndangered());
-        $this->assertEquals(self::arrayMultiData()['latitude'], $entity->getLatitude());
-        $this->assertEquals(self::arrayMultiData()['longitude'], $entity->getLongitude());
-        $this->assertEquals(self::arrayMultiData()['criteria'], $entity->getCriteria());
-        $this->assertEquals(self::arrayMultiData()['area_hectares'], $entity->getAreaHectares());
-        $this->assertEquals(self::arrayMultiData()['buffer_zone_hectares'], $entity->getBufferZoneHectares());
-        $this->assertEquals(self::arrayMultiData()['short_description'], $entity->getShortDescription());
-        $this->assertEquals(self::arrayMultiData()['unesco_site_url'], $entity->getUnescoSiteUrl());
-        $this->assertEquals(self::arrayMultiData()['state_parties'], $entity->getStatePartyCodes());
-        $this->assertEquals(self::arrayMultiData()['state_parties_meta'], $entity->getStatePartyMeta());
+        $this->assertEquals($this->arrayMultiData()['id'], $entity->getId());
+        $this->assertEquals($this->arrayMultiData()['official_name'], $entity->getOfficialName());
+        $this->assertEquals($this->arrayMultiData()['name'], $entity->getName());
+        $this->assertEquals($this->arrayMultiData()['country'], $entity->getCountry());
+        $this->assertEquals($this->arrayMultiData()['region'], $entity->getRegion());
+        $this->assertEquals($this->arrayMultiData()['category'], $entity->getCategory());
+        $this->assertEquals($this->arrayMultiData()['year_inscribed'], $entity->getYearInscribed());
+        $this->assertEquals($this->arrayMultiData()['is_endangered'], $entity->isEndangered());
+        $this->assertEquals($this->arrayMultiData()['latitude'], $entity->getLatitude());
+        $this->assertEquals($this->arrayMultiData()['longitude'], $entity->getLongitude());
+        $this->assertEquals($this->arrayMultiData()['criteria'], $entity->getCriteria());
+        $this->assertEquals($this->arrayMultiData()['area_hectares'], $entity->getAreaHectares());
+        $this->assertEquals($this->arrayMultiData()['buffer_zone_hectares'], $entity->getBufferZoneHectares());
+        $this->assertEquals($this->arrayMultiData()['short_description'], $entity->getShortDescription());
+        $this->assertEquals($this->arrayMultiData()['unesco_site_url'], $entity->getUnescoSiteUrl());
+        $this->assertEquals($this->arrayMultiData()['state_parties'], $entity->getStatePartyCodes());
+        $this->assertEquals($this->arrayMultiData()['state_parties_meta'], $entity->getStatePartyMeta());
         $this->assertEquals(
-            self::arrayMultiData()['state_parties_meta']['SVK'],
+            $this->arrayMultiData()['state_parties_meta']['SVK'],
             $entity->getStatePartyMeta()['SVK']
         );
     }

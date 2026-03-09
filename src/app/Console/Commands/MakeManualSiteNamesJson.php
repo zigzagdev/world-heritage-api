@@ -77,7 +77,9 @@ class MakeManualSiteNamesJson extends Command
         $rows = $result['rows'] ?? [];
 
         $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-        if ($pretty) $flags |= JSON_PRETTY_PRINT;
+        if ($pretty) {
+            $flags |= JSON_PRETTY_PRINT;
+        }
 
         $json = json_encode($rows, $flags);
         if ($json === false) {
@@ -113,7 +115,9 @@ class MakeManualSiteNamesJson extends Command
         foreach ($lines as $i => $raw) {
             $lineNo = $i + 1;
             $line = trim((string) $raw);
-            if ($line === '') continue;
+            if ($line === '') {
+                continue;
+            }
 
             if (!$this->isSiteLine($line)) {
                 if (!$this->isCountryLikeLine($line)) {
@@ -167,12 +171,16 @@ class MakeManualSiteNamesJson extends Command
     private function isCountryLikeLine(string $line): bool
     {
         $line = trim($line);
-        if ($line === '') return false;
-        if (preg_match('/^(#|\/\/|;|※)/u', $line) === 1) return false;
-        if (preg_match('/^[-=]{3,}$/u', $line) === 1) return false;
-        if ($this->isSiteLine($line)) return false;
-
-        return true;
+        if ($line === '') {
+            return false;
+        }
+        if (preg_match('/^(#|\/\/|;|※)/u', $line) === 1) {
+            return false;
+        }
+        if (preg_match('/^[-=]{3,}$/u', $line) === 1) {
+            return false;
+        }
+        return !$this->isSiteLine($line);
     }
 
     private function containsJapanese(string $s): bool
@@ -200,7 +208,9 @@ class MakeManualSiteNamesJson extends Command
     private function isSiteLine(string $line): bool
     {
         $line = trim($line);
-        if ($line === '') return false;
+        if ($line === '') {
+            return false;
+        }
 
         return preg_match('/[\(（]\s*\d{4}.*[\)）]\s*$/u', $line) === 1;
     }
@@ -208,9 +218,15 @@ class MakeManualSiteNamesJson extends Command
     private function resolvePath(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return $path;
-        if (str_starts_with($path, '/')) return $path;
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
+        if ($path === '') {
+            return $path;
+        }
+        if (str_starts_with($path, '/')) {
+            return $path;
+        }
+        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
 
         return base_path($path);
     }
@@ -218,7 +234,9 @@ class MakeManualSiteNamesJson extends Command
     private function toLocalDiskPath(string $path): string
     {
         $trimPath = trim($path);
-        if ($trimPath === '') return $trimPath;
+        if ($trimPath === '') {
+            return $trimPath;
+        }
 
         if (str_starts_with($trimPath, 'storage/app/')) {
             return substr($trimPath, strlen('storage/app/'));

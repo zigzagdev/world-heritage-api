@@ -229,7 +229,9 @@ class SplitCountryJson extends Command
                 if ($names !== [] && count($names) === count($codes3)) {
                     foreach ($codes3 as $idx => $code) {
                         $en = trim((string)($names[$idx] ?? ''));
-                        if ($en === '') $en = $code;
+                        if ($en === '') {
+                            $en = $code;
+                        }
 
                         $this->upsertCountryRow(
                             countryMap: $countryMap,
@@ -349,7 +351,9 @@ class SplitCountryJson extends Command
     private function upsertCountryRow(array &$countryMap, string $code, ?string $nameEn, array $existingJp, ?string $region): void
     {
         $code = strtoupper(trim($code));
-        if ($code === '') return;
+        if ($code === '') {
+            return;
+        }
 
         if (!isset($countryMap[$code])) {
             $countryMap[$code] = [
@@ -382,10 +386,14 @@ class SplitCountryJson extends Command
 
     private function normalizeRegionCode(mixed $v): ?string
     {
-        if (!is_string($v)) return null;
+        if (!is_string($v)) {
+            return null;
+        }
 
         $code = strtoupper(trim($v));
-        if ($code === '') return null;
+        if ($code === '') {
+            return null;
+        }
 
         $allowed = ['EUR', 'AFR', 'APA', 'ARB', 'LAC'];
         return in_array($code, $allowed, true) ? $code : null;
@@ -397,7 +405,9 @@ class SplitCountryJson extends Command
             return str_ends_with($path, '.json') ? [$path] : [];
         }
 
-        if (!is_dir($path)) return [];
+        if (!is_dir($path)) {
+            return [];
+        }
 
         $files = [];
         $rii = new \RecursiveIteratorIterator(
@@ -417,13 +427,21 @@ class SplitCountryJson extends Command
     private function resolvePath(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return $path;
+        if ($path === '') {
+            return $path;
+        }
 
-        if (str_starts_with($path, '/')) return $path;
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
+        if (str_starts_with($path, '/')) {
+            return $path;
+        }
+        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
 
         $storageCandidate = storage_path('app/' . ltrim($path, '/'));
-        if (file_exists($storageCandidate)) return $storageCandidate;
+        if (file_exists($storageCandidate)) {
+            return $storageCandidate;
+        }
 
         return base_path($path);
     }
@@ -439,26 +457,42 @@ class SplitCountryJson extends Command
 
     private function readExistingCountriesJpMap(string $storageOutPath): array
     {
-        if (!Storage::disk('local')->exists($storageOutPath)) return [];
+        if (!Storage::disk('local')->exists($storageOutPath)) {
+            return [];
+        }
 
         $raw = (string) Storage::disk('local')->get($storageOutPath);
         $json = json_decode($raw, true);
-        if (!is_array($json)) return [];
+        if (!is_array($json)) {
+            return [];
+        }
 
         $rows = $this->extractRows($json);
-        if ($rows === null) return [];
+        if ($rows === null) {
+            return [];
+        }
 
         $map = [];
         foreach ($rows as $row) {
-            if (!is_array($row)) continue;
+            if (!is_array($row)) {
+                continue;
+            }
             $code = strtoupper(trim((string)($row['state_party_code'] ?? '')));
-            if ($code === '') continue;
+            if ($code === '') {
+                continue;
+            }
 
             $jp = $row['name_jp'] ?? null;
-            if (is_string($jp)) $jp = trim($jp);
-            if ($jp === '') $jp = null;
+            if (is_string($jp)) {
+                $jp = trim($jp);
+            }
+            if ($jp === '') {
+                $jp = null;
+            }
 
-            if ($jp !== null) $map[$code] = $jp;
+            if ($jp !== null) {
+                $map[$code] = $jp;
+            }
         }
 
         ksort($map, SORT_STRING);
@@ -467,13 +501,19 @@ class SplitCountryJson extends Command
 
     private function normalizeStringList(mixed $v): array
     {
-        if (!is_array($v)) return [];
+        if (!is_array($v)) {
+            return [];
+        }
 
         $out = [];
         foreach ($v as $x) {
-            if (!is_string($x)) continue;
+            if (!is_string($x)) {
+                continue;
+            }
             $x = trim($x);
-            if ($x === '') continue;
+            if ($x === '') {
+                continue;
+            }
             $out[] = $x;
         }
         return $this->uniqueList($out);
@@ -485,21 +525,29 @@ class SplitCountryJson extends Command
 
         if (is_array($v)) {
             foreach ($v as $x) {
-                if (!is_string($x)) continue;
+                if (!is_string($x)) {
+                    continue;
+                }
                 $x = strtoupper(trim($x));
-                if ($x !== '') $out[] = $x;
+                if ($x !== '') {
+                    $out[] = $x;
+                }
             }
             return $this->uniqueList($out);
         }
 
         if (is_string($v)) {
             $s = trim($v);
-            if ($s === '') return [];
+            if ($s === '') {
+                return [];
+            }
 
             $parts = preg_split('/[,\|;\/\s]+/', $s) ?: [];
             foreach ($parts as $p) {
                 $p = strtoupper(trim($p));
-                if ($p !== '') $out[] = $p;
+                if ($p !== '') {
+                    $out[] = $p;
+                }
             }
             return $this->uniqueList($out);
         }
@@ -512,7 +560,9 @@ class SplitCountryJson extends Command
         $seen = [];
         $out = [];
         foreach ($list as $v) {
-            if (isset($seen[$v])) continue;
+            if (isset($seen[$v])) {
+                continue;
+            }
             $seen[$v] = true;
             $out[] = $v;
         }
@@ -522,7 +572,9 @@ class SplitCountryJson extends Command
     private function encodeJson(mixed $payload, bool $pretty): ?string
     {
         $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-        if ($pretty) $flags |= JSON_PRETTY_PRINT;
+        if ($pretty) {
+            $flags |= JSON_PRETTY_PRINT;
+        }
 
         $json = json_encode($payload, $flags);
         return $json === false ? null : $json;

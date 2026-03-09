@@ -51,34 +51,34 @@ class GetWorldHeritageByIdUseCaseTest extends TestCase
         $queryService
             ->shouldReceive('getHeritageById')
             ->andReturn(new WorldHeritageDto(
-                self::arrayData()['id'],
-                self::arrayData()['official_name'],
-                self::arrayData()['name'],
-                self::arrayData()['country'],
-                self::arrayData()['country_name_jp'] ?? null,
-                self::arrayData()['region'],
-                self::arrayData()['category'],
-                self::arrayData()['year_inscribed'],
-                self::arrayData()['latitude'],
-                self::arrayData()['longitude'],
-                self::arrayData()['is_endangered'],
-                self::arrayData()['heritage_name_jp'] ?? null,
-                self::arrayData()['state_party'],
-                self::arrayData()['criteria'],
-                self::arrayData()['area_hectares'],
-                self::arrayData()['buffer_zone_hectares'],
-                self::arrayData()['short_description'],
+                $this->arrayData()['id'],
+                $this->arrayData()['official_name'],
+                $this->arrayData()['name'],
+                $this->arrayData()['country'],
+                $this->arrayData()['country_name_jp'] ?? null,
+                $this->arrayData()['region'],
+                $this->arrayData()['category'],
+                $this->arrayData()['year_inscribed'],
+                $this->arrayData()['latitude'],
+                $this->arrayData()['longitude'],
+                $this->arrayData()['is_endangered'],
+                $this->arrayData()['heritage_name_jp'] ?? null,
+                $this->arrayData()['state_party'],
+                $this->arrayData()['criteria'],
+                $this->arrayData()['area_hectares'],
+                $this->arrayData()['buffer_zone_hectares'],
+                $this->arrayData()['short_description'],
                 null,
                 null,
-                self::arrayData()['unesco_site_url'],
-                self::arrayData()['state_party_codes'],
-                self::arrayData()['state_parties_meta'],
+                $this->arrayData()['unesco_site_url'],
+                $this->arrayData()['state_party_codes'],
+                $this->arrayData()['state_parties_meta'],
             ));
 
         return $queryService;
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             'id' => 1133,
@@ -145,7 +145,7 @@ class GetWorldHeritageByIdUseCaseTest extends TestCase
     {
         $useCase = new GetWorldHeritageByIdUseCase($this->mockQueryService());
 
-        $result = $useCase->handle(self::arrayData()['id']);
+        $result = $useCase->handle($this->arrayData()['id']);
 
         $this->assertInstanceOf(WorldHeritageDto::class, $result);
     }

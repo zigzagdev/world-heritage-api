@@ -46,17 +46,14 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
             // Requirement: ISO3 -> query='' and filter by state_party_codes:<ISO3>
             $filters[] = 'state_party_codes:' . $this->escapeToken($query->countryIso3);
             $queryString = '';
-        } else {
-            if ($this->hasValue($query->countryName)) {
-                $filters[] = $this->buildCountryOrFilter($query->countryName);
-
-                /**
-                 * IMPORTANT:
-                 * Do not blank out query here.
-                 * If the input was not a real country (e.g. "japan" typo / random word),
-                 * we still want full-text search to work rather than returning "top hits".
-                 */
-            }
+        } elseif ($this->hasValue($query->countryName)) {
+            $filters[] = $this->buildCountryOrFilter($query->countryName);
+            /**
+             * IMPORTANT:
+             * Do not blank out query here.
+             * If the input was not a real country (e.g. "japan" typo / random word),
+             * we still want full-text search to work rather than returning "top hits".
+             */
         }
 
         /**
@@ -89,7 +86,7 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
          * Never execute Algolia with query='' AND no filters,
          * otherwise you will get "top results" unrelated to the user input.
          */
-        $hasAnyFilter = !empty($filters);
+        $hasAnyFilter = $filters !== [];
         $hasQueryText = $this->hasValue($queryString);
 
         if (!$hasAnyFilter && !$hasQueryText) {

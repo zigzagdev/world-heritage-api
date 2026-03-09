@@ -55,7 +55,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         }
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return
             [
