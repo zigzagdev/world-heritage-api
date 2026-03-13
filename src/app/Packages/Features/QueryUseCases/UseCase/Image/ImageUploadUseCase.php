@@ -48,6 +48,7 @@ class ImageUploadUseCase
             }
             $images[] = new ImageEntity(
                 id: null,
+                sortOrder: (int)$row['sort_order'],
                 worldHeritageId: null,
                 disk: 'gcs',
                 path: $key,
@@ -55,7 +56,6 @@ class ImageUploadUseCase
                 height: null,
                 format: pathinfo($key, PATHINFO_EXTENSION) ?: null,
                 checksum: null,
-                sortOrder: (int)$row['sort_order'],
                 alt: $row['alt'] ?? null,
                 credit: $row['credit'] ?? null
             );

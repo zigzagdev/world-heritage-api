@@ -19,7 +19,7 @@ class WorldHeritageDetailViewModelFactoryTest extends TestCase
         parent::tearDown();
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             'id' => 1133,
@@ -87,83 +87,83 @@ class WorldHeritageDetailViewModelFactoryTest extends TestCase
 
         $dto
             ->shouldReceive('getId')
-            ->andReturn(self::arrayData()['id']);
+            ->andReturn($this->arrayData()['id']);
 
         $dto
             ->shouldReceive('getOfficialName')
-            ->andReturn(self::arrayData()['official_name']);
+            ->andReturn($this->arrayData()['official_name']);
 
         $dto
             ->shouldReceive('getName')
-            ->andReturn(self::arrayData()['name']);
+            ->andReturn($this->arrayData()['name']);
 
         $dto
             ->shouldReceive('getHeritageNameJp')
-            ->andReturn(self::arrayData()['heritage_name_jp']);
+            ->andReturn($this->arrayData()['heritage_name_jp']);
 
         $dto
             ->shouldReceive('getCountry')
-            ->andReturn(self::arrayData()['country']);
+            ->andReturn($this->arrayData()['country']);
 
         $dto
             ->shouldReceive('getRegion')
-            ->andReturn(self::arrayData()['region']);
+            ->andReturn($this->arrayData()['region']);
 
         $dto
             ->shouldReceive('getStateParty')
-            ->andReturn(self::arrayData()['state_party']);
+            ->andReturn($this->arrayData()['state_party']);
 
         $dto
             ->shouldReceive('getCategory')
-            ->andReturn(self::arrayData()['category']);
+            ->andReturn($this->arrayData()['category']);
 
         $dto
             ->shouldReceive('getCriteria')
-            ->andReturn(self::arrayData()['criteria']);
+            ->andReturn($this->arrayData()['criteria']);
 
         $dto
             ->shouldReceive('getYearInscribed')
-            ->andReturn(self::arrayData()['year_inscribed']);
+            ->andReturn($this->arrayData()['year_inscribed']);
 
         $dto
             ->shouldReceive('getAreaHectares')
-            ->andReturn(self::arrayData()['area_hectares']);
+            ->andReturn($this->arrayData()['area_hectares']);
 
         $dto
             ->shouldReceive('getBufferZoneHectares')
-            ->andReturn(self::arrayData()['buffer_zone_hectares']);
+            ->andReturn($this->arrayData()['buffer_zone_hectares']);
 
         $dto
             ->shouldReceive('isEndangered')
-            ->andReturn(self::arrayData()['is_endangered']);
+            ->andReturn($this->arrayData()['is_endangered']);
 
         $dto
             ->shouldReceive('getLatitude')
-            ->andReturn(self::arrayData()['latitude']);
+            ->andReturn($this->arrayData()['latitude']);
 
         $dto
             ->shouldReceive('getLongitude')
-            ->andReturn(self::arrayData()['longitude']);
+            ->andReturn($this->arrayData()['longitude']);
 
         $dto
             ->shouldReceive('getShortDescription')
-            ->andReturn(self::arrayData()['short_description']);
+            ->andReturn($this->arrayData()['short_description']);
 
         $dto
             ->shouldReceive('getUnescoSiteUrl')
-            ->andReturn(self::arrayData()['unesco_site_url']);
+            ->andReturn($this->arrayData()['unesco_site_url']);
 
         $dto
             ->shouldReceive('getStatePartyCodes')
-            ->andReturn(self::arrayData()['state_parties']);
+            ->andReturn($this->arrayData()['state_parties']);
 
         $dto
             ->shouldReceive('getStatePartiesMeta')
-            ->andReturn(self::arrayData()['state_parties_meta'] ?? []);
+            ->andReturn($this->arrayData()['state_parties_meta'] ?? []);
 
         $dto
             ->shouldReceive('getImages')
-            ->andReturn(self::arrayData()['images'] ?? []);
+            ->andReturn($this->arrayData()['images'] ?? []);
 
         return $dto;
     }
@@ -183,7 +183,7 @@ class WorldHeritageDetailViewModelFactoryTest extends TestCase
             $this->mockDto()
         );
 
-        foreach (self::arrayData() as $key => $value) {
+        foreach ($this->arrayData() as $key => $value) {
             if ($key === 'is_endangered') {
                 continue;
             } elseif ( $key === 'state_parties') {

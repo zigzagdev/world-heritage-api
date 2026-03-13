@@ -130,7 +130,9 @@ class CountrySeeder extends Seeder
         foreach ($regionsIso2 as $regionName => $codes2) {
             foreach ($codes2 as $code2) {
                 $code3 = $iso2to3[$code2] ?? null;
-                if ($code3) $regionByIso3[$code3] = $regionName;
+                if ($code3 !== '' && $code3 !== '0') {
+                    $regionByIso3[$code3] = $regionName;
+                }
             }
         }
 

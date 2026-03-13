@@ -129,11 +129,9 @@ class SplitWorldHeritageImageJson extends Command
         }
 
         $dir = dirname($outPath);
-        if (!is_dir($dir)) {
-            if (!@mkdir($dir, 0777, true) && !is_dir($dir)) {
-                $this->error("Failed to create output dir: {$dir}");
-                return self::FAILURE;
-            }
+        if (!is_dir($dir) && (!@mkdir($dir, 0777, true) && !is_dir($dir))) {
+            $this->error("Failed to create output dir: {$dir}");
+            return self::FAILURE;
         }
 
         if (@file_put_contents($outPath, $encoded) === false) {
@@ -153,15 +151,21 @@ class SplitWorldHeritageImageJson extends Command
 
         if (is_array($images) && $images !== []) {
             foreach ($images as $p) {
-                if (!is_string($p)) continue;
+                if (!is_string($p)) {
+                    continue;
+                }
                 $p = trim($p);
-                if ($p !== '') $urls[] = $p;
+                if ($p !== '') {
+                    $urls[] = $p;
+                }
             }
         } elseif (is_string($images)) {
             $parts = preg_split('/\s*,\s*/', trim($images)) ?: [];
             foreach ($parts as $p) {
                 $p = trim($p);
-                if ($p !== '') $urls[] = $p;
+                if ($p !== '') {
+                    $urls[] = $p;
+                }
             }
         }
 
@@ -169,7 +173,9 @@ class SplitWorldHeritageImageJson extends Command
             $main = $row['main_image_url']['url'] ?? null;
             if (is_string($main)) {
                 $main = trim($main);
-                if ($main !== '') $urls[] = $main;
+                if ($main !== '') {
+                    $urls[] = $main;
+                }
             }
         }
 
@@ -177,7 +183,9 @@ class SplitWorldHeritageImageJson extends Command
         $out = [];
 
         foreach ($urls as $u) {
-            if (isset($seen[$u])) continue;
+            if (isset($seen[$u])) {
+                continue;
+            }
             $seen[$u] = true;
             $out[] = $u;
         }
@@ -188,10 +196,16 @@ class SplitWorldHeritageImageJson extends Command
     private function resolvePathToFile(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return $path;
+        if ($path === '') {
+            return $path;
+        }
 
-        if (str_starts_with($path, '/')) return $path;
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
+        if (str_starts_with($path, '/')) {
+            return $path;
+        }
+        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
 
         if (str_starts_with($path, 'storage/app/')) {
             $path = substr($path, strlen('storage/app/'));
@@ -202,7 +216,9 @@ class SplitWorldHeritageImageJson extends Command
     private function encodeJson(mixed $payload, bool $pretty): ?string
     {
         $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-        if ($pretty) $flags |= JSON_PRETTY_PRINT;
+        if ($pretty) {
+            $flags |= JSON_PRETTY_PRINT;
+        }
 
         $json = json_encode($payload, $flags);
         return $json === false ? null : $json;

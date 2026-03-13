@@ -57,7 +57,9 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
         $now = Carbon::now();
 
         foreach ($files as $filePath) {
-            if ($max > 0 && $imported >= $max) break;
+            if ($max > 0 && $imported >= $max) {
+                break;
+            }
 
             $results = $this->loadResultsFromJsonFile($filePath);
             if ($results === null) {
@@ -66,7 +68,9 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
             }
 
             foreach ($results as $row) {
-                if ($max > 0 && $imported >= $max) break;
+                if ($max > 0 && $imported >= $max) {
+                    break;
+                }
                 if (!is_array($row)) { $skipped++; continue; }
 
                 $mapped = $this->mapRow($row);
@@ -84,7 +88,7 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
             }
         }
 
-        if ($batch) {
+        if ($batch !== []) {
             $imported += $this->flushBatch($batch);
         }
 
@@ -97,13 +101,19 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
         $siteId = $row['world_heritage_site_id'] ?? null;
         $url = $row['url'] ?? null;
 
-        if (!is_numeric($siteId)) return null;
+        if (!is_numeric($siteId)) {
+            return null;
+        }
         $siteId = (int) $siteId;
 
-        if (!is_string($url)) return null;
+        if (!is_string($url)) {
+            return null;
+        }
 
         $url = trim($url);
-        if ($url === '') return null;
+        if ($url === '') {
+            return null;
+        }
 
         $urlHash = hash('sha256', $url);
 
@@ -112,7 +122,7 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
             'url' => $url,
             'url_hash' => $urlHash,
             'sort_order' => isset($row['sort_order']) ? (int) $row['sort_order'] : 0,
-            'is_primary' => !empty($row['is_primary']) ? 1 : 0,
+            'is_primary' => empty($row['is_primary']) ? 0 : 1,
         ];
     }
 
@@ -133,10 +143,16 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
     private function resolvePath(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return $path;
+        if ($path === '') {
+            return $path;
+        }
 
-        if (str_starts_with($path, '/')) return $path;
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) return $path;
+        if (str_starts_with($path, '/')) {
+            return $path;
+        }
+        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
+            return $path;
+        }
 
         $path = ltrim($path, '/');
 
@@ -175,10 +191,14 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
     private function loadResultsFromJsonFile(string $filePath): ?array
     {
         $raw = @file_get_contents($filePath);
-        if ($raw === false) return null;
+        if ($raw === false) {
+            return null;
+        }
 
         $json = json_decode($raw, true);
-        if (!is_array($json)) return null;
+        if (!is_array($json)) {
+            return null;
+        }
 
         if (array_key_exists('results', $json)) {
             return is_array($json['results']) ? $json['results'] : null;

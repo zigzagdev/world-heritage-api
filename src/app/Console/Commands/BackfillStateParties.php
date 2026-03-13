@@ -42,11 +42,13 @@ class BackfillStateParties extends Command
                     ->filter(fn($c) => strlen($c) === 2)
                     ->values();
 
-                if ($codes->isEmpty()) continue;
+                if ($codes->isEmpty()) {
+                    continue;
+                }
 
                 $valid = Country::whereIn('state_party_code', $codes)->pluck('state_party_code')->all();
                 $missing = array_diff($codes->all(), $valid);
-                if ($missing) {
+                if ($missing !== []) {
                     Log::warning("Unknown codes for site {$site->id}: ".implode(',', $missing));
                 }
 

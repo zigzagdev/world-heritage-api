@@ -82,13 +82,13 @@ class WorldHeritageDetailFactory
                 $fieldValue = [$fieldValue];
             }
 
-            if (is_array($fieldValue) && !empty($fieldValue)) {
+            if (is_array($fieldValue) && $fieldValue !== []) {
                 $codes = $fieldValue;
                 break;
             }
         }
 
-        if (empty($codes) && !empty($data['state_party'])) {
+        if ($codes === [] && !empty($data['state_party'])) {
             $codes = self::extractIso3CodesFromString((string)$data['state_party']);
         }
 
@@ -120,10 +120,8 @@ class WorldHeritageDetailFactory
 
         foreach ($rawCodes as $rawCode) {
             $iso3 = strtoupper(trim((string)$rawCode));
-            if (preg_match('/^[A-Z]{3}$/', $iso3)) {
-                if (!in_array($iso3, $normalizedCodes, true)) {
-                    $normalizedCodes[] = $iso3;
-                }
+            if (preg_match('/^[A-Z]{3}$/', $iso3) && !in_array($iso3, $normalizedCodes, true)) {
+                $normalizedCodes[] = $iso3;
             }
         }
 

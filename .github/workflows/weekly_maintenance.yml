@@ -1,0 +1,88 @@
+name: Weekly Maintenance
+
+on:
+  schedule:
+    - cron: "0 22 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  weekly-maintenance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Setup Mago
+        uses: nhedger/setup-mago@v1
+
+      - name: Run Mago analyze
+        run: composer mago:analyze
+
+      - name: Run Rector maintenance config
+        run: composer rector:maintenance
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate branch name
+        if: steps.changes.outputs.changed == 'true'
+        id: branch
+        run: |
+          echo "name=chore/weekly-maintenance-$(date +'%Y%m%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Commit changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${{ steps.branch.outputs.name }}"
+          git add .
+          git commit -m "chore: apply weekly maintenance fixes"
+
+      - name: Push branch
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git push origin "${{ steps.branch.outputs.name }}"
+
+      - name: Create pull request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: ${{ steps.branch.outputs.name }}
+          title: "chore: weekly maintenance fixes"
+          body: |
+            ## Description
+            This PR contains weekly automated maintenance updates.
+
+            ### Included
+            - Mago analysis executed
+            - Rector safe maintenance rules applied
+
+            ## Notes
+            Please review the changes carefully before merging.
+          commit-message: "chore: apply weekly maintenance fixes"
+          base: main
+          delete-branch: false

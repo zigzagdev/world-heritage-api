@@ -18,7 +18,7 @@ class ImageEntityCollectionTest extends TestCase
         parent::tearDown();
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             [
@@ -40,7 +40,7 @@ class ImageEntityCollectionTest extends TestCase
     {
         $collection = new ImageEntityCollection();
 
-        foreach (self::arrayData() as $data) {
+        foreach ($this->arrayData() as $data) {
             $collection->add(new ImageEntity(
                 id: $data['id'],
                 url: $data['url'],
@@ -56,7 +56,7 @@ class ImageEntityCollectionTest extends TestCase
     {
         $collection = new ImageEntityCollection();
 
-        foreach (self::arrayData() as $data) {
+        foreach ($this->arrayData() as $data) {
             $collection->add(new ImageEntity(
                 id: $data['id'],
                 url: $data['url'],
@@ -66,10 +66,10 @@ class ImageEntityCollectionTest extends TestCase
         }
         foreach ($collection->getItems() as $key => $item) {
             $this->assertInstanceOf(ImageEntity::class, $item);
-            $this->assertSame(self::arrayData()[$key]['id'], $item->getId());
-            $this->assertSame(self::arrayData()[$key]['url'], $item->getUrl());
-            $this->assertEquals(self::arrayData()[$key]['sortOrder'], $item->getSortOrder());
-            $this->assertSame(self::arrayData()[$key]['isPrimary'], $item->getIsPrimary());
+            $this->assertSame($this->arrayData()[$key]['id'], $item->getId());
+            $this->assertSame($this->arrayData()[$key]['url'], $item->getUrl());
+            $this->assertEquals($this->arrayData()[$key]['sortOrder'], $item->getSortOrder());
+            $this->assertSame($this->arrayData()[$key]['isPrimary'], $item->getIsPrimary());
         }
     }
 }

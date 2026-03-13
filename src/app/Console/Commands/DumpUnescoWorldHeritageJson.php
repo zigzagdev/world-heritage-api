@@ -127,7 +127,9 @@ class DumpUnescoWorldHeritageJson extends Command
         $this->info('Fetching All records (no country refine).');
 
         $first = $this->fetch($baseUrl, null, 1, 0);
-        if ($first === null) return ['ok' => false, 'results' => [], 'results_raw' => []];
+        if ($first === null) {
+            return ['ok' => false, 'results' => [], 'results_raw' => []];
+        }
 
         $total = (int) ($first['total_count'] ?? 0);
         if ($total <= 0) {
@@ -143,22 +145,32 @@ class DumpUnescoWorldHeritageJson extends Command
         $resultsRawAll = [];
 
         while (true) {
-            if ($max > 0 && $fetched >= $max) break;
+            if ($max > 0 && $fetched >= $max) {
+                break;
+            }
 
             $resp = $this->fetch($baseUrl, null, $limit, $offset);
-            if ($resp === null) return ['ok' => false, 'results' => [], 'results_raw' => []];
+            if ($resp === null) {
+                return ['ok' => false, 'results' => [], 'results_raw' => []];
+            }
 
             $results = $resp['results'] ?? null;
-            if (!is_array($results) || $results === []) break;
+            if (!is_array($results) || $results === []) {
+                break;
+            }
 
             foreach ($results as $row) {
-                if (!is_array($row)) continue;
+                if (!is_array($row)) {
+                    continue;
+                }
 
                 $resultsRawAll[] = $row;
                 $resultsAll[] = $this->normalizeRow($row);
 
                 $fetched++;
-                if ($max > 0 && $fetched >= $max) break 2;
+                if ($max > 0 && $fetched >= $max) {
+                    break 2;
+                }
             }
 
             $offset += count($results);
@@ -220,7 +232,9 @@ class DumpUnescoWorldHeritageJson extends Command
         }
 
         $first = $this->fetch($baseUrl, $country, 1, 0);
-        if ($first === null) return 1;
+        if ($first === null) {
+            return 1;
+        }
 
         $total = (int) ($first['total_count'] ?? 0);
         if ($total <= 0) {
@@ -235,21 +249,31 @@ class DumpUnescoWorldHeritageJson extends Command
         $resultsAll = [];
 
         while (true) {
-            if ($max > 0 && $fetched >= $max) break;
+            if ($max > 0 && $fetched >= $max) {
+                break;
+            }
 
             $resp = $this->fetch($baseUrl, $country, $limit, $offset);
-            if ($resp === null) return 1;
+            if ($resp === null) {
+                return 1;
+            }
 
             $results = $resp['results'] ?? null;
-            if (!is_array($results) || $results === []) break;
+            if (!is_array($results) || $results === []) {
+                break;
+            }
 
             foreach ($results as $row) {
-                if (!is_array($row)) continue;
+                if (!is_array($row)) {
+                    continue;
+                }
 
                 $resultsAll[] = $this->normalizeRow($row);
                 $fetched++;
 
-                if ($max > 0 && $fetched >= $max) break 2;
+                if ($max > 0 && $fetched >= $max) {
+                    break 2;
+                }
             }
 
             $offset += count($results);
@@ -300,11 +324,15 @@ class DumpUnescoWorldHeritageJson extends Command
 
         foreach ($resultsAll as $row) {
             $states = $row['states_names'] ?? null;
-            if (!is_array($states)) continue;
+            if (!is_array($states)) {
+                continue;
+            }
 
             foreach ($states as $name) {
                 $name = trim((string) $name);
-                if ($name === '') continue;
+                if ($name === '') {
+                    continue;
+                }
                 $set[$name] = true;
             }
         }
@@ -470,9 +498,13 @@ class DumpUnescoWorldHeritageJson extends Command
     {
         $raw = $row['criteria_txt'] ?? null;
 
-        if (!is_string($raw)) return [];
+        if (!is_string($raw)) {
+            return [];
+        }
         $raw = trim($raw);
-        if ($raw === '') return [];
+        if ($raw === '') {
+            return [];
+        }
 
         preg_match_all('/\(\s*([ivxlcdm]+)\s*\)/i', $raw, $m1);
         $vals = $m1[1] ?? [];
@@ -482,15 +514,21 @@ class DumpUnescoWorldHeritageJson extends Command
             $vals = $m2[1] ?? [];
         }
 
-        if (!is_array($vals) || $vals === []) return [];
+        if (!is_array($vals) || $vals === []) {
+            return [];
+        }
 
         $out = [];
         $seen = [];
 
         foreach ($vals as $v) {
             $v = strtolower(trim((string) $v));
-            if ($v === '') continue;
-            if (!preg_match('/^[ivxlcdm]+$/', $v)) continue;
+            if ($v === '') {
+                continue;
+            }
+            if (!preg_match('/^[ivxlcdm]+$/', $v)) {
+                continue;
+            }
 
             if (!isset($seen[$v])) {
                 $seen[$v] = true;

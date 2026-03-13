@@ -9,11 +9,11 @@ class WorldHeritageDto
         private readonly string $name,
         private readonly ?string $country = null,
         private readonly ?string $countryNameJp = null,
-        private readonly string $region,
-        private readonly string $category,
-        private readonly int $yearInscribed,
-        private readonly ?float $latitude,
-        private readonly ?float $longitude,
+        private readonly string $region = '',
+        private readonly string $category = '',
+        private readonly int $yearInscribed = 0,
+        private readonly ?float $latitude = null,
+        private readonly ?float $longitude = null,
         private readonly bool $isEndangered = false,
         private readonly ?string $heritageNameJp = null,
         private readonly ?string $stateParty = null,
@@ -160,12 +160,12 @@ class WorldHeritageDto
 
     public function hasImages(): bool
     {
-        return $this->images !== null;
+        return $this->images instanceof \App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
     }
 
     public function getImages(): array
     {
-        return $this->images ? $this->images->toArray() : [];
+        return $this->images instanceof \App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection ? $this->images->toArray() : [];
     }
 
     public function getImageUrl(): ?ImageDto
@@ -206,7 +206,7 @@ class WorldHeritageDto
 
         if ($this->hasImages()) {
             $value['images'] = $this->getImages();
-        } elseif ($this->imageUrl !== null) {
+        } elseif ($this->imageUrl instanceof \App\Packages\Features\QueryUseCases\Dto\ImageDto) {
             $value['thumbnail'] = $this->getImageUrl()->toArray();
         }
 

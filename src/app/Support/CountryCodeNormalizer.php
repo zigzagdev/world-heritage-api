@@ -16,7 +16,9 @@ class CountryCodeNormalizer
 
         foreach ($codesOrNames as $v) {
             $raw = trim((string) $v);
-            if ($raw === '') continue;
+            if ($raw === '') {
+                continue;
+            }
 
             $key = strtoupper($raw);
 

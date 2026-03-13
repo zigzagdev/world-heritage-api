@@ -21,7 +21,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
         parent::tearDown();
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             [
@@ -134,7 +134,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 statePartyCodes: $data['state_party_codes'] ?? ($data['state_parties'] ?? []),
                 statePartiesMeta: $data['state_parties_meta'] ?? []
             );
-        }, self::arrayData());
+        }, $this->arrayData());
 
         return new WorldHeritageDtoCollection(...$dtos);
     }
@@ -159,29 +159,29 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
 
         foreach ($result->toArray() as $key => $value) {
 
-            $expectedCodes = self::arrayData()[$key]['state_party_codes'] ?? self::arrayData()[$key]['state_parties'] ?? [];
+            $expectedCodes = $this->arrayData()[$key]['state_party_codes'] ?? $this->arrayData()[$key]['state_parties'] ?? [];
 
-            $this->assertEquals(self::arrayData()[$key]['id'], $value['id']);
-            $this->assertEquals(self::arrayData()[$key]['official_name'], $value['official_name']);
-            $this->assertEquals(self::arrayData()[$key]['name'], $value['name']);
-            $this->assertEquals(self::arrayData()[$key]['heritage_name_jp'], $value['heritage_name_jp']);
-            $this->assertEquals(self::arrayData()[$key]['country'], $value['country']);
-            $this->assertEquals(self::arrayData()[$key]['country_name_jp'], $value['country_name_jp']);
-            $this->assertEquals(self::arrayData()[$key]['region'], $value['region']);
-            $this->assertEquals(self::arrayData()[$key]['state_party'], $value['state_party']);
-            $this->assertEquals(self::arrayData()[$key]['category'], $value['category']);
-            $this->assertEquals(self::arrayData()[$key]['criteria'], $value['criteria']);
-            $this->assertEquals(self::arrayData()[$key]['year_inscribed'], $value['year_inscribed']);
-            $this->assertEquals(self::arrayData()[$key]['area_hectares'], $value['area_hectares']);
-            $this->assertEquals(self::arrayData()[$key]['buffer_zone_hectares'], $value['buffer_zone_hectares']);
-            $this->assertEquals(self::arrayData()[$key]['is_endangered'], $value['is_endangered']);
-            $this->assertEquals(self::arrayData()[$key]['latitude'], $value['latitude']);
-            $this->assertEquals(self::arrayData()[$key]['longitude'], $value['longitude']);
-            $this->assertEquals(self::arrayData()[$key]['short_description'], $value['short_description']);
-            $this->assertEquals(self::arrayData()[$key]['thumbnail_url'], $value['thumbnail_url']);
+            $this->assertEquals($this->arrayData()[$key]['id'], $value['id']);
+            $this->assertEquals($this->arrayData()[$key]['official_name'], $value['official_name']);
+            $this->assertEquals($this->arrayData()[$key]['name'], $value['name']);
+            $this->assertEquals($this->arrayData()[$key]['heritage_name_jp'], $value['heritage_name_jp']);
+            $this->assertEquals($this->arrayData()[$key]['country'], $value['country']);
+            $this->assertEquals($this->arrayData()[$key]['country_name_jp'], $value['country_name_jp']);
+            $this->assertEquals($this->arrayData()[$key]['region'], $value['region']);
+            $this->assertEquals($this->arrayData()[$key]['state_party'], $value['state_party']);
+            $this->assertEquals($this->arrayData()[$key]['category'], $value['category']);
+            $this->assertEquals($this->arrayData()[$key]['criteria'], $value['criteria']);
+            $this->assertEquals($this->arrayData()[$key]['year_inscribed'], $value['year_inscribed']);
+            $this->assertEquals($this->arrayData()[$key]['area_hectares'], $value['area_hectares']);
+            $this->assertEquals($this->arrayData()[$key]['buffer_zone_hectares'], $value['buffer_zone_hectares']);
+            $this->assertEquals($this->arrayData()[$key]['is_endangered'], $value['is_endangered']);
+            $this->assertEquals($this->arrayData()[$key]['latitude'], $value['latitude']);
+            $this->assertEquals($this->arrayData()[$key]['longitude'], $value['longitude']);
+            $this->assertEquals($this->arrayData()[$key]['short_description'], $value['short_description']);
+            $this->assertEquals($this->arrayData()[$key]['thumbnail_url'], $value['thumbnail_url']);
             $this->assertSame($expectedCodes, $value['state_party_codes']);
-            $this->assertEquals(self::arrayData()[$key]['state_parties_meta'], $value['state_parties_meta']);
-            $this->assertEquals(self::arrayData()[$key]['unesco_site_url'], $value['unesco_site_url']);
+            $this->assertEquals($this->arrayData()[$key]['state_parties_meta'], $value['state_parties_meta']);
+            $this->assertEquals($this->arrayData()[$key]['unesco_site_url'], $value['unesco_site_url']);
         }
     }
 }

@@ -37,16 +37,6 @@ class WorldHeritage extends Model
         'thumbnail_image_id',
     ];
 
-    protected $casts = [
-        'criteria' => 'array',
-        'is_endangered'  => 'boolean',
-        'year_inscribed' => 'integer',
-        'area_hectares'  => 'float',
-        'buffer_zone_hectares' => 'float',
-        'latitude'  => 'float',
-        'longitude' => 'float',
-    ];
-
     protected $hidden = [
         'created_at',
         'updated_at',
@@ -73,5 +63,17 @@ class WorldHeritage extends Model
     public function thumbnail(): BelongsTo
     {
         return $this->belongsTo(Image::class, 'thumbnail_image_id');
+    }
+    protected function casts(): array
+    {
+        return [
+            'criteria' => 'array',
+            'is_endangered'  => 'boolean',
+            'year_inscribed' => 'integer',
+            'area_hectares'  => 'float',
+            'buffer_zone_hectares' => 'float',
+            'latitude'  => 'float',
+            'longitude' => 'float',
+        ];
     }
 }

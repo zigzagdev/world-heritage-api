@@ -14,7 +14,9 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
 
     public function findByIdsPreserveOrder(array $ids): Collection
     {
-        if (empty($ids)) return collect();
+        if ($ids === []) {
+            return collect();
+        }
 
         $modelsById = WorldHeritage::query()
             ->select([

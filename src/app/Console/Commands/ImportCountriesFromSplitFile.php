@@ -55,7 +55,9 @@ class ImportCountriesFromSplitFile extends Command
         $batch = [];
 
         foreach ($rows as $row) {
-            if ($max > 0 && $imported >= $max) break;
+            if ($max > 0 && $imported >= $max) {
+                break;
+            }
             if (!is_array($row)) { $skipped++; continue; }
 
             $code = strtoupper(trim((string) ($row['state_party_code'] ?? '')));
@@ -89,7 +91,7 @@ class ImportCountriesFromSplitFile extends Command
             }
         }
 
-        if ($batch) {
+        if ($batch !== []) {
             $imported += $this->flush($batch, $dryRun);
         }
 

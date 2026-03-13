@@ -75,11 +75,9 @@ class SplitWorldHeritageJson extends Command
         }
 
         $outDir = $this->resolvePathToDir($out);
-        if (!is_dir($outDir)) {
-            if (!@mkdir($outDir, 0777, true) && !is_dir($outDir)) {
-                $this->error("Failed to create output dir: {$outDir}");
-                return self::FAILURE;
-            }
+        if (!is_dir($outDir) && (!@mkdir($outDir, 0777, true) && !is_dir($outDir))) {
+            $this->error("Failed to create output dir: {$outDir}");
+            return self::FAILURE;
         }
 
         if ($clean && !$dryRun) {
@@ -556,17 +554,15 @@ class SplitWorldHeritageJson extends Command
             $encodedSummary = $this->encodeJson($summary, true);
             if ($encodedSummary === null) {
                 $this->warn("Failed to encode summary JSON: {$summaryPath}");
-            } else {
-                if (!$dryRun) {
-                    $ok = @file_put_contents($summaryPath, $encodedSummary);
-                    if ($ok === false) {
-                        $this->warn("Failed to write summary: {$summaryPath}");
-                    } else {
-                        $this->info("Wrote summary: {$summaryPath}");
-                    }
+            } elseif (!$dryRun) {
+                $ok = @file_put_contents($summaryPath, $encodedSummary);
+                if ($ok === false) {
+                    $this->warn("Failed to write summary: {$summaryPath}");
                 } else {
-                    $this->info("[dry] would write summary: {$summaryPath}");
+                    $this->info("Wrote summary: {$summaryPath}");
                 }
+            } else {
+                $this->info("[dry] would write summary: {$summaryPath}");
             }
         }
 
@@ -776,10 +772,8 @@ class SplitWorldHeritageJson extends Command
     private function mergeSiteRowPreferExisting(array $existing, array $incoming): array
     {
         $fill = function (string $key, mixed $value) use (&$existing): void {
-            if (!array_key_exists($key, $existing) || $existing[$key] === null || $existing[$key] === '') {
-                if ($value !== null && $value !== '') {
-                    $existing[$key] = $value;
-                }
+            if ((!array_key_exists($key, $existing) || $existing[$key] === null || $existing[$key] === '') && ($value !== null && $value !== '')) {
+                $existing[$key] = $value;
             }
         };
 

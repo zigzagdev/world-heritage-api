@@ -18,7 +18,7 @@ class ImageDtoCollectionTest extends TestCase
         parent::tearDown();
     }
 
-    private static function arrayMultiData(): array
+    private function arrayMultiData(): array
     {
         return [
             [
@@ -45,7 +45,7 @@ class ImageDtoCollectionTest extends TestCase
     {
         $collection = new ImageDtoCollection();
 
-        foreach (self::arrayMultiData() as $data) {
+        foreach ($this->arrayMultiData() as $data) {
             $dto = new ImageDto(
                 $data['id'],
                 $data['url'],
@@ -62,7 +62,7 @@ class ImageDtoCollectionTest extends TestCase
     {
         $collection = new ImageDtoCollection();
 
-        foreach (self::arrayMultiData() as $data) {
+        foreach ($this->arrayMultiData() as $data) {
             $dto = new ImageDto(
                 $data['id'],
                 $data['url'],
@@ -75,10 +75,10 @@ class ImageDtoCollectionTest extends TestCase
         $this->assertCount(3, $collection->toArray());
 
         foreach ($collection->toArray() as $index => $item) {
-            $this->assertEquals(self::arrayMultiData()[$index]['id'], $item['id']);
-            $this->assertEquals(self::arrayMultiData()[$index]['url'], $item['url']);
-            $this->assertEquals(self::arrayMultiData()[$index]['sortOrder'], $item['sort_order']);
-            $this->assertEquals(self::arrayMultiData()[$index]['isPrimary'], $item['is_primary']);
+            $this->assertEquals($this->arrayMultiData()[$index]['id'], $item['id']);
+            $this->assertEquals($this->arrayMultiData()[$index]['url'], $item['url']);
+            $this->assertEquals($this->arrayMultiData()[$index]['sortOrder'], $item['sort_order']);
+            $this->assertEquals($this->arrayMultiData()[$index]['isPrimary'], $item['is_primary']);
         }
     }
 }

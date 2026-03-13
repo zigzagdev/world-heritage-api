@@ -17,7 +17,7 @@ class ImageEntityTest extends TestCase
         parent::tearDown();
     }
 
-    private static function arrayNoIdData(): array
+    private function arrayNoIdData(): array
     {
         return [
             'id' => null,
@@ -27,7 +27,7 @@ class ImageEntityTest extends TestCase
         ];
     }
 
-    private static function arrayData(): array
+    private function arrayData(): array
     {
         return [
             'id' => 1,
@@ -40,10 +40,10 @@ class ImageEntityTest extends TestCase
     public function test_entity_check_type_with_no_id_entity(): void
     {
         $entity = new ImageEntity(
-            self::arrayNoIdData()['id'],
-            self::arrayNoIdData()['url'],
-            self::arrayNoIdData()['sortOrder'],
-            self::arrayNoIdData()['isPrimary'],
+            $this->arrayNoIdData()['id'],
+            $this->arrayNoIdData()['url'],
+            $this->arrayNoIdData()['sortOrder'],
+            $this->arrayNoIdData()['isPrimary'],
         );
 
         $this->assertInstanceOf(ImageEntity::class, $entity);
@@ -52,10 +52,10 @@ class ImageEntityTest extends TestCase
     public function test_entity_check_type_with_id_entity(): void
     {
         $entity = new ImageEntity(
-            self::arrayData()['id'],
-            self::arrayData()['url'],
-            self::arrayData()['sortOrder'],
-            self::arrayData()['isPrimary'],
+            $this->arrayData()['id'],
+            $this->arrayData()['url'],
+            $this->arrayData()['sortOrder'],
+            $this->arrayData()['isPrimary'],
         );
 
         $this->assertInstanceOf(ImageEntity::class, $entity);
@@ -65,29 +65,29 @@ class ImageEntityTest extends TestCase
     {
         $entity = new ImageEntity(
             id: null,
-            url: self::arrayData()['url'],
-            sortOrder: self::arrayData()['sortOrder'],
-            isPrimary: self::arrayData()['isPrimary'],
+            url: $this->arrayData()['url'],
+            sortOrder: $this->arrayData()['sortOrder'],
+            isPrimary: $this->arrayData()['isPrimary'],
         );
 
         $this->assertSame(null, $entity->getId());
-        $this->assertSame(self::arrayData()['url'], $entity->getUrl());
-        $this->assertSame(self::arrayData()['sortOrder'], $entity->getSortOrder());
-        $this->assertSame(self::arrayData()['isPrimary'], $entity->getIsPrimary());
+        $this->assertSame($this->arrayData()['url'], $entity->getUrl());
+        $this->assertSame($this->arrayData()['sortOrder'], $entity->getSortOrder());
+        $this->assertSame($this->arrayData()['isPrimary'], $entity->getIsPrimary());
     }
 
     public function test_entity_check_value_with_no_id(): void
     {
         $entity = new ImageEntity(
-            id: self::arrayNoIdData()['id'],
-            url: self::arrayNoIdData()['url'],
-            sortOrder: self::arrayNoIdData()['sortOrder'],
-            isPrimary: self::arrayNoIdData()['isPrimary'],
+            id: $this->arrayNoIdData()['id'],
+            url: $this->arrayNoIdData()['url'],
+            sortOrder: $this->arrayNoIdData()['sortOrder'],
+            isPrimary: $this->arrayNoIdData()['isPrimary'],
         );
 
         $this->assertSame(null, $entity->getId());
-        $this->assertSame(self::arrayNoIdData()['url'], $entity->getUrl());
-        $this->assertSame(self::arrayNoIdData()['sortOrder'], $entity->getSortOrder());
-        $this->assertSame(self::arrayNoIdData()['isPrimary'], $entity->getIsPrimary());
+        $this->assertSame($this->arrayNoIdData()['url'], $entity->getUrl());
+        $this->assertSame($this->arrayNoIdData()['sortOrder'], $entity->getSortOrder());
+        $this->assertSame($this->arrayNoIdData()['isPrimary'], $entity->getIsPrimary());
     }
 }

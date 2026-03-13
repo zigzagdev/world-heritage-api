@@ -57,7 +57,9 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
         $now = Carbon::now();
 
         foreach ($rows as $row) {
-            if ($max > 0 && $imported >= $max) break;
+            if ($max > 0 && $imported >= $max) {
+                break;
+            }
             if (!is_array($row)) { $skipped++; continue; }
 
             $idNo = $row['id_no']
@@ -65,7 +67,7 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
                 ?? $row['site_id']
                 ?? null;
 
-            if (!(is_int($idNo) || (is_string($idNo) && is_numeric($idNo)))) {
+            if (!is_int($idNo) && !(is_string($idNo) && is_numeric($idNo))) {
                 $skipped++;
                 if ($strict) {
                     $this->error('Strict: missing/invalid id_no: ' . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
@@ -107,7 +109,7 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
             }
         }
 
-        if ($batch) {
+        if ($batch !== []) {
             $imported += $this->flush($batch, $dryRun);
         }
 
@@ -117,7 +119,9 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
 
     private function flush(array $rows, bool $dryRun): int
     {
-        if ($dryRun) return count($rows);
+        if ($dryRun) {
+            return count($rows);
+        }
 
         DB::table('world_heritage_site_country_exceptions')->upsert(
             $rows,
@@ -131,10 +135,14 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
     private function loadRows(string $path): ?array
     {
         $raw = @file_get_contents($path);
-        if ($raw === false) return null;
+        if ($raw === false) {
+            return null;
+        }
 
         $json = json_decode($raw, true);
-        if (!is_array($json)) return null;
+        if (!is_array($json)) {
+            return null;
+        }
 
         if (array_key_exists('results', $json)) {
             return is_array($json['results']) ? $json['results'] : null;
@@ -146,7 +154,9 @@ class ImportWorldHeritageSiteCountryExceptionsFromSplitFile extends Command
     private function resolvePath(string $path): string
     {
         $path = trim($path);
-        if ($path === '') return $path;
+        if ($path === '') {
+            return $path;
+        }
 
         if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
             return $path;

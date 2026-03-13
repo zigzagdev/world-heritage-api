@@ -10,7 +10,7 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
 {
     public function test_build_returns_dto_no_country_value(): void
     {
-        $result = WorldHeritageSummaryFactory::build(self::arrayDataNoStateParty());
+        $result = WorldHeritageSummaryFactory::build($this->arrayDataNoStateParty());
 
         $this->assertInstanceOf(WorldHeritageDto::class, $result);
     }
@@ -24,7 +24,7 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
 
     public function test_build_returns_dto_with_no_country_values(): void
     {
-        $input = self::arrayDataNoStateParty();
+        $input = $this->arrayDataNoStateParty();
         $dto = WorldHeritageSummaryFactory::build($input);
 
         $this->assertSame($input['id'], $dto->getId());
@@ -99,13 +99,19 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
 
     private function normalizeNullableFloat(float|int|string|null $v): ?float
     {
-        if ($v === null) return null;
+        if ($v === null) {
+            return null;
+        }
 
         // 数値文字列も許容（DB/配列が文字列で来るケース対策）
         if (is_string($v)) {
             $s = trim($v);
-            if ($s === '') return null;
-            if (!is_numeric($s)) return null;
+            if ($s === '') {
+                return null;
+            }
+            if (!is_numeric($s)) {
+                return null;
+            }
             return (float) $s;
         }
 
@@ -189,7 +195,7 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
         return $meta;
     }
 
-    private static function arrayDataNoStateParty(): array
+    private function arrayDataNoStateParty(): array
     {
         return [
             'id' => 148,

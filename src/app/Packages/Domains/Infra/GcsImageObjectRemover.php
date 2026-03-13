@@ -34,7 +34,7 @@ class GcsImageObjectRemover implements ObjectRemovePort
         }
         $bucket = $this->storage->bucket($cfg['bucket']);
         $root   = trim((string)($cfg['root'] ?? ''), '/');
-        $path   = ltrim(($root ? "{$root}/" : '').ltrim($key, '/'), '/');
+        $path   = ltrim(($root !== '' && $root !== '0' ? "{$root}/" : '').ltrim($key, '/'), '/');
 
         return [$bucket, $path];
     }
