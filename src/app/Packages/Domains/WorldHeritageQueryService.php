@@ -27,7 +27,11 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     /**
      * 一覧（最大30件）: サムネのみ、state_party/state_party_code を要件通りに整形
      */
-    public function getAllHeritages(int $currentPage, int $perPage): PaginationDto
+    public function getAllHeritages(
+        int $currentPage,
+        int $perPage,
+        string $order
+    ): PaginationDto
     {
         $items = WorldHeritage::query()
             ->select([
@@ -57,7 +61,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                     ]);
                 }
             ])
-            ->orderBy('world_heritage_sites.id', 'asc')
+            ->orderBy('world_heritage_sites.id', $order)
             ->paginate($perPage, page: $currentPage);
 
         $array = $items->map(fn($heritage) => $this->buildWorldHeritagePayload($heritage))->all();

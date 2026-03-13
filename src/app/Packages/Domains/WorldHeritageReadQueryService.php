@@ -9,7 +9,6 @@ use Illuminate\Support\Collection;
 class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInterface
 {
     public function __construct(
-        private WorldHeritage $model,
     ) {}
 
     public function findByIdsPreserveOrder(array $ids): Collection

@@ -22,6 +22,9 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
     private const CURRENT_PAGE = 1;
     private const PER_PAGE = 10;
 
+    private const ORDER = 'asc';
+    private const OPPOSITE_ORDER = 'desc';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -58,21 +61,34 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
         }
     }
 
-    public function test_fetch_data_check_type(): void
+    public function test_fetch_data_check_type_asc(): void
     {
         $result = $this->queryService->getAllHeritages(
             self::CURRENT_PAGE,
-            self::PER_PAGE
+            self::PER_PAGE,
+                self::ORDER
         );
 
         $this->assertInstanceOf(PaginationDto::class, $result);
     }
 
-    public function test_fetch_data_check_value(): void
+    public function test_fetch_data_check_type_desc(): void
     {
         $result = $this->queryService->getAllHeritages(
             self::CURRENT_PAGE,
-            self::PER_PAGE
+            self::PER_PAGE,
+            self::OPPOSITE_ORDER
+        );
+
+        $this->assertInstanceOf(PaginationDto::class, $result);
+    }
+
+    public function test_fetch_data_check_value_asc(): void
+    {
+        $result = $this->queryService->getAllHeritages(
+            self::CURRENT_PAGE,
+            self::PER_PAGE,
+                self::ORDER
         );
 
         $arrayResult = $result->toArray();
@@ -97,5 +113,51 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
             'prev_page_url',
             'links'
         ], array_keys($arrayResult['pagination']));
+
+        // whether data id is sorted in ascending order
+            $items = $arrayResult['items'];
+            $ids = array_column($items, 'id');
+            $sortedIds = $ids;
+            sort($sortedIds);
+            $this->assertSame($sortedIds, $ids);
+    }
+
+    public function test_fetch_data_check_value_desc(): void
+    {
+        $result = $this->queryService->getAllHeritages(
+            self::CURRENT_PAGE,
+            self::PER_PAGE,
+            self::OPPOSITE_ORDER
+        );
+
+        $arrayResult = $result->toArray();
+
+        $this->assertArrayHasKey('items', $arrayResult);
+        $this->assertArrayHasKey('pagination', $arrayResult);
+
+        $this->assertIsArray($arrayResult['items']);
+        $this->assertIsArray($arrayResult['pagination']);
+
+        $this->assertSame([
+            'current_page',
+            'per_page',
+            'total',
+            'last_page',
+            'from',
+            'to',
+            'path',
+            'first_page_url',
+            'last_page_url',
+            'next_page_url',
+            'prev_page_url',
+            'links'
+        ], array_keys($arrayResult['pagination']));
+
+        // whether data id is sorted in descending order
+            $items = $arrayResult['items'];
+            $ids = array_column($items, 'id');
+            $sortedIds = $ids;
+            rsort($sortedIds);
+            $this->assertSame($sortedIds, $ids);
     }
 }

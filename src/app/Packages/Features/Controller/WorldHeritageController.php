@@ -2,26 +2,13 @@
 
 namespace App\Packages\Features\Controller;
 
-use App\Common\Pagination\PaginationViewModel;
 use App\Http\Controllers\Controller;
-use App\Packages\Features\QueryUseCases\Factory\ListQuery\UpdateWorldHeritageListQueryCollectionFactory;
-use App\Packages\Features\QueryUseCases\Factory\ListQuery\UpdateWorldHeritageListQueryFactory;
-use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageViewModelCollectionFactory;
-use App\Packages\Features\QueryUseCases\UseCase\CreateWorldHeritageUseCase;
-use App\Packages\Features\QueryUseCases\UseCase\CreateWorldManyHeritagesUseCase;
-use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritagesUseCase;
-use App\Packages\Features\QueryUseCases\UseCase\DeleteWorldHeritageUseCase;
-use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdsUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\SearchWorldHeritagesWithAlgoliaUseCase;
-use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritagesUseCase;
-use App\Packages\Features\QueryUseCases\UseCase\UpdateWorldHeritageUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritagesUseCase;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class WorldHeritageController extends Controller
@@ -33,8 +20,9 @@ class WorldHeritageController extends Controller
     {
         $currentPage = $request->get('current_page', 1);
         $perPage = $request->get('per_page', 30);
+        $order = $request->get('order', 'asc');
 
-        $dto = $useCase->handle($currentPage, $perPage);
+        $dto = $useCase->handle($currentPage, $perPage, $order);
 
         return response()->json([
             'status' => 'success',
@@ -69,6 +57,7 @@ class WorldHeritageController extends Controller
     {
         $currentPage = (int) $request->query('current_page', 1);
         $perPage = (int) $request->query('per_page', 30);
+        $order = $request->get('order', 'asc');
         $keyword = $request->query('search_query');
         if ($keyword === null || trim((string) $keyword) === '') {
             $keyword = $request->query('keyword');
@@ -83,7 +72,7 @@ class WorldHeritageController extends Controller
             $request->query('year_inscribed_from'),
             $request->query('year_inscribed_to'),
             $currentPage,
-            $perPage
+            $perPage,
         );
 
         return response()->json([
