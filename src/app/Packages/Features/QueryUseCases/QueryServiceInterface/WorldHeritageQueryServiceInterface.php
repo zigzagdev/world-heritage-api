@@ -11,7 +11,8 @@ interface WorldHeritageQueryServiceInterface
 {
     public function getAllHeritages(
         int $currentPage,
-        int $perPage
+        int $perPage,
+        string $order
     ): PaginationDto;
 
     public function getHeritageById(

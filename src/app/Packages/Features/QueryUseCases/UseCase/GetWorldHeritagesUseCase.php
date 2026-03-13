@@ -14,12 +14,14 @@ class GetWorldHeritagesUseCase
 
     public function handle(
         int $currentPage,
-        int $perPage
+        int $perPage,
+        string $order = 'asc'
     ): PaginationDto
     {
         return $this->worldHeritageQueryService->getAllHeritages(
             $currentPage,
-            $perPage
+            $perPage,
+            $order
         );
     }
 }
