@@ -23,6 +23,7 @@ class WorldHeritage extends Model
         'name_jp',
         'country',
         'region',
+        'study_region',
         'state_party',
         'category',
         'criteria',
