@@ -6,6 +6,7 @@ use App\Support\CountryCodeNormalizer;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
+use App\Support\StudyRegionResolver;
 
 class SplitWorldHeritageJson extends Command
 {
@@ -703,74 +704,54 @@ class SplitWorldHeritageJson extends Command
         $category = $this->normalizeCategoryOrFallback($row['category'] ?? null);
         $criteria = $this->resolveCriteriaList($row);
 
-        $toBool = function ($v): bool {
-            if (is_bool($v)) {
-                return $v;
-            }
-            if (is_int($v) || is_float($v)) {
-                return ((int) $v) === 1;
-            }
-
-            $s = strtolower(trim((string) $v));
-            return in_array($s, ['1', 'true', 't', 'yes', 'y', 'on'], true);
-        };
-        $toTinyInt = fn($v) => $toBool($v) ? 1 : 0;
-
         $iso2List = $this->extractIsoCodes($row['iso_codes'] ?? null);
+        $stateNames = $this->normalizeStatesNames($row['states_names'] ?? null);
+        $countryName = $stateNames[0] ?? null;
 
         $stateParty = null;
         $country = null;
         if (count($iso2List) === 1) {
             $iso3 = $this->toIso3OrNull($iso2List[0]);
             $stateParty = $iso3;
-            $country = $iso3;
+            $country = $countryName ?? $iso3;
         }
-
-        $main = $row['main_image_url']['url'] ?? null;
-        $imageUrl = null;
-
-        if (is_string($main)) {
-            $main = trim($main);
-            if ($main !== '') {
-                $imageUrl = mb_substr($main, 0, 255);
-            }
-        }
-
-        $primaryImageUrl = null;
-
-        $year = isset($row['date_inscribed']) && is_numeric($row['date_inscribed'])
-            ? (int) $row['date_inscribed']
-            : 0;
 
         return [
             'id' => $siteId,
             'official_name' => $this->stringOrFallback($row['official_name'] ?? ($row['name_en'] ?? null), (string) $siteId),
             'name' => $this->stringOrFallback($row['name_en'] ?? null, (string) $siteId),
             'name_jp' => $this->stringOrNull($row['name_jp'] ?? null),
+            'study_region' => $countryName
+                ? StudyRegionResolver::resolve($countryName)->value
+                : null,
             'country' => $country,
             'region' => $region,
             'state_party' => $stateParty,
             'category' => $category,
             'criteria' => $criteria,
-            'year_inscribed' => $year,
-            'area_hectares' => isset($row['area_hectares']) && is_numeric($row['area_hectares']) ? (float) $row['area_hectares'] : null,
-            'buffer_zone_hectares' => isset($row['buffer_zone_hectares']) && is_numeric($row['buffer_zone_hectares']) ? (float) $row['buffer_zone_hectares'] : null,
-            'is_endangered' => $toTinyInt($row['danger'] ?? $row['is_endangered'] ?? false),
-            'latitude' => is_numeric($lat) ? (float) $lat : null,
-            'longitude' => is_numeric($lon) ? (float) $lon : null,
+            'year_inscribed' => (isset($row['date_inscribed']) && is_numeric($row['date_inscribed'])) ? (int) $row['date_inscribed'] : null,
+            'area_hectares' => isset($row['area_hectares']) ? (is_numeric($row['area_hectares']) ? (float) $row['area_hectares'] : null) : null,
+            'buffer_zone_hectares' => isset($row['buffer_zone_hectares']) ? (is_numeric($row['buffer_zone_hectares']) ? (float) $row['buffer_zone_hectares'] : null) : null,
+            'latitude' => isset($lat) ? (is_numeric($lat) ? (float) $lat : null) : null,
+            'longitude' => isset($lon) ? (is_numeric($lon) ? (float) $lon : null) : null,
             'short_description' => $this->stringOrNull($row['short_description_en'] ?? null),
-            'image_url' => $imageUrl,
-            'primary_image_url' => $primaryImageUrl,
-            'thumbnail_image_id' => null,
+            'image_url' => null,
+            'primary_image_url' => null,
             'unesco_site_url' => $this->stringOrNull($row['unesco_site_url'] ?? ($row['url'] ?? null)),
-            'created_at' => null,
-            'updated_at' => null,
-            'deleted_at' => null,
         ];
     }
 
     private function mergeSiteRowPreferExisting(array $existing, array $incoming): array
     {
+        if (($existing['study_region'] ?? null) === null) {
+            $stateNames = $this->normalizeStatesNames($incoming['states_names'] ?? null);
+            $countryName = $stateNames[0] ?? null;
+
+            if ($countryName) {
+                $existing['study_region'] = StudyRegionResolver::resolve($countryName)->value;
+            }
+        }
+
         $fill = function (string $key, mixed $value) use (&$existing): void {
             if ((!array_key_exists($key, $existing) || $existing[$key] === null || $existing[$key] === '') && ($value !== null && $value !== '')) {
                 $existing[$key] = $value;

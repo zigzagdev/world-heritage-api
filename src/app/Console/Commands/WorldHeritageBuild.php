@@ -27,7 +27,10 @@ class WorldHeritageBuild extends Command
         {--jp-dry-run : No DB writes for Japanese name import}
         {--jp-batch=500 : Chunk size for Japanese name import}
         {--jp-missing-out= : Write missing id_no list to this path}
-        {--jp-missing-limit=200 : Max missing ids to print to console}';
+        {--jp-missing-limit=200 : Max missing ids to print to console}
+
+        {--algolia : Also import records into Algolia}
+        {--algolia-truncate : Clear Algolia index before import}';
 
     protected $description = 'Rebuild local DB and import UNESCO World Heritage data (dump -> split -> import)';
 
@@ -134,6 +137,13 @@ class WorldHeritageBuild extends Command
 
                 '--missing-out' => trim((string) $this->option('jp-missing-out')) !== '' ? (string) $this->option('jp-missing-out') : null,
                 '--missing-limit' => (int) $this->option('jp-missing-limit'),
+            ], fn ($v) => $v !== null));
+        }
+
+        // 8) Algolia import (optional)
+        if ((bool) $this->option('algolia')) {
+            $this->callOrFail('algolia:import-world-heritages', array_filter([
+                '--truncate' => (bool) $this->option('algolia-truncate') ? true : null,
             ], fn ($v) => $v !== null));
         }
 

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\WorldHeritage;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use App\Support\StudyRegionResolver;
 
 class ImportWorldHeritageFromJson extends Command
 {
@@ -133,26 +134,17 @@ class ImportWorldHeritageFromJson extends Command
         $id = $row['id_no'] ?? null;
         $lat = $row['coordinates']['lat'] ?? null;
         $lon = $row['coordinates']['lon'] ?? null;
-        $criteriaRaw = $row['criteria_txt'] ?? $row['criteria'] ?? null;
-        $stateParty = $row['states'] ?? $row['state_party'] ?? null;
-        if (is_array($stateParty)) {
-            $stateParty = $stateParty[0] ?? null;
-        }
 
-        $stateParty = is_string($stateParty) ? strtoupper(trim($stateParty)) : null;
-        if ($stateParty === '') {
-            $stateParty = null;
-        }
-        if ($stateParty !== null && !preg_match('/^[A-Z]{3}$/', $stateParty)) {
-            $stateParty = null;
-        }
+        $countryName = $this->extractCountryName($row);
+        $statePartyIso3 = $this->extractIso3StateParty($row);
 
         return [
             'id' => $this->toNullableInt($id),
             'official_name' => $row['official_name'] ?? null,
             'name' => $row['name_en'] ?? $row['name'] ?? null,
             'region' => $row['region_en'] ?? $row['region'] ?? null,
-            'state_party' => $stateParty,
+            'state_party' => $statePartyIso3,
+            'study_region' => StudyRegionResolver::resolve($countryName)->value,
             'category' => $row['category'] ?? $row['type'] ?? null,
             'criteria' => $row['criteria'] ?? null,
             'year_inscribed' => $this->toNullableInt($row['date_inscribed'] ?? $row['year_inscribed'] ?? null),
@@ -166,29 +158,6 @@ class ImportWorldHeritageFromJson extends Command
             'thumbnail_image_id' => null,
             'unesco_site_url' => $row['url'] ?? null,
         ];
-    }
-
-    private function criteriaFromTxt(mixed $raw): array
-    {
-        if ($raw === null) {
-            return [];
-        }
-
-        $s = trim((string) $raw);
-        if ($s === '') {
-            return [];
-        }
-
-        preg_match_all('/\(([^)]+)\)/', $s, $m);
-        if (isset($m[1]) && $m[1] !== []) {
-            return array_values(array_filter(array_map(fn($v) => trim((string) $v), $m[1])));
-        }
-
-        $s = trim($s, " \t\n\r\0\x0B()");
-        if ($s === '') {
-            return [];
-        }
-        return [$s];
     }
 
     private function flushBatch(array $batch): int
@@ -235,6 +204,26 @@ class ImportWorldHeritageFromJson extends Command
             $c = strtoupper(trim($c));
             if ($c !== '' && preg_match('/^[A-Z]{3}$/', $c)) {
                 return $c;
+            }
+        }
+
+        return null;
+    }
+
+    private function extractCountryName(array $row): ?string
+    {
+        $states = $row['states'] ?? $row['state_party'] ?? null;
+
+        if (is_string($states)) {
+            $normalized = trim($states);
+            return $normalized !== '' ? $normalized : null;
+        }
+
+        if (is_array($states)) {
+            $first = $states[0] ?? null;
+            if (is_string($first)) {
+                $normalized = trim($first);
+                return $normalized !== '' ? $normalized : null;
             }
         }
 

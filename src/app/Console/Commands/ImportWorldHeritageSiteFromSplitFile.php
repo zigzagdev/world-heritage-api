@@ -78,6 +78,7 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
                 'official_name' => $this->toNullableString($row['official_name'] ?? null),
                 'name' => $this->toNullableString($row['name'] ?? null),
                 'name_jp' => $this->toNullableString($row['name_jp'] ?? null),
+                'study_region' => $this->toNullableString($row['study_region'] ?? null),
                 'country' => $this->toNullableString($row['country'] ?? null),
                 'region' => $this->toNullableString($row['region'] ?? null),
                 'state_party' => $this->toNullableString($row['state_party'] ?? null),
@@ -200,23 +201,29 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
     private function toNullableBoolInt(mixed $v): ?int
     {
         if ($v === null || $v === '') {
-            return null;
+            return 0;
         }
+
         if (is_bool($v)) {
             return $v ? 1 : 0;
         }
+
         if (is_int($v) || is_float($v)) {
             return ((int) $v) === 1 ? 1 : 0;
         }
+
         if (is_string($v)) {
             $s = strtolower(trim($v));
+
             if (in_array($s, ['1', 'true', 't', 'yes', 'y', 'on'], true)) {
                 return 1;
             }
+
             if (in_array($s, ['0', 'false', 'f', 'no', 'n', 'off'], true)) {
                 return 0;
             }
         }
-        return null;
+
+        return 0;
     }
 }
