@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -58,13 +59,20 @@ class ImportCountriesFromSplitFile extends Command
             if ($max > 0 && $imported >= $max) {
                 break;
             }
-            if (!is_array($row)) { $skipped++; continue; }
+
+            if (!is_array($row)) {
+                $skipped++;
+                continue;
+            }
 
             $code = strtoupper(trim((string) ($row['state_party_code'] ?? '')));
             if ($code === '' || strlen($code) !== 3) {
                 $skipped++;
                 if ($strict) {
-                    $this->error("Strict: invalid state_party_code: " . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                    $this->error(
+                        'Strict: invalid state_party_code: ' .
+                        json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                    );
                     return self::FAILURE;
                 }
                 continue;
@@ -76,6 +84,15 @@ class ImportCountriesFromSplitFile extends Command
 
             if ($nameEn === null) {
                 $nameEn = $code;
+            }
+
+            if ($nameJp === null) {
+                $nameJp = $this->resolveCountryNameJapanese($code);
+            }
+
+            if ($strict && $nameJp === null) {
+                $this->error("Strict: name_jp could not be resolved for state_party_code [{$code}]");
+                return self::FAILURE;
             }
 
             $batch[] = [
@@ -164,6 +181,16 @@ class ImportCountriesFromSplitFile extends Command
         }
 
         $s = trim($v);
+
         return $s === '' ? null : $s;
+    }
+
+    private function resolveCountryNameJapanese(string $iso3): ?string
+    {
+        $countryNameJa = Config::get('country_ja.alpha3_to_country.' . strtoupper(trim($iso3)));
+
+        return is_string($countryNameJa) && $countryNameJa !== ''
+            ? $countryNameJa
+            : null;
     }
 }
