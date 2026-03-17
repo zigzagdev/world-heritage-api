@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Algolia\AlgoliaSearch\Api\SearchClient;
 use App\Models\WorldHeritage;
 use Illuminate\Console\Command;
-use App\Packages\Support\StudyRegionResolver;
+use App\Support\StudyRegionResolver;
 
 class AlgoliaImportWorldHeritages extends Command
 {
@@ -144,6 +144,7 @@ class AlgoliaImportWorldHeritages extends Command
                     $processed += count($objects);
                     return;
                 }
+
                 if ((int) $row->id === 1133) {
                     dd([
                         'state_party_codes' => $statePartyCodes,
