@@ -722,7 +722,7 @@ class SplitWorldHeritageJson extends Command
             'name' => $this->stringOrFallback($row['name_en'] ?? null, (string) $siteId),
             'name_jp' => $this->stringOrNull($row['name_jp'] ?? null),
             'study_region' => $countryName
-                ? StudyRegionResolver::resolve($countryName)->value
+                ? StudyRegionResolver::resolveFromCountry($countryName)->value
                 : null,
             'country' => $country,
             'region' => $region,
@@ -748,7 +748,7 @@ class SplitWorldHeritageJson extends Command
             $countryName = $stateNames[0] ?? null;
 
             if ($countryName) {
-                $existing['study_region'] = StudyRegionResolver::resolve($countryName)->value;
+                $existing['study_region'] = StudyRegionResolver::resolveFromCountry($countryName)->value;
             }
         }
 

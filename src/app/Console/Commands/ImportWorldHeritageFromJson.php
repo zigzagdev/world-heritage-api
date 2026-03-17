@@ -144,7 +144,7 @@ class ImportWorldHeritageFromJson extends Command
             'name' => $row['name_en'] ?? $row['name'] ?? null,
             'region' => $row['region_en'] ?? $row['region'] ?? null,
             'state_party' => $statePartyIso3,
-            'study_region' => StudyRegionResolver::resolve($countryName)->value,
+            'study_region' => StudyRegionResolver::resolveFromCountry($countryName)->value,
             'category' => $row['category'] ?? $row['type'] ?? null,
             'criteria' => $row['criteria'] ?? null,
             'year_inscribed' => $this->toNullableInt($row['date_inscribed'] ?? $row['year_inscribed'] ?? null),

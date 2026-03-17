@@ -39,7 +39,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'world_heritage_sites.official_name',
                 'world_heritage_sites.name',
                 'world_heritage_sites.name_jp as heritage_name_jp',
-                'world_heritage_sites.region',
+                'world_heritage_sites.study_region',
                 'world_heritage_sites.category',
                 'world_heritage_sites.criteria',
                 'world_heritage_sites.year_inscribed',
@@ -67,7 +67,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         $array = $items->map(fn($heritage) => $this->buildWorldHeritagePayload($heritage))->all();
         $dtoCollection = $this->buildDtoFromCollection($array);
         $lastPage = (int) ceil($items->toArray()['total'] / max(1, $perPage));
-
+dd($items->toArray());
         return new PaginationDto(
             collection: $dtoCollection,
             pagination: [
@@ -162,14 +162,14 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         $displayCountry = $displayCountry ?? $heritage->country;
         $countryNameJp = $heritage->countries->first()?->name_jp;
 
-         return WorldHeritageDetailFactory::build([
+        return WorldHeritageDetailFactory::build([
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
             'heritage_name_jp' => $heritage->name_jp,
             'country' => $displayCountry,
             'country_name_jp' => $countryNameJp,
-            'region' => $heritage->region,
+            'region' => $heritage->study_region,
             'category' => $heritage->category,
             'year_inscribed' => $heritage->year_inscribed,
             'latitude' => $heritage->latitude,
@@ -417,8 +417,8 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'name' => $heritage->name,
             'heritage_name_jp' => $heritage->heritage_name_jp,
             'country' => $countryRelations->first()?->name_en ?? $heritage->country,
-            'country_name_jp' => $heritage->country_name_jp,
-            'region' => $heritage->region,
+            'country_name_jp' => $heritage->countries->first()?->name_jp,
+            'region' => $heritage->study_region,
             'category' => $heritage->category,
             'criteria' => $heritage->criteria,
             'state_party' => $statePartyName,
