@@ -735,8 +735,8 @@ class SplitWorldHeritageJson extends Command
             'latitude' => isset($lat) ? (is_numeric($lat) ? (float) $lat : null) : null,
             'longitude' => isset($lon) ? (is_numeric($lon) ? (float) $lon : null) : null,
             'short_description' => $this->stringOrNull($row['short_description_en'] ?? null),
-            'image_url' => null,
-            'primary_image_url' => null,
+            'image_url' => $this->stringOrNull($row['image_url'] ?? null),
+            'primary_image_url' => $this->stringOrNull($row['image_url'] ?? null),
             'unesco_site_url' => $this->stringOrNull($row['unesco_site_url'] ?? ($row['url'] ?? null)),
         ];
     }
