@@ -67,7 +67,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         $array = $items->map(fn($heritage) => $this->buildWorldHeritagePayload($heritage))->all();
         $dtoCollection = $this->buildDtoFromCollection($array);
         $lastPage = (int) ceil($items->toArray()['total'] / max(1, $perPage));
-dd($items->toArray());
+
         return new PaginationDto(
             collection: $dtoCollection,
             pagination: [
@@ -169,7 +169,7 @@ dd($items->toArray());
             'heritage_name_jp' => $heritage->name_jp,
             'country' => $displayCountry,
             'country_name_jp' => $countryNameJp,
-            'region' => $heritage->study_region,
+            'region' => $heritage->region,
             'category' => $heritage->category,
             'year_inscribed' => $heritage->year_inscribed,
             'latitude' => $heritage->latitude,
@@ -334,6 +334,7 @@ dd($items->toArray());
         );
 
         $result = $this->searchPort->search($search, $currentPage, $perPage);
+
         $models = $this->readQueryService->findByIdsPreserveOrder($result->ids);
 
         $payloads = $models
