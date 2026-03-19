@@ -32,7 +32,7 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
             keyword: 'galapagos',
             countryName: 'Ecuador',
             countryIso3: 'ECU',
-            region: 'LAC',
+            region: 'South America',
             category: 'Natural',
             yearFrom: 1978,
             yearTo: 1980,
@@ -46,7 +46,7 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
             'page' => 1,
             'hitsPerPage' => 30,
             'filters' =>
-                'state_party_codes:ECU AND region:"LAC" AND category:"Natural" ' .
+                'state_party_codes:ECU AND study_region:"South America" AND category:"Natural" ' .
                 'AND year_inscribed >= 1978 AND year_inscribed <= 1980',
         ];
 
