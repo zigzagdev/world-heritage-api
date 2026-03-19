@@ -143,6 +143,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         foreach ($expectedCodes as $code) {
             $orderedExpected[$code] = $expected[$code];
         }
+
         $this->assertEquals($this->arrayData()['id'], $result->getId());
         $this->assertEquals($this->arrayData()['official_name'], $result->getOfficialName());
         $this->assertEquals($this->arrayData()['name'], $result->getName());

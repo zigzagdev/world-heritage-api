@@ -4,11 +4,8 @@ namespace App\Packages\Domains\StudyRegion;
 
 use App\Enums\StudyRegion;
 
-final class CountryToStudyRegionMap
+class CountryToStudyRegionMap
 {
-    /**
-     * @var array<string, StudyRegion>
-     */
     public const MAPPING = [
         // Asia
         'Japan' => StudyRegion::ASIA,
