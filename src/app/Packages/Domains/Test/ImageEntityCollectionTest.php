@@ -5,6 +5,7 @@ namespace App\Packages\Domains\Test;
 use Tests\TestCase;
 use App\Packages\Domains\ImageEntity;
 use App\Packages\Domains\ImageEntityCollection;
+use Mockery;
 
 class ImageEntityCollectionTest extends TestCase
 {
@@ -15,6 +16,7 @@ class ImageEntityCollectionTest extends TestCase
 
     protected function tearDown(): void
     {
+        Mockery::close();
         parent::tearDown();
     }
 

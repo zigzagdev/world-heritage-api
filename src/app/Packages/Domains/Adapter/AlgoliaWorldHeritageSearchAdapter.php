@@ -60,7 +60,7 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
          * Region filter (exact match).
          */
         if ($this->hasValue($query->region)) {
-            $filters[] = 'region:"' . $this->escapeForQuotedString($query->region) . '"';
+            $filters[] = 'study_region:"' . $this->escapeForQuotedString($query->region) . '"';
         }
 
         /**

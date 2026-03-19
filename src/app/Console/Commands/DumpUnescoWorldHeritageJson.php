@@ -456,14 +456,12 @@ class DumpUnescoWorldHeritageJson extends Command
             'name_ru' => $row['name_ru'] ?? null,
             'name_ar' => $row['name_ar'] ?? null,
             'name_zh' => $row['name_zh'] ?? null,
-
             'short_description_en' => $row['short_description_en'] ?? null,
             'short_description_fr' => $row['short_description_fr'] ?? null,
             'short_description_es' => $row['short_description_es'] ?? null,
             'short_description_ru' => $row['short_description_ru'] ?? null,
             'short_description_ar' => $row['short_description_ar'] ?? null,
             'short_description_zh' => $row['short_description_zh'] ?? null,
-
             'description_en' => $row['description_en'] ?? null,
             'justification_en' => $row['justification_en'] ?? null,
             'criteria' => $row['criteria_txt'] ?? null,
@@ -473,19 +471,15 @@ class DumpUnescoWorldHeritageJson extends Command
             'date_end' => $row['date_end'] ?? null,
             'danger_list' => $row['danger_list'] ?? null,
             'area_hectares' => $toFloat($row['area_hectares'] ?? null),
-
             'category' => $row['category'] ?? null,
             'category_id' => $toInt($row['category_id'] ?? null),
-
             'states_names' => is_array($row['states_names'] ?? null) ? $row['states_names'] : [],
             'iso_codes' => $row['iso_codes'] ?? null,
             'region' => $row['region'] ?? null,
             'region_code' => $row['region_code'] ?? null,
             'transboundary' => $toBool($row['transboundary'] ?? null),
-
-            'image_url' => $row['image_url'] ?? null,
+            'image_url' => $row['main_image_url'] ?? null,
             'images_urls' => $images,
-
             'uuid' => $row['uuid'] ?? null,
             'id_no' => $row['id_no'] ?? null,
             'coordinates' => $row['coordinates'] ?? null,

@@ -57,7 +57,6 @@ class WorldHeritageController extends Controller
     {
         $currentPage = (int) $request->query('current_page', 1);
         $perPage = (int) $request->query('per_page', 30);
-        $order = $request->get('order', 'asc');
         $keyword = $request->query('search_query');
         if ($keyword === null || trim((string) $keyword) === '') {
             $keyword = $request->query('keyword');

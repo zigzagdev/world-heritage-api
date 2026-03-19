@@ -23,7 +23,7 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
                 'world_heritage_sites.official_name',
                 'world_heritage_sites.name',
                 'world_heritage_sites.name_jp as heritage_name_jp',
-                'world_heritage_sites.region',
+                'world_heritage_sites.study_region',
                 'world_heritage_sites.category',
                 'world_heritage_sites.criteria',
                 'world_heritage_sites.year_inscribed',

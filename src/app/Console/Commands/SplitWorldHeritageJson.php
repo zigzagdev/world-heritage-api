@@ -722,7 +722,7 @@ class SplitWorldHeritageJson extends Command
             'name' => $this->stringOrFallback($row['name_en'] ?? null, (string) $siteId),
             'name_jp' => $this->stringOrNull($row['name_jp'] ?? null),
             'study_region' => $countryName
-                ? StudyRegionResolver::resolve($countryName)->value
+                ? StudyRegionResolver::resolveFromCountry($countryName)->value
                 : null,
             'country' => $country,
             'region' => $region,
@@ -735,8 +735,8 @@ class SplitWorldHeritageJson extends Command
             'latitude' => isset($lat) ? (is_numeric($lat) ? (float) $lat : null) : null,
             'longitude' => isset($lon) ? (is_numeric($lon) ? (float) $lon : null) : null,
             'short_description' => $this->stringOrNull($row['short_description_en'] ?? null),
-            'image_url' => null,
-            'primary_image_url' => null,
+            'image_url' => $this->stringOrNull($row['image_url'] ?? null),
+            'primary_image_url' => $this->stringOrNull($row['image_url'] ?? null),
             'unesco_site_url' => $this->stringOrNull($row['unesco_site_url'] ?? ($row['url'] ?? null)),
         ];
     }
@@ -748,7 +748,7 @@ class SplitWorldHeritageJson extends Command
             $countryName = $stateNames[0] ?? null;
 
             if ($countryName) {
-                $existing['study_region'] = StudyRegionResolver::resolve($countryName)->value;
+                $existing['study_region'] = StudyRegionResolver::resolveFromCountry($countryName)->value;
             }
         }
 
