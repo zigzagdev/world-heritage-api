@@ -3,6 +3,7 @@
 namespace App\Packages\Domains\Test;
 
 use Algolia\AlgoliaSearch\Api\SearchClient;
+use App\Enums\StudyRegion;
 use App\Packages\Domains\Adapter\AlgoliaWorldHeritageSearchAdapter;
 use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
 use Mockery;
@@ -20,6 +21,7 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
 
     protected function tearDown(): void
     {
+        Mockery::close();
         parent::tearDown();
     }
 
@@ -32,7 +34,7 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
             keyword: 'galapagos',
             countryName: 'Ecuador',
             countryIso3: 'ECU',
-            region: 'South America',
+            region: StudyRegion::SOUTH_AMERICA,
             category: 'Natural',
             yearFrom: 1978,
             yearTo: 1980,

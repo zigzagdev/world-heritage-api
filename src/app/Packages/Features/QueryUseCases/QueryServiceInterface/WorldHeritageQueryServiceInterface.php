@@ -3,8 +3,10 @@
 namespace App\Packages\Features\QueryUseCases\QueryServiceInterface;
 
 use App\Common\Pagination\PaginationDto;
+use App\Enums\StudyRegion;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
 
 
 interface WorldHeritageQueryServiceInterface
@@ -26,14 +28,6 @@ interface WorldHeritageQueryServiceInterface
     ): PaginationDto;
 
     public function searchHeritages(
-        ?string $keyword,
-        ?string $countryName,
-        ?string $countryIso3,
-        ?string $region,
-        ?string $category,
-        ?int $yearInscribedFrom,
-        ?int $yearInscribedTo,
-        int $currentPage,
-        int $perPage
+        AlgoliaSearchListQuery $query
     ): PaginationDto;
 }
