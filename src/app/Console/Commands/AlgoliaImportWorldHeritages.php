@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Algolia\AlgoliaSearch\Api\SearchClient;
 use App\Models\WorldHeritage;
 use Illuminate\Console\Command;
+use App\Support\StudyRegionResolver;
 
 class AlgoliaImportWorldHeritages extends Command
 {
@@ -100,6 +101,21 @@ class AlgoliaImportWorldHeritages extends Command
                         $countryNameJp = $countryNamesJp[0] ?? null;
                     }
 
+                    $resolvedStudyRegions = StudyRegionResolver::resolveManyFromRecord(
+                        siteId: (int) $row->id,
+                        country: $country,
+                        statePartyCodes: $statePartyCodes,
+                    );
+
+                    $studyRegions = array_map(
+                        static fn ($region) => $region->value,
+                        $resolvedStudyRegions
+                    );
+
+                    $primaryStudyRegion = count($studyRegions) === 1
+                        ? $studyRegions[0]
+                        : null;
+
                     $objects[] = [
                         'objectID' => (string) $row->id,
                         'id' => (int) $row->id,
@@ -109,12 +125,13 @@ class AlgoliaImportWorldHeritages extends Command
                         'country' => $country,
                         'country_name_jp' => $countryNameJp,
                         'region' => (string) $row->region,
-                        'study_region' => (string) $row->study_region,
+                        'study_region' => $primaryStudyRegion,
+                        'study_regions' => $studyRegions,
                         'category' => (string) $row->category,
                         'year_inscribed' => $row->year_inscribed !== null ? (int) $row->year_inscribed : null,
                         'is_endangered' => (bool) $row->is_endangered,
                         'thumbnail_url' => $row->image_url !== null ? (string) $row->image_url : null,
-                        'state_party_codes' => $countryCount > 1 ? $statePartyCodes : [],
+                        'state_party_codes' => $statePartyCodes,
                         'country_names_jp' => $countryCount > 1 ? $countryNamesJp : [],
                     ];
                 }
@@ -127,6 +144,7 @@ class AlgoliaImportWorldHeritages extends Command
                     $processed += count($objects);
                     return;
                 }
+
                 if ((int) $row->id === 1133) {
                     dd([
                         'state_party_codes' => $statePartyCodes,

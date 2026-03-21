@@ -4,6 +4,7 @@ namespace App\Packages\Domains;
 
 use Algolia\AlgoliaSearch\Api\SearchClient;
 use App\Common\Pagination\PaginationDto;
+use App\Enums\StudyRegion;
 use App\Models\WorldHeritage;
 use App\Packages\Features\QueryUseCases\Dto\ImageDto;
 use App\Packages\Features\QueryUseCases\Dto\ImageDtoCollection;
@@ -39,7 +40,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'world_heritage_sites.official_name',
                 'world_heritage_sites.name',
                 'world_heritage_sites.name_jp as heritage_name_jp',
-                'world_heritage_sites.region',
+                'world_heritage_sites.study_region',
                 'world_heritage_sites.category',
                 'world_heritage_sites.criteria',
                 'world_heritage_sites.year_inscribed',
@@ -162,7 +163,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         $displayCountry = $displayCountry ?? $heritage->country;
         $countryNameJp = $heritage->countries->first()?->name_jp;
 
-         return WorldHeritageDetailFactory::build([
+        return WorldHeritageDetailFactory::build([
             'id' => $heritage->id,
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
@@ -309,31 +310,14 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         );
     }
 
-    public function searchHeritages(
-        ?string $keyword,
-        ?string $countryName,
-        ?string $countryIso3,
-        ?string $region,
-        ?string $category,
-        ?int $yearInscribedFrom,
-        ?int $yearInscribedTo,
-        int $currentPage,
-        int $perPage
-    ): PaginationDto {
-
-        $search = new AlgoliaSearchListQuery(
-            keyword: $keyword,
-            countryName: $countryName,
-            countryIso3: $countryIso3,
-            region: $region,
-            category: $category,
-            yearFrom: $yearInscribedFrom,
-            yearTo: $yearInscribedTo,
-            currentPage: $currentPage,
-            perPage: $perPage,
+    public function searchHeritages(AlgoliaSearchListQuery $query): PaginationDto
+    {
+        $result = $this->searchPort->search(
+            $query,
+            $query->currentPage,
+            $query->perPage,
         );
 
-        $result = $this->searchPort->search($search, $currentPage, $perPage);
         $models = $this->readQueryService->findByIdsPreserveOrder($result->ids);
 
         $payloads = $models
@@ -342,16 +326,16 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
 
         $dtoCollection = $this->buildDtoFromCollection($payloads);
         $total = (int) $result->total;
-        $lastPage = (int) ceil($total / max(1, $perPage));
+        $lastPage = (int) ceil($total / max(1, $query->perPage));
         $count = $models->count();
-        $from = $count > 0 ? (($currentPage - 1) * $perPage + 1) : null;
+        $from = $count > 0 ? (($query->currentPage - 1) * $query->perPage + 1) : null;
         $to = $count > 0 ? ($from + $count - 1) : null;
 
         return new PaginationDto(
             collection: $dtoCollection,
             pagination: [
-                'current_page' => $currentPage,
-                'per_page' => $perPage,
+                'current_page' => $query->currentPage,
+                'per_page' => $query->perPage,
                 'total' => $total,
                 'last_page' => $lastPage,
                 'from' => $from,
@@ -365,7 +349,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             ]
         );
     }
-
     private function buildWorldHeritagePayload($heritage): array
     {
         $countryRelations = $heritage->countries ?? collect();
@@ -417,8 +400,8 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'name' => $heritage->name,
             'heritage_name_jp' => $heritage->heritage_name_jp,
             'country' => $countryRelations->first()?->name_en ?? $heritage->country,
-            'country_name_jp' => $heritage->country_name_jp,
-            'region' => $heritage->region,
+            'country_name_jp' => $heritage->countries->first()?->name_jp,
+            'region' => $heritage->study_region,
             'category' => $heritage->category,
             'criteria' => $heritage->criteria,
             'state_party' => $statePartyName,

@@ -2,6 +2,7 @@
 
 namespace App\Packages\Domains\Test\QueryService;
 
+use App\Enums\StudyRegion;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
@@ -18,12 +19,26 @@ use Illuminate\Support\Collection;
 
 final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
 {
-    private \App\Packages\Domains\WorldHeritageQueryService $queryService;
+    private WorldHeritageQueryService $queryService;
+    private AlgoliaSearchListQuery $listQuery;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->refresh();
         (new DatabaseSeeder())->run();
+
+        $this->listQuery = new AlgoliaSearchListQuery(
+            keyword: 'galapagos',
+            countryName: null,
+            countryIso3: null,
+            region: StudyRegion::ASIA,
+            category: null,
+            yearFrom: null,
+            yearTo: null,
+            currentPage: 1,
+            perPage: 10,
+        );
 
         $fakeSearchPort = new class implements WorldHeritageSearchPort {
             public function search($query, int $currentPage, int $perPage): HeritageSearchResult
@@ -41,8 +56,7 @@ final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
         $this->app->instance(WorldHeritageSearchPort::class, $fakeSearchPort);
 
         $fakeReadService = new class implements WorldHeritageReadQueryServiceInterface {
-            public function findByIdsPreserveOrder(array $ids):
-            Collection
+            public function findByIdsPreserveOrder(array $ids): Collection
             {
                 return collect();
             }
@@ -118,17 +132,7 @@ final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
         $this->app->instance(WorldHeritageReadQueryServiceInterface::class, $readQueryService);
         $queryService = app(WorldHeritageQueryService::class);
 
-        $dto = $queryService->searchHeritages(
-            keyword: 'Japan',
-            countryName: null,
-            countryIso3: null,
-            region: null,
-            category: null,
-            yearInscribedFrom: null,
-            yearInscribedTo: null,
-            currentPage: 1,
-            perPage: 10
-        );
+        $dto = $queryService->searchHeritages($this->listQuery);
 
         $this->assertSame(1, $dto->getCurrentPage());
         $this->assertSame(10, $dto->getPerPage());

@@ -1,10 +1,12 @@
 version: '3.8'
+
 services:
   app:
     build:
       context: .
       dockerfile: ./environment/local/docker/Dockerfile
     image: wha-api:local
+    container_name: heritage-app
     ports:
       - "8700:8080"
     environment:
@@ -14,10 +16,8 @@ services:
     working_dir: /var/www
     volumes:
       - ./src:/var/www
-      - vendor_data:/var/www/vendor
-      - cache_data:/var/www/bootstrap/cache
-      - composer_cache:/var/www/.composer
-    networks: [ heritage-net ]
+    networks:
+      - heritage-net
 
   mysql:
     image: mysql:8.0
@@ -32,7 +32,21 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./environment/mysql-init:/docker-entrypoint-initdb.d:ro
-    networks: [ heritage-net ]
+    networks:
+      - heritage-net
+
+  mysql_test:
+    image: mysql:8.0
+    container_name: heritage-mysql-test
+    environment:
+      MYSQL_ROOT_PASSWORD: world-heritage
+      MYSQL_USER: world-heritage
+      MYSQL_PASSWORD: world-heritage
+      MYSQL_DATABASE: world_heritage_test
+    ports:
+      - "2307:3306"
+    networks:
+      - heritage-net
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -44,14 +58,13 @@ services:
       PMA_PASSWORD: world-heritage
     ports:
       - "127.0.0.1:8081:80"
-    depends_on: [ mysql ]
-    networks: [ heritage-net ]
+    depends_on:
+      - mysql
+    networks:
+      - heritage-net
 
 networks:
   heritage-net:
 
 volumes:
   db_data:
-  vendor_data:
-  cache_data:
-  composer_cache:

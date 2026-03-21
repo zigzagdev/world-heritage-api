@@ -6,6 +6,8 @@ use Tests\TestCase;
 use Mockery;
 
 use App\Common\Pagination\PaginationDto;
+use App\Enums\StudyRegion;
+use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
 use App\Packages\Features\QueryUseCases\UseCase\SearchWorldHeritagesWithAlgoliaUseCase;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use App\Packages\Domains\Infra\CountryResolver;
@@ -82,17 +84,17 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
 
         $queryService
             ->shouldReceive('searchHeritages')
-            ->with(
-                'test keyword',
-                'test country',
-                'FRA',
-                'test region',
-                'test category',
-                2000,
-                2020,
-                self::CURRENT_PAGE,
-                self::PER_PAGE
-            )
+            ->with(Mockery::on(function (AlgoliaSearchListQuery $query) {
+                return $query->keyword === 'test keyword'
+                    && $query->countryName === 'test country'
+                    && $query->countryIso3 === 'FRA'
+                    && $query->region === StudyRegion::ASIA
+                    && $query->category === 'test category'
+                    && $query->yearFrom === 2000
+                    && $query->yearTo === 2020
+                    && $query->currentPage === self::CURRENT_PAGE
+                    && $query->perPage === self::PER_PAGE;
+            }))
             ->once()
             ->andReturn($expectedDto);
 
@@ -102,7 +104,7 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
             'test keyword',
             'test country',
             null,
-            'test region',
+            'Asia', // ← 有効なEnumの値
             'test category',
             2000,
             2020,
@@ -128,30 +130,24 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
 
         $queryService
             ->shouldReceive('searchHeritages')
-            ->with(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                self::CURRENT_PAGE,
-                self::PER_PAGE
-            )
+            ->with(Mockery::on(function (AlgoliaSearchListQuery $query) {
+                return $query->keyword === null
+                    && $query->countryName === null
+                    && $query->countryIso3 === null
+                    && $query->region === null
+                    && $query->category === null
+                    && $query->yearFrom === null
+                    && $query->yearTo === null
+                    && $query->currentPage === self::CURRENT_PAGE
+                    && $query->perPage === self::PER_PAGE;
+            }))
             ->once()
             ->andReturn($expectedDto);
 
         $useCase = new SearchWorldHeritagesWithAlgoliaUseCase($queryService, $resolver);
 
         $result = $useCase->handle(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
+            null, null, null, null, null, null, null,
             self::CURRENT_PAGE,
             self::PER_PAGE
         );

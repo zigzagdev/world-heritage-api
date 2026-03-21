@@ -3,6 +3,7 @@
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
 use App\Packages\Domains\Infra\CountryResolver;
+use App\Packages\Features\QueryUseCases\Factory\ListQuery\AlgoliaSearchListQueryFactory;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use App\Common\Pagination\PaginationDto;
 
@@ -54,23 +55,24 @@ class SearchWorldHeritagesWithAlgoliaUseCase
             $maybeIso3 = $this->resolver->resolveIso3($countryIso3);
             if ($maybeIso3 !== null) {
                 $resolvedIso3 = $maybeIso3;
-                // We do NOT force a countryName here
                 if ($resolvedCountryName === null) {
                     $resolvedCountryName = null;
                 }
             }
         }
 
-        return $this->queryService->searchHeritages(
+        $listQuery = AlgoliaSearchListQueryFactory::build(
             keyword: $keyword,
             countryName: $resolvedCountryName,
             countryIso3: $resolvedIso3,
             region: $region,
             category: $category,
-            yearInscribedFrom: $yearInscribedFrom,
-            yearInscribedTo: $yearInscribedTo,
+            yearFrom: $yearInscribedFrom,
+            yearTo: $yearInscribedTo,
             currentPage: $currentPage,
             perPage: $perPage,
         );
+
+        return $this->queryService->searchHeritages($listQuery);
     }
 }
