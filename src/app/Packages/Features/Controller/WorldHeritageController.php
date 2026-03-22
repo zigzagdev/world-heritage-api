@@ -3,6 +3,7 @@
 namespace App\Packages\Features\Controller;
 
 use App\Http\Controllers\Controller;
+use App\Packages\Features\QueryUseCases\UseCase\GetCountEachRegionUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use App\Packages\Features\QueryUseCases\UseCase\SearchWorldHeritagesWithAlgoliaUseCase;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModel;
@@ -77,6 +78,19 @@ class WorldHeritageController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $dto->toArray(),
+        ], 200);
+    }
+
+    public function getWorldHeritagesCountByRegion(
+        Request $request,
+        GetCountEachRegionUseCase $useCase
+    ): JsonResponse
+    {
+        $dto = $useCase->handle();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => array_map(fn ($item) => $item->toArray(), $dto),
         ], 200);
     }
 }
