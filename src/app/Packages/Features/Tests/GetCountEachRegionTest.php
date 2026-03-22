@@ -5,6 +5,8 @@ namespace App\Packages\Features\Tests;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
+use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
+use App\Packages\Domains\Ports\WorldHeritageSearchPort;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -15,6 +17,14 @@ class GetCountEachRegionTest extends TestCase
     {
         parent::setUp();
         $this->refresh();
+
+        $this->app->bind(WorldHeritageSearchPort::class, function () {
+            return new class implements WorldHeritageSearchPort {
+                public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
+                    return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
+                }
+            };
+        });
 
         $seeder = new DatabaseSeeder();
         $seeder->run();
