@@ -30,4 +30,6 @@ interface WorldHeritageQueryServiceInterface
     public function searchHeritages(
         AlgoliaSearchListQuery $query
     ): PaginationDto;
+
+    public function getEachRegionsHeritagesCount(): array;
 }
