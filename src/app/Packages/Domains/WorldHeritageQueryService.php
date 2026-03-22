@@ -349,6 +349,29 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             ]
         );
     }
+
+    public function getEachRegionsHeritagesCount(): array
+    {
+        $counts = $this->model
+            ->whereNotNull('study_region')
+            ->where('study_region', '!=', StudyRegion::UNKNOWN->value)
+            ->groupBy('study_region')
+            ->selectRaw('study_region, COUNT(*) as count')
+            ->pluck('count', 'study_region')
+            ->toArray();
+
+        foreach (StudyRegion::cases() as $region) {
+            if ($region === StudyRegion::UNKNOWN) continue;
+            $counts[$region->value] ??= 0;
+        }
+
+        // id: 148 (Old City of Jerusalem) is stored as Unknown
+        // but geographically belongs to Asia
+        $counts[StudyRegion::ASIA->value] += 1;
+
+        return $counts;
+    }
+
     private function buildWorldHeritagePayload($heritage): array
     {
         $countryRelations = $heritage->countries ?? collect();
