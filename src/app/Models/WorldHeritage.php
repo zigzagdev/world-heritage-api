@@ -35,7 +35,6 @@ class WorldHeritage extends Model
         'longitude',
         'short_description',
         'unesco_site_url',
-        'thumbnail_image_id',
     ];
 
     protected $hidden = [
@@ -61,10 +60,6 @@ class WorldHeritage extends Model
             ->orderBy('sort_order', 'asc');
     }
 
-    public function thumbnail(): BelongsTo
-    {
-        return $this->belongsTo(Image::class, 'thumbnail_image_id');
-    }
     protected function casts(): array
     {
         return [
