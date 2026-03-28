@@ -95,7 +95,13 @@ class SplitWorldHeritageJson extends Command
         $normalizer = app(CountryCodeNormalizer::class);
 
         $logged = 0;
-        $logSkip = function (string $reason, int $index, mixed $idNo = null, array $extra = []) use ($logLimit, &$logged): void {
+        $logSkip = function (
+            string $reason,
+            int $index,
+            mixed $idNo = null,
+            array $extra =
+            []
+        ) use ($logLimit, &$logged): void {
             if ($logLimit <= 0) {
                 return;
             }
@@ -276,7 +282,7 @@ class SplitWorldHeritageJson extends Command
                 foreach ($imageUrls as $idx => $url) {
                     $images[] = [
                         'world_heritage_site_id' => $siteId,
-                        'url' => $url,
+                        'url' => hash('sha256', $url),
                         'sort_order' => $idx,
                         'is_primary' => ($idx === 0) ? 1 : 0,
                     ];
@@ -324,9 +330,9 @@ class SplitWorldHeritageJson extends Command
                     ];
                 } else {
                     if (($countries[$code3]['name_en'] ?? null) === $code3) {
-                        $better = $names[$idx] ?? $names[0] ?? null;
-                        if (is_string($better) && trim($better) !== '') {
-                            $countries[$code3]['name_en'] = trim($better);
+                        $betterName = $names[$idx] ?? $names[0] ?? null;
+                        if (is_string($betterName) && trim($betterName) !== '') {
+                            $countries[$code3]['name_en'] = trim($betterName);
                         }
                     }
                     if (($countries[$code3]['region'] ?? null) === null && $region !== null) {
@@ -609,14 +615,14 @@ class SplitWorldHeritageJson extends Command
         $out = [];
         $seen = [];
 
-        foreach ($parts as $p) {
-            $p = strtoupper($p);
-            if ($p === '') {
+        foreach ($parts as $part) {
+            $part = strtoupper($part);
+            if ($part === '') {
                 continue;
             }
-            if (!isset($seen[$p])) {
-                $seen[$p] = true;
-                $out[] = $p;
+            if (!isset($seen[$part])) {
+                $seen[$part] = true;
+                $out[] = $part;
             }
         }
 
@@ -632,8 +638,8 @@ class SplitWorldHeritageJson extends Command
         $seen = [];
         $out = [];
 
-        foreach ($statesNames as $v) {
-            $name = trim((string) $v);
+        foreach ($statesNames as $stateName) {
+            $name = trim((string) $stateName);
             if ($name === '') {
                 continue;
             }
@@ -650,49 +656,49 @@ class SplitWorldHeritageJson extends Command
     {
         $urls = [];
 
-        $main = $row['main_image_url']['url'] ?? null;
-        if (is_string($main)) {
-            $main = trim($main);
-            if ($main !== '') {
-                $urls[] = $main;
+        $mainImageUrl = $row['main_image_url']['url'] ?? null;
+        if (is_string($mainImageUrl)) {
+            $mainImageUrl = trim($mainImageUrl);
+            if ($mainImageUrl !== '') {
+                $urls[] = $mainImageUrl;
             }
         }
 
-        $images = $row['images_urls'] ?? null;
+        $imageUrls = $row['images_urls'] ?? null;
 
-        if (is_string($images)) {
-            $parts = preg_split('/\s*,\s*/', trim($images)) ?: [];
-            foreach ($parts as $p) {
-                $p = trim($p);
-                if ($p !== '') {
-                    $urls[] = $p;
+        if (is_string($imageUrls)) {
+            $parts = preg_split('/\s*,\s*/', trim($imageUrls)) ?: [];
+            foreach ($parts as $part) {
+                $part = trim($part);
+                if ($part !== '') {
+                    $urls[] = $part;
                 }
             }
         }
 
-        if (is_array($images)) {
-            foreach ($images as $p) {
-                if (!is_string($p)) {
+        if (is_array($imageUrls)) {
+            foreach ($imageUrls as $imageUrl) {
+                if (!is_string($imageUrl)) {
                     continue;
                 }
-                $p = trim($p);
-                if ($p !== '') {
-                    $urls[] = $p;
+                $imageUrl = trim($imageUrl);
+                if ($imageUrl !== '') {
+                    $urls[] = $imageUrl;
                 }
             }
         }
 
         $seen = [];
-        $out = [];
-        foreach ($urls as $u) {
-            if (isset($seen[$u])) {
+        $deduplicated = [];
+        foreach ($urls as $url) {
+            if (isset($seen[$url])) {
                 continue;
             }
-            $seen[$u] = true;
-            $out[] = $u;
+            $seen[$url] = true;
+            $deduplicated[] = $url;
         }
 
-        return $out;
+        return $deduplicated;
     }
 
     private function normalizeSiteRowImportReady(array $row, int $siteId): array
@@ -735,8 +741,6 @@ class SplitWorldHeritageJson extends Command
             'latitude' => isset($lat) ? (is_numeric($lat) ? (float) $lat : null) : null,
             'longitude' => isset($lon) ? (is_numeric($lon) ? (float) $lon : null) : null,
             'short_description' => $this->stringOrNull($row['short_description_en'] ?? null),
-            'image_url' => $this->stringOrNull($row['image_url'] ?? null),
-            'primary_image_url' => $this->stringOrNull($row['image_url'] ?? null),
             'unesco_site_url' => $this->stringOrNull($row['unesco_site_url'] ?? ($row['url'] ?? null)),
         ];
     }
@@ -782,11 +786,11 @@ class SplitWorldHeritageJson extends Command
         if (($existing['state_party'] ?? null) === null) {
             $iso2List = $this->extractIsoCodes($incoming['iso_codes'] ?? null);
             if (count($iso2List) === 1) {
-                $sp = $this->toIso3OrNull($iso2List[0]);
-                if ($sp !== null) {
-                    $existing['state_party'] = $sp;
+                $stateParty = $this->toIso3OrNull($iso2List[0]);
+                if ($stateParty !== null) {
+                    $existing['state_party'] = $stateParty;
                     if (($existing['country'] ?? null) === null) {
-                        $existing['country'] = $sp;
+                        $existing['country'] = $stateParty;
                     }
                 }
             }
@@ -804,25 +808,9 @@ class SplitWorldHeritageJson extends Command
 
         $fill('short_description', $incoming['short_description_en'] ?? null);
 
-        if (($existing['image_url'] ?? null) === null || $existing['image_url'] === '') {
-            $main = $incoming['main_image_url']['url'] ?? null;
-            if (is_string($main)) {
-                $main = trim($main);
-                if ($main !== '') {
-                    $existing['image_url'] = mb_substr($main, 0, 255);
-                }
-            }
-        }
-
-        if (($existing['primary_image_url'] ?? null) !== null) {
-            $existing['primary_image_url'] = null;
-        }
-
-        if (($existing['unesco_site_url'] ?? null) === null) {
-            $u = $incoming['unesco_site_url'] ?? ($incoming['url'] ?? null);
-            if ($u) {
-                $existing['unesco_site_url'] = $u;
-            }
+        $unescoUrl = $incoming['unesco_site_url'] ?? ($incoming['url'] ?? null);
+        if (($existing['unesco_site_url'] ?? null) === null && $unescoUrl) {
+            $existing['unesco_site_url'] = $unescoUrl;
         }
 
         return $existing;
@@ -945,11 +933,11 @@ class SplitWorldHeritageJson extends Command
         $files = glob($pattern) ?: [];
         $deleted = 0;
 
-        foreach ($files as $f) {
-            if (!is_file($f)) {
+        foreach ($files as $file) {
+            if (!is_file($file)) {
                 continue;
             }
-            if (@unlink($f)) {
+            if (@unlink($file)) {
                 $deleted++;
             }
         }
@@ -963,30 +951,17 @@ class SplitWorldHeritageJson extends Command
             return [];
         }
 
-        $s = trim($criteriaTxt);
-        if ($s === '') {
+        $stringText = trim($criteriaTxt);
+        if ($stringText === '') {
             return [];
         }
 
-        preg_match_all('/\(([ivx]+)\)/i', $s, $m);
-        if (!isset($m[1]) || !is_array($m[1])) {
+        preg_match_all('/\(([ivx]+)\)/i', $stringText, $matches);
+        if (!isset($matches[1]) || !is_array($matches[1])) {
             return [];
         }
 
-        $out = [];
-        $seen = [];
-        foreach ($m[1] as $v) {
-            $v = strtolower(trim((string) $v));
-            if ($v === '') {
-                continue;
-            }
-            if (!isset($seen[$v])) {
-                $seen[$v] = true;
-                $out[] = $v;
-            }
-        }
-
-        return $out;
+        return $this->deduplicateCriteria($matches[1]);
     }
 
     private function resolveCriteriaList(array $row): array
@@ -1001,12 +976,7 @@ class SplitWorldHeritageJson extends Command
             return $criteria;
         }
 
-        $criteria = $this->extractCriteriaFromJustification($row['justification_en'] ?? null);
-        if ($criteria !== []) {
-            return $criteria;
-        }
-
-        return [];
+        return $this->extractCriteriaFromJustification($row['justification_en'] ?? null);
     }
 
     private function extractCriteriaFromJustification(mixed $justificationEn): array
@@ -1015,37 +985,41 @@ class SplitWorldHeritageJson extends Command
             return [];
         }
 
-        $s = trim($justificationEn);
-        if ($s === '') {
+        $stringText = trim($justificationEn);
+        if ($stringText === '') {
             return [];
         }
 
-        $pos = stripos($s, 'criterion');
+        $pos = stripos($stringText, 'criterion');
         if ($pos === false) {
-            $pos = stripos($s, 'criteria');
+            $pos = stripos($stringText, 'criteria');
         }
         if ($pos === false) {
             return [];
         }
 
-        $slice = substr($s, $pos, 600);
+        $slice = substr($stringText, $pos, 600);
 
-        preg_match_all('/\(([ivx]+)\)/i', $slice, $m);
-        if (!isset($m[1]) || !is_array($m[1]) || $m[1] === []) {
+        preg_match_all('/\(([ivx]+)\)/i', $slice, $matches);
+        if (!isset($matches[1]) || !is_array($matches[1]) || $matches[1] === []) {
             return [];
         }
 
+        return $this->deduplicateCriteria($matches[1]);
+    }
+
+    private function deduplicateCriteria(array $criteriaMatches): array
+    {
         $out = [];
         $seen = [];
-        foreach ($m[1] as $v) {
-            $v = strtolower(trim((string) $v));
-            if ($v === '') {
+
+        foreach ($criteriaMatches as $criterion) {
+            $criterion = strtolower(trim((string) $criterion));
+            if ($criterion === '' || isset($seen[$criterion])) {
                 continue;
             }
-            if (!isset($seen[$v])) {
-                $seen[$v] = true;
-                $out[] = $v;
-            }
+            $seen[$criterion] = true;
+            $out[] = $criterion;
         }
 
         return $out;
