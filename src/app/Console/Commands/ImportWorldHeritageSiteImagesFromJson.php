@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\LoadsJsonRows;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -12,6 +12,9 @@ use FilesystemIterator;
 
 class ImportWorldHeritageSiteImagesFromJson extends Command
 {
+
+    use LoadsJsonRows;
+
     /**
      * The name and signature of the console command.
      *
@@ -35,11 +38,10 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
     public function handle(): int
     {
         $path = (string) $this->option('path');
-        $max  = (int) $this->option('max');
+        $max = (int) $this->option('max');
         $batchSize = max(1, (int) $this->option('batch'));
 
         $fullPath = $this->resolvePath($path);
-
         if (!file_exists($fullPath)) {
             $this->error("Path not found: {$fullPath}");
             return self::FAILURE;
@@ -52,7 +54,7 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
         }
 
         $imported = 0;
-        $skipped  = 0;
+        $skipped = 0;
         $batch = [];
         $now = Carbon::now();
 
@@ -61,7 +63,7 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
                 break;
             }
 
-            $results = $this->loadResultsFromJsonFile($filePath);
+            $results = $this->loadRows($filePath);
             if ($results === null) {
                 $this->warn("Skipped invalid JSON: {$filePath}");
                 continue;
@@ -71,14 +73,19 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
                 if ($max > 0 && $imported >= $max) {
                     break;
                 }
-                if (!is_array($row)) { $skipped++; continue; }
+                if (!is_array($row)) {
+                    $skipped++;
+                    continue;
+                }
 
                 $mapped = $this->mapRow($row);
-                if ($mapped === null) { $skipped++; continue; }
+                if ($mapped === null) {
+                    $skipped++;
+                    continue;
+                }
 
-                $mapped['updated_at'] = $now;
                 $mapped['created_at'] ??= $now;
-
+                $mapped['updated_at'] = $now;
                 $batch[] = $mapped;
 
                 if (count($batch) >= $batchSize) {
@@ -101,12 +108,7 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
         $siteId = $row['world_heritage_site_id'] ?? null;
         $url = $row['url'] ?? null;
 
-        if (!is_numeric($siteId)) {
-            return null;
-        }
-        $siteId = (int) $siteId;
-
-        if (!is_string($url)) {
+        if (!is_numeric($siteId) || !is_string($url)) {
             return null;
         }
 
@@ -115,20 +117,15 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
             return null;
         }
 
-        $urlHash = hash('sha256', $url);
-
         return [
-            'world_heritage_site_id' => $siteId,
+            'world_heritage_site_id' => (int) $siteId,
             'url' => $url,
-            'url_hash' => $urlHash,
+            'url_hash' => hash('sha256', $url),
             'sort_order' => isset($row['sort_order']) ? (int) $row['sort_order'] : 0,
             'is_primary' => empty($row['is_primary']) ? 0 : 1,
         ];
     }
 
-    /**
-     * @param array<int, array<string, mixed>> $batch
-     */
     private function flushBatch(array $batch): int
     {
         DB::table('world_heritage_site_images')->upsert(
@@ -136,35 +133,7 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
             ['world_heritage_site_id', 'url_hash'],
             ['url', 'sort_order', 'is_primary', 'updated_at']
         );
-
         return count($batch);
-    }
-
-    private function resolvePath(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '') {
-            return $path;
-        }
-
-        if (str_starts_with($path, '/')) {
-            return $path;
-        }
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
-            return $path;
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/app/')) {
-            $path = substr($path, strlen('storage/app/'));
-        }
-
-        if (str_starts_with($path, 'private/')) {
-            $path = substr($path, strlen('private/'));
-        }
-
-        return Storage::disk('local')->path($path);
     }
 
     private function collectJsonFiles(string $fullPath): array
@@ -186,24 +155,5 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
 
         sort($files);
         return $files;
-    }
-
-    private function loadResultsFromJsonFile(string $filePath): ?array
-    {
-        $raw = @file_get_contents($filePath);
-        if ($raw === false) {
-            return null;
-        }
-
-        $json = json_decode($raw, true);
-        if (!is_array($json)) {
-            return null;
-        }
-
-        if (array_key_exists('results', $json)) {
-            return is_array($json['results']) ? $json['results'] : null;
-        }
-
-        return $json;
     }
 }

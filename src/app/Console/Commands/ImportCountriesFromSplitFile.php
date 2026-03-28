@@ -5,10 +5,12 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use App\Console\Concerns\LoadsJsonRows;
 
 class ImportCountriesFromSplitFile extends Command
 {
+    use LoadsJsonRows;
+
     /**
      * The name and signature of the console command.
      *
@@ -69,26 +71,15 @@ class ImportCountriesFromSplitFile extends Command
             if ($code === '' || strlen($code) !== 3) {
                 $skipped++;
                 if ($strict) {
-                    $this->error(
-                        'Strict: invalid state_party_code: ' .
-                        json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
-                    );
+                    $this->error('Strict: invalid state_party_code: ' . json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                     return self::FAILURE;
                 }
                 continue;
             }
 
-            $nameEn = $this->toNullableString($row['name_en'] ?? null);
-            $nameJp = $this->toNullableString($row['name_jp'] ?? null);
+            $nameEn = $this->toNullableString($row['name_en'] ?? null) ?? $code;
+            $nameJp = $this->toNullableString($row['name_jp'] ?? null) ?? $this->resolveCountryNameJapanese($code);
             $region = $this->toNullableString($row['region'] ?? null);
-
-            if ($nameEn === null) {
-                $nameEn = $code;
-            }
-
-            if ($nameJp === null) {
-                $nameJp = $this->resolveCountryNameJapanese($code);
-            }
 
             if ($strict && $nameJp === null) {
                 $this->error("Strict: name_jp could not be resolved for state_party_code [{$code}]");
@@ -122,56 +113,8 @@ class ImportCountriesFromSplitFile extends Command
             return count($rows);
         }
 
-        DB::table('countries')->upsert(
-            $rows,
-            ['state_party_code'],
-            ['name_en', 'name_jp', 'region']
-        );
-
+        DB::table('countries')->upsert($rows, ['state_party_code'], ['name_en', 'name_jp', 'region']);
         return count($rows);
-    }
-
-    private function loadRows(string $path): ?array
-    {
-        $raw = @file_get_contents($path);
-        if ($raw === false) {
-            return null;
-        }
-
-        $json = json_decode($raw, true);
-        if (!is_array($json)) {
-            return null;
-        }
-
-        if (array_key_exists('results', $json)) {
-            return is_array($json['results']) ? $json['results'] : null;
-        }
-
-        return array_is_list($json) ? $json : null;
-    }
-
-    private function resolvePath(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '') {
-            return $path;
-        }
-
-        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
-            return $path;
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/app/')) {
-            $path = substr($path, strlen('storage/app/'));
-        }
-
-        if (str_starts_with($path, 'private/')) {
-            $path = substr($path, strlen('private/'));
-        }
-
-        return Storage::disk('local')->path($path);
     }
 
     private function toNullableString(mixed $v): ?string
@@ -179,18 +122,13 @@ class ImportCountriesFromSplitFile extends Command
         if (!is_string($v)) {
             return null;
         }
-
         $s = trim($v);
-
         return $s === '' ? null : $s;
     }
 
     private function resolveCountryNameJapanese(string $iso3): ?string
     {
-        $countryNameJa = Config::get('country_ja.alpha3_to_country.' . strtoupper(trim($iso3)));
-
-        return is_string($countryNameJa) && $countryNameJa !== ''
-            ? $countryNameJa
-            : null;
+        $name = Config::get('country_ja.alpha3_to_country.' . strtoupper(trim($iso3)));
+        return is_string($name) && $name !== '' ? $name : null;
     }
 }
