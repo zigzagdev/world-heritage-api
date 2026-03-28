@@ -2,13 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\LoadsJsonRows;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ImportWorldHeritageSiteFromSplitFile extends Command
 {
+
+    use LoadsJsonRows;
+
     /**
      * The name and signature of the console command.
      *
@@ -60,7 +63,10 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
             if ($max > 0 && $imported >= $max) {
                 break;
             }
-            if (!is_array($row)) { $skipped++; continue; }
+            if (!is_array($row)) {
+                $skipped++;
+                continue;
+            }
 
             $id = $row['id'] ?? null;
             if (!is_int($id) && !(is_string($id) && is_numeric($id))) {
@@ -71,10 +77,9 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
                 }
                 continue;
             }
-            $id = (int) $id;
 
-            $mapped = [
-                'id' => $id,
+            $batch[] = [
+                'id' => (int) $id,
                 'official_name' => $this->toNullableString($row['official_name'] ?? null),
                 'name' => $this->toNullableString($row['name'] ?? null),
                 'name_jp' => $this->toNullableString($row['name_jp'] ?? null),
@@ -97,8 +102,6 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
                 'updated_at' => $now,
             ];
 
-            $batch[] = $mapped;
-
             if (count($batch) >= $batchSize) {
                 $imported += $this->flush($batch, $dryRun);
                 $batch = [];
@@ -119,55 +122,12 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
             return count($rows);
         }
 
-        $update = array_values(array_diff(array_keys($rows[0]), ['id', 'created_at']));
-
         DB::table('world_heritage_sites')->upsert(
             $rows,
             ['id'],
-            $update
+            array_values(array_diff(array_keys($rows[0]), ['id', 'created_at']))
         );
-
         return count($rows);
-    }
-
-    private function loadRows(string $path): ?array
-    {
-        $raw = @file_get_contents($path);
-        if ($raw === false) {
-            return null;
-        }
-
-        $json = json_decode($raw, true);
-        if (!is_array($json)) {
-            return null;
-        }
-
-        if (array_key_exists('results', $json)) {
-            return is_array($json['results']) ? $json['results'] : null;
-        }
-        return array_is_list($json) ? $json : null;
-    }
-
-    private function resolvePath(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '') {
-            return $path;
-        }
-
-        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
-            return $path;
-        }
-
-        $path = ltrim($path, '/');
-        if (str_starts_with($path, 'storage/app/')) {
-            $path = substr($path, strlen('storage/app/'));
-        }
-        if (str_starts_with($path, 'private/')) {
-            $path = substr($path, strlen('private/'));
-        }
-
-        return Storage::disk('local')->path($path);
     }
 
     private function toNullableString(mixed $v): ?string
@@ -198,32 +158,23 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
         return is_numeric($v) ? (float) $v : null;
     }
 
-    private function toNullableBoolInt(mixed $v): ?int
+    private function toNullableBoolInt(mixed $v): int
     {
         if ($v === null || $v === '') {
             return 0;
         }
-
         if (is_bool($v)) {
             return $v ? 1 : 0;
         }
-
         if (is_int($v) || is_float($v)) {
             return ((int) $v) === 1 ? 1 : 0;
         }
-
         if (is_string($v)) {
             $s = strtolower(trim($v));
-
             if (in_array($s, ['1', 'true', 't', 'yes', 'y', 'on'], true)) {
                 return 1;
             }
-
-            if (in_array($s, ['0', 'false', 'f', 'no', 'n', 'off'], true)) {
-                return 0;
-            }
         }
-
         return 0;
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ImportWorldHeritageJapaneseNameFromJson extends Command
 {
@@ -94,38 +95,52 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
                 ->whereIn('id', $chunkIds)
                 ->get();
 
-            DB::beginTransaction();
+            $upsertRows = [];
 
-            try {
-                foreach ($rows as $row) {
-                    $id = (int) $row->id;
+            foreach ($rows as $row) {
+                $id = (int) $row->id;
 
-                    if ($onlyEmpty) {
-                        $current = is_string($row->name_jp) ? trim($row->name_jp) : '';
-                        if ($current !== '') {
-                            $skippedAlreadySet++;
-                            continue;
-                        }
+                if ($onlyEmpty) {
+                    $current = is_string($row->name_jp) ? trim($row->name_jp) : '';
+                    if ($current !== '') {
+                        $skippedAlreadySet++;
+                        continue;
                     }
-
-                    DB::table('world_heritage_sites')
-                        ->where('id', $id)
-                        ->update([
-                            'name_jp' => $map[$id],
-                            'updated_at' => $now,
-                        ]);
-
-                    $updated++;
                 }
 
-                DB::commit();
-            } catch (\Throwable $e) {
-                DB::rollBack();
-                $this->error('Failed while updating chunk: ' . $e->getMessage());
-                return self::FAILURE;
+                $upsertRows[] = [
+                    'id'         => $id,
+                    'name_jp'    => $map[$id],
+                    'updated_at' => $now,
+                ];
+            }
+
+            if ($upsertRows !== []) {
+                DB::beginTransaction();
+                try {
+                    $chunkIdList = array_column($upsertRows, 'id');
+                    $cases = implode(' ', array_map(
+                        fn ($row) => "WHEN {$row['id']} THEN ?",
+                        $upsertRows
+                    ));
+                    $bindings = array_column($upsertRows, 'name_jp');
+                    $bindings[] = $now;
+                    $placeholders = implode(',', $chunkIdList);
+
+                    DB::statement(
+                        "UPDATE world_heritage_sites SET name_jp = CASE id {$cases} END, updated_at = ? WHERE id IN ({$placeholders})",
+                        $bindings
+                    );
+
+                    DB::commit();
+                    $updated += count($upsertRows);
+                } catch (Throwable $e) {
+                    DB::rollBack();
+                    $this->error('Failed while updating chunk: ' . $e->getMessage());
+                    return self::FAILURE;
+                }
             }
         }
-
         $this->info(
             "Done: updated={$updated}, missing=" . count($missing) .
             ", skipped_already_set={$skippedAlreadySet}, invalid/skipped={$invalid}"

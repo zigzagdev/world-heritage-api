@@ -487,49 +487,4 @@ class DumpUnescoWorldHeritageJson extends Command
             'components_count' => $toInt($row['components_count'] ?? null),
         ];
     }
-
-    private function buildCriteriaFromDumpRow(array $row): array
-    {
-        $raw = $row['criteria_txt'] ?? null;
-
-        if (!is_string($raw)) {
-            return [];
-        }
-        $raw = trim($raw);
-        if ($raw === '') {
-            return [];
-        }
-
-        preg_match_all('/\(\s*([ivxlcdm]+)\s*\)/i', $raw, $m1);
-        $vals = $m1[1] ?? [];
-
-        if (!is_array($vals) || $vals === []) {
-            preg_match_all('/\b([ivxlcdm]{1,6})\b/i', $raw, $m2);
-            $vals = $m2[1] ?? [];
-        }
-
-        if (!is_array($vals) || $vals === []) {
-            return [];
-        }
-
-        $out = [];
-        $seen = [];
-
-        foreach ($vals as $v) {
-            $v = strtolower(trim((string) $v));
-            if ($v === '') {
-                continue;
-            }
-            if (!preg_match('/^[ivxlcdm]+$/', $v)) {
-                continue;
-            }
-
-            if (!isset($seen[$v])) {
-                $seen[$v] = true;
-                $out[] = $v;
-            }
-        }
-
-        return $out;
-    }
 }
