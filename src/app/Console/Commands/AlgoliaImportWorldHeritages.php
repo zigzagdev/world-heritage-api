@@ -145,14 +145,6 @@ class AlgoliaImportWorldHeritages extends Command
                     return;
                 }
 
-                if ((int) $row->id === 1133) {
-                    dd([
-                        'state_party_codes' => $statePartyCodes,
-                        'country_names_jp' => $countryNamesJp,
-                        'object' => end($objects),
-                    ]);
-                }
-
                 $res = $client->saveObjects(
                     indexName: $indexName,
                     objects: $objects
