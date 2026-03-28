@@ -21,12 +21,6 @@ interface WorldHeritageQueryServiceInterface
         int $id
     ): WorldHeritageDto;
 
-    public function getHeritagesByIds(
-        array $ids,
-        int $currentPage,
-        int $perPage
-    ): PaginationDto;
-
     public function searchHeritages(
         AlgoliaSearchListQuery $query
     ): PaginationDto;
