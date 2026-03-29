@@ -33,12 +33,14 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
                 'world_heritage_sites.latitude',
                 'world_heritage_sites.longitude',
                 'world_heritage_sites.short_description',
-                'world_heritage_sites.image_url',
             ])
             ->with([
                 'countries' => function ($q) {
                     $q->select('countries.state_party_code', 'countries.name_en', 'countries.name_jp', 'countries.region')
                         ->orderBy('countries.state_party_code', 'asc');
+                },
+                'images' => function ($imageQuery) {
+                    $imageQuery->where('is_primary', true)->limit(1);
                 },
             ])
             ->whereIn('world_heritage_sites.id', $ids)
