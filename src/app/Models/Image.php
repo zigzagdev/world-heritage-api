@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Image extends Model
 {
@@ -22,6 +21,13 @@ class Image extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function casts(): array
+    {
+        return [
+            'is_primary' => 'boolean',
+        ];
+    }
 
     public function worldHeritage()
     {

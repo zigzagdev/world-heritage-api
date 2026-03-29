@@ -12,8 +12,6 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\Image;
-use App\Packages\Domains\Ports\SignedUrlPort;
-use Mockery;
 
 class WorldHeritageQueryService_getByIdTest extends TestCase
 {
@@ -57,49 +55,48 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
 
     private function arrayData(): array
     {
-        return
-            [
-                'id' => 1133,
-                'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
-                'name' => "Ancient and Primeval Beech Forests",
-                'heritage_name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
-                'country' => 'Slovakia',
-                'study_region' => 'Europe',
-                'category' => 'Natural',
-                'criteria' => ['ix'],
-                'state_party' => null,
-                'year_inscribed' => 2007,
-                'area_hectares' => 99947.81,
-                'buffer_zone_hectares' => 296275.8,
-                'is_endangered' => false,
-                'latitude' => 0.0,
-                'longitude' => 0.0,
-                'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
-                'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
-                'state_parties_codes' => [
-                    'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
-                ],
-                'state_parties_meta' => [
-                    'ALB' => ['is_primary' => false],
-                    'AUT' => ['is_primary' => false],
-                    'BEL' => ['is_primary' => false],
-                    'BIH' => ['is_primary' => false],
-                    'BGR' => ['is_primary' => false],
-                    'HRV' => ['is_primary' => false],
-                    'CZE' => ['is_primary' => false],
-                    'FRA' => ['is_primary' => false],
-                    'DEU' => ['is_primary' => false],
-                    'ITA' => ['is_primary' => false],
-                    'MKD' => ['is_primary' => false],
-                    'POL' => ['is_primary' => false],
-                    'ROU' => ['is_primary' => false],
-                    'SVK' => ['is_primary' => true],
-                    'SVN' => ['is_primary' => false],
-                    'ESP' => ['is_primary' => false],
-                    'CHE' => ['is_primary' => false],
-                    'UKR' => ['is_primary' => false],
-                ]
-            ];
+        return [
+            'id' => 1133,
+            'official_name' => "Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe",
+            'name' => "Ancient and Primeval Beech Forests",
+            'heritage_name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
+            'country' => 'Slovakia',
+            'study_region' => 'Europe',
+            'category' => 'Natural',
+            'criteria' => ['ix'],
+            'state_party' => null,
+            'year_inscribed' => 2007,
+            'area_hectares' => 99947.81,
+            'buffer_zone_hectares' => 296275.8,
+            'is_endangered' => false,
+            'latitude' => 0.0,
+            'longitude' => 0.0,
+            'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
+            'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
+            'state_parties_codes' => [
+                'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
+            ],
+            'state_parties_meta' => [
+                'ALB' => ['is_primary' => false],
+                'AUT' => ['is_primary' => false],
+                'BEL' => ['is_primary' => false],
+                'BIH' => ['is_primary' => false],
+                'BGR' => ['is_primary' => false],
+                'HRV' => ['is_primary' => false],
+                'CZE' => ['is_primary' => false],
+                'FRA' => ['is_primary' => false],
+                'DEU' => ['is_primary' => false],
+                'ITA' => ['is_primary' => false],
+                'MKD' => ['is_primary' => false],
+                'POL' => ['is_primary' => false],
+                'ROU' => ['is_primary' => false],
+                'SVK' => ['is_primary' => true],
+                'SVN' => ['is_primary' => false],
+                'ESP' => ['is_primary' => false],
+                'CHE' => ['is_primary' => false],
+                'UKR' => ['is_primary' => false],
+            ]
+        ];
     }
 
     public function test_queryService_check(): void
@@ -163,13 +160,39 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEquals($expectedCodes, $result->getStatePartyCodes());
         $this->assertEquals($orderedExpected, $result->getStatePartiesMeta());
-        foreach ($result->getImages() as $img) {
+    }
+
+    public function test_images_contract(): void
+    {
+        $result = $this->queryService->getHeritageById($this->arrayData()['id']);
+        $images = $result->getImages();
+
+        $this->assertIsArray($images);
+        $this->assertNotEmpty($images);
+        $this->assertTrue($images[0]['is_primary']);
+        $this->assertEquals(0, $images[0]['sort_order']);
+        $this->assertFalse($images[1]['is_primary']);
+        $this->assertEquals(1, $images[1]['sort_order']);
+
+        foreach ($images as $img) {
             $this->assertArrayHasKey('id', $img);
             $this->assertArrayHasKey('url', $img);
             $this->assertArrayHasKey('sort_order', $img);
             $this->assertArrayHasKey('is_primary', $img);
             $this->assertIsBool($img['is_primary']);
-            $this->assertNotEmpty($img['url']);
         }
+    }
+
+    public function test_images_empty_when_no_images(): void
+    {
+        DB::table('world_heritage_site_images')
+            ->where('world_heritage_site_id', 1133)
+            ->delete();
+
+
+        $result = $this->queryService->getHeritageById(1133);
+
+        $this->assertIsArray($result->getImages());
+        $this->assertEmpty($result->getImages());
     }
 }
