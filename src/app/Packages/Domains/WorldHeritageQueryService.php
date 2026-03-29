@@ -25,15 +25,11 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         private readonly WorldHeritageSearchPort $searchPort,
     ) {}
 
-    /**
-     * 一覧（最大30件）: サムネのみ、state_party/state_party_code を要件通りに整形
-     */
     public function getAllHeritages(
         int $currentPage,
         int $perPage,
         string $order
-    ): PaginationDto
-    {
+    ): PaginationDto {
         $items = WorldHeritage::query()
             ->select([
                 'world_heritage_sites.id',
@@ -50,7 +46,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'world_heritage_sites.latitude',
                 'world_heritage_sites.longitude',
                 'world_heritage_sites.short_description',
-                'world_heritage_sites.image_url',
+                'world_heritage_sites.unesco_site_url',
             ])
             ->with([
                 'countries' => function ($q) {
@@ -60,7 +56,10 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                         'countries.name_jp',
                         'countries.region',
                     ]);
-                }
+                },
+                'images' => function ($imagesQuery) {
+                    $imagesQuery->where('is_primary', true)->limit(1);
+                },
             ])
             ->orderBy('world_heritage_sites.id', $order)
             ->paginate($perPage, page: $currentPage);
@@ -107,12 +106,12 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         $imageCollection = new ImageDtoCollection();
         $images = ($heritage->images ?? collect())->values();
 
-        foreach ($images as $idx => $img) {
+        foreach ($images as $img) {
             $imageCollection->add(new ImageDto(
                 id: $img->id,
                 url: $img->url,
                 sortOrder: $img->sort_order,
-                isPrimary: $idx === 0,
+                isPrimary: (bool) $img->is_primary,
             ));
         }
 
@@ -189,121 +188,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         ]);
     }
 
-    public function getHeritagesByIds(array $ids, int $currentPage, int $perPage): PaginationDto
-    {
-        $paginator = $this->model
-            ->select([
-                'id',
-                'official_name',
-                'name',
-                'name_jp',
-                'country',
-                'region',
-                'study_region',
-                'category',
-                'criteria',
-                'year_inscribed',
-                'area_hectares',
-                'buffer_zone_hectares',
-                'is_endangered',
-                'latitude',
-                'longitude',
-                'short_description',
-                'unesco_site_url',
-                'thumbnail_image_id',
-            ])
-            ->with([
-                'countries' => function ($countriesQuery) {
-                    $countriesQuery->withPivot(['is_primary'])->orderBy('countries.state_party_code', 'asc')->orderBy(
-                        'site_state_parties.inscription_year',
-                        'asc',
-                    );
-                },
-                'thumbnail' => function ($thumbnailQuery) {
-                    $thumbnailQuery->select([
-                        'images.id',
-                        'images.world_heritage_id',
-                        'path',
-                        'sort_order',
-                    ]);
-                },
-            ])
-            ->whereIn('id', $ids)
-            ->paginate($perPage, ['*'], 'current_page', $currentPage)
-            ->through(function ($heritage) {
-                $countries = $heritage->countries ?? collect();
-
-                $codes = $countries
-                    ->pluck('state_party_code')
-                    ->filter()
-                    ->map($this->statePartyCodeNormalize(...))
-                    ->unique()
-                    ->values();
-
-                $statePartyName = null;
-                $statePartyCodes = null;
-                $stateParties = [];
-
-                if ($codes->count() === 1) {
-                    $onlyCode = $codes->first();
-
-                    $countryModel = $heritage->countries->first(
-                        fn($country) => $this->statePartyCodeNormalize($country->state_party_code) === $onlyCode,
-                    );
-
-                    $statePartyName = $countryModel?->name;
-                    $statePartyCodes = null;
-                } elseif ($codes->count() > 1) {
-                    $statePartyName = null;
-                    $statePartyCodes = $codes->all();
-                }
-
-                $statePartiesMeta = [];
-
-                foreach ($countries as $country) {
-                    $code = strtoupper($country->state_party_code);
-                    if ($code === '' || $code === '0') {
-                        continue;
-                    }
-
-                    $statePartiesMeta[$code] = [
-                        'is_primary' => (bool) data_get($country, 'pivot.is_primary', false),
-                    ];
-                }
-
-                return [
-                    'id' => $heritage->id,
-                    'official_name' => $heritage->official_name,
-                    'name' => $heritage->name,
-                    'name_jp' => $heritage->name_jp,
-                    'country' => $heritage->country,
-                    'region' => $heritage->study_region,
-                    'category' => $heritage->category,
-                    'criteria' => $heritage->criteria,
-                    'state_party' => $statePartyName,
-                    'state_party_code' => $statePartyCodes,
-                    'year_inscribed' => $heritage->year_inscribed,
-                    'area_hectares' => $heritage->area_hectares,
-                    'buffer_zone_hectares' => $heritage->buffer_zone_hectares,
-                    'is_endangered' => (bool) $heritage->is_endangered,
-                    'latitude' => $heritage->latitude,
-                    'longitude' => $heritage->longitude,
-                    'short_description' => $heritage->short_description,
-                    'unesco_site_url' => $heritage->unesco_site_url,
-                    'state_parties' => $stateParties,
-                    'state_parties_meta' => $statePartiesMeta,
-                ];
-            });
-
-        $paginationArray = $paginator->toArray();
-        $dtoCollection = $this->buildDtoFromCollection($paginationArray['data']);
-
-        return new PaginationDto(
-            collection: $dtoCollection,
-            pagination: collect($paginationArray)->except('data')->toArray(),
-        );
-    }
-
     public function searchHeritages(AlgoliaSearchListQuery $query): PaginationDto
     {
         $result = $this->searchPort->search(
@@ -359,8 +243,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             $counts[$region->value] ??= 0;
         }
 
-        // id: 148 (Old City of Jerusalem) is stored as Unknown
-        // but geographically belongs to Asia
         $counts[StudyRegion::ASIA->value] += 1;
 
         return $counts;
@@ -377,6 +259,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             ->unique()
             ->values();
 
+        $statePartyName = null;
         $statePartyCodeValue = null;
         $statePartyCodeList = [];
 
@@ -385,16 +268,11 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             $primaryCountry = $countryRelations->first(
                 fn($country) => strtoupper($country->state_party_code) === $onlyStateParty,
             );
-
             $statePartyName = $primaryCountry?->name_en ?? $heritage->country ?? null;
         } elseif ($statePartyCodeCollection->count() > 1) {
             $statePartyName = null;
             $statePartyCodeValue = $statePartyCodeCollection->all();
             $statePartyCodeList = $statePartyCodeCollection->all();
-        } else {
-            $statePartyName = null;
-            $statePartyCodeValue = null;
-            $statePartyCodeList = [];
         }
 
         $statePartiesMeta = [];
@@ -408,8 +286,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'is_primary' => (bool) ($country->pivot->is_primary ?? false),
             ];
         }
-
-        $thumbnailModel = $heritage->thumbnail;
 
         return [
             'id' => $heritage->id,
@@ -430,11 +306,10 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'latitude' => $heritage->latitude,
             'longitude' => $heritage->longitude,
             'short_description' => $heritage->short_description,
-            'thumbnail_id' => $thumbnailModel?->id,
+            'image_url' => $heritage->images->first()?->url,
             'unesco_site_url' => $heritage->unesco_site_url,
             'state_parties' => $statePartyCodeList,
             'state_parties_meta' => $statePartiesMeta,
-            'image_url' => $heritage->image_url,
         ];
     }
 
