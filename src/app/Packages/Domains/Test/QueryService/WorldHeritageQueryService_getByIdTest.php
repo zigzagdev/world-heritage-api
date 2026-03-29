@@ -53,30 +53,6 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         }
     }
 
-    private function seedImages(): void
-    {
-        DB::table('world_heritage_site_images')->insert([
-            [
-                'world_heritage_site_id' => 1133,
-                'url' => 'https://example.com/image1.jpg',
-                'url_hash' => hash('sha256', 'https://example.com/image1.jpg'),
-                'sort_order' => 0,
-                'is_primary' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'world_heritage_site_id' => 1133,
-                'url' => 'https://example.com/image2.jpg',
-                'url_hash' => hash('sha256', 'https://example.com/image2.jpg'),
-                'sort_order' => 1,
-                'is_primary' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
-    }
-
     private function arrayData(): array
     {
         return [
