@@ -69,7 +69,6 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
             'latitude'             => null,
             'longitude'            => null,
             'short_description'    => '',
-            'image_url'            => null,
             'unesco_site_url'      => null,
             'created_at'           => $now,
             'updated_at'           => $now,
