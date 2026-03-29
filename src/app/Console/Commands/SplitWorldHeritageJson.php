@@ -282,7 +282,7 @@ class SplitWorldHeritageJson extends Command
                 foreach ($imageUrls as $idx => $url) {
                     $images[] = [
                         'world_heritage_site_id' => $siteId,
-                        'url' => hash('sha256', $url),
+                        'url' => $url,
                         'sort_order' => $idx,
                         'is_primary' => ($idx === 0) ? 1 : 0,
                     ];
