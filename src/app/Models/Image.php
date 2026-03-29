@@ -22,6 +22,13 @@ class Image extends Model
         'updated_at',
     ];
 
+    public function casts(): array
+    {
+        return [
+            'is_primary' => 'boolean',
+        ];
+    }
+
     public function worldHeritage()
     {
         return $this->belongsTo(WorldHeritage::class, 'world_heritage_site_id', 'id');
