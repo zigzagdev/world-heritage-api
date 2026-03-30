@@ -403,7 +403,7 @@ class DumpUnescoWorldHeritageJson extends Command
                 return [];
             }
             $lines = preg_split('/\R/u', (string) Storage::disk('local')->get($file)) ?: [];
-            $items = array_map(fn ($v) => trim((string) $v), $lines);
+            $items = array_map(static fn ($v) => trim((string) $v), $lines);
             return array_values(array_filter(array_unique($items)));
         }
 
@@ -440,9 +440,9 @@ class DumpUnescoWorldHeritageJson extends Command
 
     private function normalizeRow(array $row): array
     {
-        $toBool = fn ($v) => is_bool($v) ? $v : (strtolower(trim((string) $v)) === 'true');
-        $toFloat = fn ($v) => $v === null || $v === '' ? null : (float) $v;
-        $toInt = fn ($v) => $v === null || $v === '' ? null : (int) $v;
+        $toBool = static fn ($v) => is_bool($v) ? $v : (strtolower(trim((string) $v)) === 'true');
+        $toFloat = static fn ($v) => $v === null || $v === '' ? null : (float) $v;
+        $toInt = static fn ($v) => $v === null || $v === '' ? null : (int) $v;
 
         $images = [];
         if (isset($row['images_urls']) && is_string($row['images_urls'])) {

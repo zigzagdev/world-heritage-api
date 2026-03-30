@@ -65,7 +65,7 @@ class WorldHeritageReadQueryService_findTest extends TestCase
 
         $this->assertNotNull($existingId, 'Seeder must insert at least 1 world heritage.');
 
-        $requested = [$existingId, 999999999];
+        $requested = [$existingId, 999_999_999];
         $rows = $this->readQueryService->findByIdsPreserveOrder($requested);
 
         $this->assertSame([$existingId], $rows->pluck('id')->all());

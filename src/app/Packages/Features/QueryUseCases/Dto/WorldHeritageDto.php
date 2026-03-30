@@ -152,7 +152,7 @@ class WorldHeritageDto
         $parts = preg_split('/[;,\s]+/', strtoupper($this->stateParty));
         $codes = array_filter(
             $parts,
-            fn ($countryCode) => preg_match('/^[A-Z]{3}$/', $countryCode)
+            static fn ($countryCode) => preg_match('/^[A-Z]{3}$/', $countryCode)
         );
 
         return array_values(array_unique($codes));

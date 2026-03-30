@@ -21,7 +21,7 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
         parent::setUp();
         $this->refresh();
 
-        $this->app->bind(WorldHeritageSearchPort::class, function () {
+        $this->app->bind(WorldHeritageSearchPort::class, static function () {
             return new class implements WorldHeritageSearchPort {
                 public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
                     return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
@@ -86,8 +86,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'name'         => 'Simien National Park',
                 'study_region' => StudyRegion::AFRICA->value,
                 'category'     => 'Natural',
-                'latitude'     => 13.1833333333,
-                'longitude'    => 38.0666666667,
+                'latitude'     => 13.183_333_333_3,
+                'longitude'    => 38.066_666_666_7,
             ]),
             // id:25 Djoudj National Bird Sanctuary (Senegal, AFR)
             $this->baseRecord([
@@ -96,8 +96,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'name'         => 'Djoudj National Bird Sanctuary',
                 'study_region' => StudyRegion::AFRICA->value,
                 'category'     => 'Natural',
-                'latitude'     => 16.414602,
-                'longitude'    => -16.237906,
+                'latitude'     => 16.414_602,
+                'longitude'    => -16.237_906,
             ]),
             // id:26 Island of Gorée (Senegal, AFR)
             $this->baseRecord([
@@ -105,8 +105,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'official_name'=> 'Island of Gorée',
                 'name'         => 'Island of Gorée',
                 'study_region' => StudyRegion::AFRICA->value,
-                'latitude'     => 14.66722,
-                'longitude'    => -17.40083,
+                'latitude'     => 14.667_22,
+                'longitude'    => -17.400_83,
             ]),
 
             // Europe × 3
@@ -116,8 +116,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'official_name'=> 'Aachen Cathedral',
                 'name'         => 'Aachen Cathedral',
                 'study_region' => StudyRegion::EUROPE->value,
-                'latitude'     => 50.7747468537,
-                'longitude'    => 6.083919968,
+                'latitude'     => 50.774_746_853_7,
+                'longitude'    => 6.083_919_968,
             ]),
             // id:29 Historic Centre of Kraków (Poland, EUR)
             $this->baseRecord([
@@ -125,8 +125,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'official_name'=> 'Historic Centre of Kraków',
                 'name'         => 'Historic Centre of Kraków',
                 'study_region' => StudyRegion::EUROPE->value,
-                'latitude'     => 50.0613888889,
-                'longitude'    => 19.9372222222,
+                'latitude'     => 50.061_388_888_9,
+                'longitude'    => 19.937_222_222_2,
             ]),
             // id:30 Historic Centre of Warsaw (Poland, EUR)
             $this->baseRecord([
@@ -145,7 +145,7 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'official_name'=> "L'Anse aux Meadows National Historic Site",
                 'name'         => "L'Anse aux Meadows",
                 'study_region' => StudyRegion::NORTH_AMERICA->value,
-                'latitude'     => 51.5847222222,
+                'latitude'     => 51.584_722_222_2,
                 'longitude'    => -55.55,
             ]),
             // id:27 Mesa Verde National Park (USA, EUR/North America)
@@ -154,8 +154,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'official_name'=> 'Mesa Verde National Park',
                 'name'         => 'Mesa Verde National Park',
                 'study_region' => StudyRegion::NORTH_AMERICA->value,
-                'latitude'     => 37.26166667,
-                'longitude'    => -108.4855556,
+                'latitude'     => 37.261_666_67,
+                'longitude'    => -108.485_555_6,
             ]),
 
             // South America × 2
@@ -166,8 +166,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'name'         => 'Galápagos Islands',
                 'study_region' => StudyRegion::SOUTH_AMERICA->value,
                 'category'     => 'Natural',
-                'latitude'     => -0.68986,
-                'longitude'    => -90.501319,
+                'latitude'     => -0.689_86,
+                'longitude'    => -90.501_319,
             ]),
             // id:2  City of Quito (Ecuador, LAC)
             $this->baseRecord([
@@ -176,7 +176,7 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'name'         => 'City of Quito',
                 'study_region' => StudyRegion::SOUTH_AMERICA->value,
                 'latitude'     => -0.22,
-                'longitude'    => -78.5120833333,
+                'longitude'    => -78.512_083_333_3,
             ]),
 
             // Oceania × 1 (JSONにないため仮データ)
@@ -206,8 +206,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'official_name'=> 'Ancient City of Damascus',
                 'name'         => 'Ancient City of Damascus',
                 'study_region' => StudyRegion::UNKNOWN->value,
-                'latitude'     => 33.5108333333,
-                'longitude'    => 36.3097222222,
+                'latitude'     => 33.510_833_333_3,
+                'longitude'    => 36.309_722_222_2,
             ]),
             // id:8  Ichkeul National Park (Tunisia, ARB)
             $this->baseRecord([
@@ -216,8 +216,8 @@ class WorldHeritageQueryService_countEachRegionTest extends TestCase
                 'name'         => 'Ichkeul National Park',
                 'study_region' => StudyRegion::UNKNOWN->value,
                 'category'     => 'Natural',
-                'latitude'     => 37.16361,
-                'longitude'    => 9.67472,
+                'latitude'     => 37.163_61,
+                'longitude'    => 9.674_72,
             ]),
         ]);
 

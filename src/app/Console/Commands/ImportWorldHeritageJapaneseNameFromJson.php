@@ -59,7 +59,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
         $existingIds = WorldHeritage::query()
             ->whereIn('id', $ids)
             ->pluck('id')
-            ->map(fn ($id) => (int) $id)
+            ->map(static fn ($id) => (int) $id)
             ->all();
 
         $existingIdSet = array_fill_keys($existingIds, true);
@@ -120,7 +120,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
                 try {
                     $chunkIdList = array_column($upsertRows, 'id');
                     $cases = implode(' ', array_map(
-                        fn ($row) => "WHEN {$row['id']} THEN ?",
+                        static fn ($row) => "WHEN {$row['id']} THEN ?",
                         $upsertRows
                     ));
                     $bindings = array_column($upsertRows, 'name_jp');
@@ -217,7 +217,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
         $dir = dirname($fullOut);
 
         if (!is_dir($dir)) {
-            @mkdir($dir, 0777, true);
+            @mkdir($dir, 0o777, true);
         }
 
         $content = implode(PHP_EOL, $missing) . PHP_EOL;

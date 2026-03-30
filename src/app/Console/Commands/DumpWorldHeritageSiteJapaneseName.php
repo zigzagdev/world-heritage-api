@@ -123,7 +123,7 @@ class DumpWorldHeritageSiteJapaneseName extends Command
             $sid = (string) $id;
             $url = "{$baseUrl}/{$sid}";
 
-            $this->line("[$i/" . (count($targets) - 1) . "] {$url}");
+            $this->line("[{$i}/" . (count($targets) - 1) . "] {$url}");
 
             $html = $this->fetchHtml($url, $timeout);
             if ($html === null) {
@@ -250,7 +250,7 @@ class DumpWorldHeritageSiteJapaneseName extends Command
             return [];
         }
 
-        return array_values(array_filter($json, fn ($v) => is_array($v)));
+        return array_values(array_filter($json, static fn ($v) => is_array($v)));
     }
 
     private function containsJapanese(string $s): bool

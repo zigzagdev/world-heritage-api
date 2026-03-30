@@ -32,7 +32,7 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
         $seeder = new DatabaseSeeder();
         $seeder->run();
 
-        $this->app->bind(WorldHeritageSearchPort::class, function () {
+        $this->app->bind(WorldHeritageSearchPort::class, static function () {
             return new class implements WorldHeritageSearchPort {
                 public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
                     return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);

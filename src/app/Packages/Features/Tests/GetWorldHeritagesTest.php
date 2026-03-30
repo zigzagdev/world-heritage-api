@@ -18,7 +18,7 @@ class GetWorldHeritagesTest extends TestCase
         parent::setUp();
         $this->refresh();
 
-        $this->app->bind(WorldHeritageSearchPort::class, function () {
+        $this->app->bind(WorldHeritageSearchPort::class, static function () {
             return new class implements WorldHeritageSearchPort {
                 public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
                     return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
@@ -84,7 +84,7 @@ class GetWorldHeritagesTest extends TestCase
                 'category' => 'Natural',
                 'criteria' => ['vii','ix'],
                 'year_inscribed' => 1993,
-                'area_hectares' => 10747.0,
+                'area_hectares' => 10_747.0,
                 'buffer_zone_hectares' => null,
                 'is_endangered' => false,
                 'latitude' => null,
@@ -104,7 +104,7 @@ class GetWorldHeritagesTest extends TestCase
                 'category' => 'Natural',
                 'criteria' => ['ix','x'],
                 'year_inscribed' => 1993,
-                'area_hectares' => 16971.0,
+                'area_hectares' => 16_971.0,
                 'buffer_zone_hectares' => 6832.0,
                 'is_endangered' => false,
                 'latitude' => null,
@@ -124,8 +124,8 @@ class GetWorldHeritagesTest extends TestCase
                 'category' => 'Cultural',
                 'criteria' => ['ii','iii','vi'],
                 'year_inscribed' => 2014,
-                'area_hectares' => 42668.16,
-                'buffer_zone_hectares' => 189963.1,
+                'area_hectares' => 42_668.16,
+                'buffer_zone_hectares' => 189_963.1,
                 'is_endangered' => false,
                 'latitude' => 0.0,
                 'longitude' => 0.0,

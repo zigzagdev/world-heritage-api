@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageEntity;
 
+/**
+ * @covers \App\Packages\Domains\WorldHeritageEntity
+ */
 class WorldHeritageEntityTest extends TestCase
 {
     protected function setUp(): void
@@ -76,8 +79,8 @@ class WorldHeritageEntityTest extends TestCase
             'criteria' => ['ix'],
             'state_party' => null,
             'year_inscribed' => 2007,
-            'area_hectares' => 99947.81,
-            'buffer_zone_hectares' => 296275.8,
+            'area_hectares' => 99_947.81,
+            'buffer_zone_hectares' => 296_275.8,
             'is_endangered' => false,
             'latitude' => 0.0,
             'longitude' => 0.0,

@@ -14,14 +14,14 @@ class WorldHeritageDtoCollection
     public function toArray(): array
     {
         return array_map(
-            fn (WorldHeritageDto $heritage) => $heritage->toArray(),
+            static fn (WorldHeritageDto $heritage) => $heritage->toArray(),
             $this->heritages
         );
     }
 
     public function toSummaryArray(): array
     {
-        return array_map(function (WorldHeritageDto $heritage) {
+        return array_map(static function (WorldHeritageDto $heritage) {
             return [
                 'id' => $heritage->getId(),
                 'official_name' => $heritage->getOfficialName(),

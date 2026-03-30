@@ -36,8 +36,8 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 'criteria' => ['ix'],
                 'state_party' => null,
                 'year_inscribed' => 2007,
-                'area_hectares' => 99947.81,
-                'buffer_zone_hectares' => 296275.8,
+                'area_hectares' => 99_947.81,
+                'buffer_zone_hectares' => 296_275.8,
                 'is_endangered' => false,
                 'latitude' => 0.0,
                 'longitude' => 0.0,
@@ -100,7 +100,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
 
     private function mockDtoCollection(): WorldHeritageDtoCollection
     {
-        $dtos = array_map(function (array $data) {
+        $dtos = array_map(static function (array $data) {
             $thumbnail = isset($data['thumbnail_url']) && $data['thumbnail_url']
                 ? new ImageDto(
                     id: $data['id'] ?? 0,

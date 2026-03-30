@@ -133,7 +133,7 @@ class  WorldHeritageListQuery
         }
 
         $parts = preg_split('/[;,\s]+/', strtoupper($this->state_party));
-        $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{2}$/', $country));
+        $codes = array_filter($parts, static fn($country) => preg_match('/^[A-Z]{2}$/', $country));
 
         return array_values(array_unique($codes));
     }

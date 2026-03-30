@@ -7,7 +7,7 @@ use App\Models\Country;
 use App\Models\WorldHeritage;
 use App\Models\Image;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritagesUseCase;
-use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;

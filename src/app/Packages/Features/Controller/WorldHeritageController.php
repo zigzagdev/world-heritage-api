@@ -90,7 +90,7 @@ class WorldHeritageController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => array_map(fn ($item) => $item->toArray(), $dto),
+            'data' => array_map(static fn ($item) => $item->toArray(), $dto),
         ], 200);
     }
 }

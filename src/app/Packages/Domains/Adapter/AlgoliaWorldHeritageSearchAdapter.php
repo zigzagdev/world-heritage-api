@@ -109,13 +109,13 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
                     'hitsPerPage' => $perPage,
                     'filters' => $hasAnyFilter ? implode(' AND ', $filters) : null,
                 ],
-                fn ($v) => $v !== null,
+                static fn ($v) => $v !== null,
             ),
         );
 
         $hits = $response['hits'] ?? [];
 
-        $ids = array_values(array_filter(array_map(function (array $h) {
+        $ids = array_values(array_filter(array_map(static function (array $h) {
             return isset($h['id'])
                 ? (int) $h['id']
                 : (isset($h['objectID']) ? (int) $h['objectID'] : null);

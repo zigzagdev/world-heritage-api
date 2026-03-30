@@ -19,7 +19,7 @@ class GetCountEachRegionUseCase
         $result = $this->queryService->getEachRegionsHeritagesCount();
 
         return array_map(
-            fn(string $region, int $count) => new RegionCountDto(
+            static fn(string $region, int $count) => new RegionCountDto(
                 region: $region,
                 count: $count,
             ),

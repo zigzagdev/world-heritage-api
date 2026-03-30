@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\ListQuery;
 
-use App\Packages\Features\QueryUseCases\ListQuery\WorldHeritageListQuery;
+
 
 class UpdateWorldHeritageListQueryCollection
 {
@@ -17,7 +17,7 @@ class UpdateWorldHeritageListQueryCollection
     public function toArray(): array
     {
         return array_map(
-            fn(WorldHeritageListQuery $query) => $query->toArray(),
+            static fn(WorldHeritageListQuery $query) => $query->toArray(),
             $this->listQuery
         );
     }

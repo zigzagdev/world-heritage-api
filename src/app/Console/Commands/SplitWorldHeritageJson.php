@@ -76,7 +76,7 @@ class SplitWorldHeritageJson extends Command
         }
 
         $outDir = $this->resolvePathToDir($out);
-        if (!is_dir($outDir) && (!@mkdir($outDir, 0777, true) && !is_dir($outDir))) {
+        if (!is_dir($outDir) && (!@mkdir($outDir, 0o777, true) && !is_dir($outDir))) {
             $this->error("Failed to create output dir: {$outDir}");
             return self::FAILURE;
         }
@@ -756,7 +756,7 @@ class SplitWorldHeritageJson extends Command
             }
         }
 
-        $fill = function (string $key, mixed $value) use (&$existing): void {
+        $fill = static function (string $key, mixed $value) use (&$existing): void {
             if ((!array_key_exists($key, $existing) || $existing[$key] === null || $existing[$key] === '') && ($value !== null && $value !== '')) {
                 $existing[$key] = $value;
             }

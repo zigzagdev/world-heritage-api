@@ -76,7 +76,7 @@ class WorldHeritageBuild extends Command
                 '--out' => $dumpOut, // e.g. unesco/world-heritage-sites.json
                 '--pretty' => $pretty ? true : null,
                 '--dry-run' => (bool) $this->option('dump-dry-run') ? true : null,
-            ], fn ($v) => $v !== null));
+            ], static fn ($v) => $v !== null));
         }
 
         // 1) Split raw UNESCO JSON -> normalized JSON files
@@ -88,7 +88,7 @@ class WorldHeritageBuild extends Command
             '--exceptions-out' => self::NORM_DIR . '/exceptions-missing-iso-codes.json',
             '--clean' => true,
             '--pretty' => $pretty ? true : null,
-        ], fn ($v) => $v !== null));
+        ], static fn ($v) => $v !== null));
 
         // 2) Import countries (FK parent)
         $this->callOrFail('world-heritage:import-countries-split', [
@@ -137,14 +137,14 @@ class WorldHeritageBuild extends Command
 
                 '--missing-out' => trim((string) $this->option('jp-missing-out')) !== '' ? (string) $this->option('jp-missing-out') : null,
                 '--missing-limit' => (int) $this->option('jp-missing-limit'),
-            ], fn ($v) => $v !== null));
+            ], static fn ($v) => $v !== null));
         }
 
         // 8) Algolia import (optional)
         if ((bool) $this->option('algolia')) {
             $this->callOrFail('algolia:import-world-heritages', array_filter([
                 '--truncate' => (bool) $this->option('algolia-truncate') ? true : null,
-            ], fn ($v) => $v !== null));
+            ], static fn ($v) => $v !== null));
         }
 
         $this->info('Done: DB rebuilt + UNESCO data imported (dump -> split -> import)');

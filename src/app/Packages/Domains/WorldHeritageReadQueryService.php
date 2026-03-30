@@ -36,11 +36,11 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
                 'world_heritage_sites.unesco_site_url',
             ])
             ->with([
-                'countries' => function ($q) {
+                'countries' => static function ($q): void {
                     $q->select('countries.state_party_code', 'countries.name_en', 'countries.name_jp', 'countries.region')
                         ->orderBy('countries.state_party_code', 'asc');
                 },
-                'images' => function ($imageQuery) {
+                'images' => static function ($imageQuery): void {
                     $imageQuery->where('is_primary', true)->limit(1);
                 },
             ])
@@ -49,7 +49,7 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
             ->keyBy('id');
 
         return collect($ids)
-            ->map(fn ($id) => $modelsById->get($id))
+            ->map(static fn ($id) => $modelsById->get($id))
             ->filter();
     }
 }

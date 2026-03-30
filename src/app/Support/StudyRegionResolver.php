@@ -28,10 +28,6 @@ class StudyRegionResolver
         return StudyRegion::UNKNOWN;
     }
 
-    /**
-     * @param array<int, mixed> $statePartyCodes
-     * @return array<int, StudyRegion>
-     */
     public static function resolveManyFromRecord(
         ?int $siteId,
         ?string $country,
@@ -82,10 +78,6 @@ class StudyRegionResolver
         return Iso3ToStudyRegionMap::all()[$normalized] ?? StudyRegion::UNKNOWN;
     }
 
-    /**
-     * @param array<int, mixed> $iso3List
-     * @return array<int, StudyRegion>
-     */
     public static function resolveManyFromIso3List(array $iso3List): array
     {
         $regions = [];
