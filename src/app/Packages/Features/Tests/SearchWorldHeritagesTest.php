@@ -7,7 +7,7 @@ use App\Models\Image;
 use App\Models\WorldHeritage;
 use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
 use App\Packages\Domains\Ports\WorldHeritageSearchPort;
-use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
+
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Mockery;

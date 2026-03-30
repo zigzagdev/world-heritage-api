@@ -27,7 +27,7 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
 
     private function makePaginationDto(array $heritageIds, int $currentPage, int $perPage, int $total): PaginationDto
     {
-        $heritages = array_map(function (int $id) {
+        $heritages = array_map(static function (int $id) {
             return new WorldHeritageDto(
                 id: $id,
                 officialName: 'test1234',
@@ -84,7 +84,7 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
 
         $queryService
             ->shouldReceive('searchHeritages')
-            ->with(Mockery::on(function (AlgoliaSearchListQuery $query) {
+            ->with(Mockery::on(static function (AlgoliaSearchListQuery $query) {
                 return $query->keyword === 'test keyword'
                     && $query->countryName === 'test country'
                     && $query->countryIso3 === 'FRA'
@@ -130,7 +130,7 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
 
         $queryService
             ->shouldReceive('searchHeritages')
-            ->with(Mockery::on(function (AlgoliaSearchListQuery $query) {
+            ->with(Mockery::on(static function (AlgoliaSearchListQuery $query) {
                 return $query->keyword === null
                     && $query->countryName === null
                     && $query->countryIso3 === null

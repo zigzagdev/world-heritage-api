@@ -16,9 +16,7 @@ class CountryResolver
         // not to conflict cache even if the environment/connection is different
         $key = self::CACHE_KEY.':'.(string) config('database.default');
 
-        // Cache::remember:
-        // - キャッシュがあればそれを返す
-        // - なければクロージャを実行して値を作り、保存して返す
+        // Cache::remember() is atomic, so it prevents cache stampede when there are multiple concurrent requests and the cache is expired.
         return Cache::store('file')->remember(
             $key,
             now()->addHours(self::TTL_HOURS),

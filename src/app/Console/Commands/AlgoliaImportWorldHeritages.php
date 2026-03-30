@@ -51,10 +51,10 @@ class AlgoliaImportWorldHeritages extends Command
 
         WorldHeritage::query()
             ->with([
-                'images' => function ($query) {
+                'images' => static function ($query): void {
                     $query->where('is_primary', true)->select(['world_heritage_site_id', 'url']);
                 },
-                'countries' => function ($query) {
+                'countries' => static function ($query): void {
                     $query->select(['countries.state_party_code', 'countries.name_en', 'countries.name_jp']);
                 },
             ])
@@ -69,12 +69,12 @@ class AlgoliaImportWorldHeritages extends Command
                 'world_heritage_sites.year_inscribed',
                 'world_heritage_sites.is_endangered',
             ])
-            ->chunkById($chunk, function ($rows) use ($client, $indexName, $dryRun, &$processed) {
+            ->chunkById($chunk, function ($rows) use ($client, $indexName, $dryRun, &$processed): void {
                 $objects = [];
 
                 foreach ($rows as $row) {
                     $countries = $row->countries
-                        ->filter(fn ($country) => $country->state_party_code !== null)
+                        ->filter(static fn ($country) => $country->state_party_code !== null)
                         ->values();
 
                     $statePartyCodes = $countries

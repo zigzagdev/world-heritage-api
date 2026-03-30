@@ -148,9 +148,9 @@ class ImportWorldHeritageSiteImagesFromJson extends Command
         );
 
         foreach ($rii as $file) {
-            if ($file->isFile() && str_ends_with($file->getFilename(), '.json')) {
-                $files[] = $file->getPathname();
-            }
+            if (!($file->isFile() && str_ends_with($file->getFilename(), '.json'))) { continue; }
+
+$files[] = $file->getPathname();
         }
 
         sort($files);

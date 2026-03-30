@@ -119,7 +119,7 @@ final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
             ->keyBy('id');
 
         $ordered = collect($hitIds)
-            ->map(fn ($id) => $modelsById->get($id))
+            ->map(static fn ($id) => $modelsById->get($id))
             ->filter();
 
         $readQueryService = Mockery::mock(WorldHeritageReadQueryServiceInterface::class);
@@ -140,7 +140,7 @@ final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
         $this->assertSame(1, $dto->getLastPage());
 
         $heritageIds = collect($dto->getCollection()->getHeritages())
-            ->map(fn ($h) => $h->getId())
+            ->map(static fn ($h) => $h->getId())
             ->all();
 
         $this->assertCount(2, $heritageIds);

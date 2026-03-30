@@ -9,16 +9,16 @@ class WorldHeritageViewModelCollection
     public function __construct(array $items = [])
     {
         foreach ($items as $item) {
-            if ($item instanceof WorldHeritageViewModel) {
-                $this->items[] = $item;
-            }
+            if (!($item instanceof WorldHeritageViewModel)) { continue; }
+
+$this->items[] = $item;
         }
     }
 
     public function toArray(): array
     {
         return array_map(
-            fn(WorldHeritageViewModel $item) => $item->toArray(),
+            static fn(WorldHeritageViewModel $item) => $item->toArray(),
             $this->items
         );
     }

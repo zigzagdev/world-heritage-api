@@ -3,9 +3,9 @@
 namespace App\Packages\Features\QueryUseCases\QueryServiceInterface;
 
 use App\Common\Pagination\PaginationDto;
-use App\Enums\StudyRegion;
+
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
-use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+
 use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
 
 

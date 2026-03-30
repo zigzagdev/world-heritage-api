@@ -2,7 +2,7 @@
 
 namespace App\Packages\Domains;
 
-use Algolia\AlgoliaSearch\Api\SearchClient;
+
 use App\Common\Pagination\PaginationDto;
 use App\Enums\StudyRegion;
 use App\Models\WorldHeritage;
@@ -49,7 +49,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'world_heritage_sites.unesco_site_url',
             ])
             ->with([
-                'countries' => function ($q) {
+                'countries' => static function ($q): void {
                     $q->select([
                         'countries.state_party_code',
                         'countries.name_en',
@@ -57,7 +57,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                         'countries.region',
                     ]);
                 },
-                'images' => function ($imagesQuery) {
+                'images' => static function ($imagesQuery): void {
                     $imagesQuery->where('is_primary', true)->limit(1);
                 },
             ])
@@ -91,13 +91,13 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
     {
         $heritage = $this->model
             ->with([
-                'countries' => function ($countriesQuery) {
+                'countries' => static function ($countriesQuery): void {
                     $countriesQuery
                         ->withPivot(['is_primary', 'inscription_year'])
                         ->orderBy('countries.state_party_code', 'asc')
                         ->orderBy('site_state_parties.inscription_year', 'asc');
                 },
-                'images' => function ($imagesQuery) {
+                'images' => static function ($imagesQuery): void {
                     $imagesQuery->orderBy('sort_order', 'asc');
                 },
             ])
@@ -154,12 +154,12 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             $displayCountry = $heritage->countries->first()?->name_en;
         } elseif ($codes->count() > 1) {
             $primary = $heritage->countries->first(
-                fn ($c) => (bool) data_get($c, 'pivot.is_primary', false),
+                static fn ($c) => (bool) data_get($c, 'pivot.is_primary', false),
             );
             $displayCountry = $primary?->name_en;
         }
 
-        $displayCountry = $displayCountry ?? $heritage->country;
+        $displayCountry ??= $heritage->country;
         $countryNameJp = $heritage->countries->first()?->name_jp;
 
         return WorldHeritageDetailFactory::build([
@@ -255,7 +255,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         $statePartyCodeCollection = $countryRelations
             ->pluck('state_party_code')
             ->filter()
-            ->map(fn($countryCode) => strtoupper($countryCode))
+            ->map(static fn($countryCode) => strtoupper($countryCode))
             ->unique()
             ->values();
 
@@ -266,9 +266,9 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         if ($statePartyCodeCollection->count() === 1) {
             $onlyStateParty = $statePartyCodeCollection->first();
             $primaryCountry = $countryRelations->first(
-                fn($country) => strtoupper($country->state_party_code) === $onlyStateParty,
+                static fn($country) => strtoupper($country->state_party_code) === $onlyStateParty,
             );
-            $statePartyName = $primaryCountry?->name_en ?? $heritage->country ?? null;
+            $statePartyName = $primaryCountry->name_en ?? $heritage->country ?? null;
         } elseif ($statePartyCodeCollection->count() > 1) {
             $statePartyName = null;
             $statePartyCodeValue = $statePartyCodeCollection->all();
@@ -292,7 +292,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'official_name' => $heritage->official_name,
             'name' => $heritage->name,
             'heritage_name_jp' => $heritage->heritage_name_jp,
-            'country' => $countryRelations->first()?->name_en ?? $heritage->country,
+            'country' => $countryRelations->first()->name_en ?? $heritage->country,
             'country_name_jp' => $heritage->countries->first()?->name_jp,
             'region' => $heritage->study_region,
             'category' => $heritage->category,

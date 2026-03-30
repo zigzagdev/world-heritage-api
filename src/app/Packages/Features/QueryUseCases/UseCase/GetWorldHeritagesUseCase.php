@@ -3,7 +3,7 @@
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
 use App\Common\Pagination\PaginationDto;
-use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
+
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 
 class GetWorldHeritagesUseCase

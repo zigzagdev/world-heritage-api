@@ -22,7 +22,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         parent::setUp();
         $this->refresh();
 
-        $this->app->bind(WorldHeritageSearchPort::class, function () {
+        $this->app->bind(WorldHeritageSearchPort::class, static function () {
             return new class implements WorldHeritageSearchPort {
                 public function search($query, int $currentPage, int $perPage): HeritageSearchResult {
                     return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
@@ -66,8 +66,8 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
             'criteria' => ['ix'],
             'state_party' => null,
             'year_inscribed' => 2007,
-            'area_hectares' => 99947.81,
-            'buffer_zone_hectares' => 296275.8,
+            'area_hectares' => 99_947.81,
+            'buffer_zone_hectares' => 296_275.8,
             'is_endangered' => false,
             'latitude' => 0.0,
             'longitude' => 0.0,

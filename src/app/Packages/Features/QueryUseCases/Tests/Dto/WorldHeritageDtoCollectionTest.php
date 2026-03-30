@@ -53,8 +53,8 @@ class WorldHeritageDtoCollectionTest extends TestCase
                 'criteria' => ['ix'],
                 'state_party' => null,
                 'year_inscribed' => 2007,
-                'area_hectares' => 99947.81,
-                'buffer_zone_hectares' => 296275.8,
+                'area_hectares' => 99_947.81,
+                'buffer_zone_hectares' => 296_275.8,
                 'is_endangered' => false,
                 'latitude' => 0.0,
                 'longitude' => 0.0,
@@ -214,7 +214,7 @@ class WorldHeritageDtoCollectionTest extends TestCase
             $this->assertArrayHasKey('thumbnail', $item);
             $this->assertTrue(is_string($item['thumbnail']) || is_null($item['thumbnail']));
 
-            return collect($item)->keyBy(fn($v, $k) => Str::snake($k))->toArray();
+            return collect($item)->keyBy(static fn($v, $k) => Str::snake($k))->toArray();
         })->toArray();
     }
 }

@@ -165,16 +165,16 @@ class WorldHeritageEntity
         }
 
         $parts = preg_split('/[;,\s]+/', strtoupper($this->stateParty));
-        $codes = array_filter($parts, fn($country) => preg_match('/^[A-Z]{3}$/', $country));
+        $codes = array_filter($parts, static fn($country) => preg_match('/^[A-Z]{3}$/', $country));
 
         return array_values(array_unique($codes));
     }
     private function normalizeCodes(array $codes): array
     {
         $codes = array_map('trim', $codes);
-        $codes = array_filter($codes, fn($v) => $v !== '');
+        $codes = array_filter($codes, static fn($v) => $v !== '');
         $codes = array_map('strtoupper', $codes);
-        $codes = array_filter($codes, fn($v) => preg_match('/^[A-Z]{3}$/', $v));
+        $codes = array_filter($codes, static fn($v) => preg_match('/^[A-Z]{3}$/', $v));
 
         return array_values(array_unique($codes));
     }

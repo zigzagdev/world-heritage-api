@@ -5,14 +5,14 @@ namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 use App\Models\Country;
 use App\Models\WorldHeritage;
 use App\Models\Image;
-use App\Packages\Domains\WorldHeritageQueryService;
+
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
-use App\Packages\Domains\Ports\SignedUrlPort;
+
 use Mockery;
 
 class GetWorldHeritageByIdUseCaseTest extends TestCase
@@ -91,8 +91,8 @@ class GetWorldHeritageByIdUseCaseTest extends TestCase
             'criteria' => ['ix'],
             'state_party' => null,
             'year_inscribed' => 2007,
-            'area_hectares' => 99947.81,
-            'buffer_zone_hectares' => 296275.8,
+            'area_hectares' => 99_947.81,
+            'buffer_zone_hectares' => 296_275.8,
             'is_endangered' => false,
             'latitude' => 0.0,
             'longitude' => 0.0,

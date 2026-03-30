@@ -83,8 +83,8 @@ class WorldHeritageEntityCollectionTest extends TestCase
                 'criteria' => ['ix'],
                 'state_party' => null,
                 'year_inscribed' => 2007,
-                'area_hectares' => 99947.81,
-                'buffer_zone_hectares' => 296275.8,
+                'area_hectares' => 99_947.81,
+                'buffer_zone_hectares' => 296_275.8,
                 'is_endangered' => false,
                 'latitude' => 0.0,
                 'longitude' => 0.0,
@@ -147,7 +147,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
     public function test_collection_check_type(): void
     {
         $collection = new WorldHeritageEntityCollection(
-            array_map(function ($data) {
+            array_map(static function ($data) {
                 return new WorldHeritageEntity(
                     $data['id'],
                     $data['official_name'],
@@ -186,7 +186,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
     public function test_collection_check_count_value(): void
     {
         $collection = new WorldHeritageEntityCollection(
-            array_map(function ($data) {
+            array_map(static function ($data) {
                 return new WorldHeritageEntity(
                     $data['id'],
                     $data['official_name'],
@@ -219,7 +219,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
     public function test_multi_collection_check_type(): void
     {
         $collection = new WorldHeritageEntityCollection(
-            array_map(function ($data) {
+            array_map(static function ($data) {
                 return new WorldHeritageEntity(
                     $data['id'],
                     $data['official_name'],
@@ -252,7 +252,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
     public function test_multi_collection_check_count_value(): void
     {
         $collection = new WorldHeritageEntityCollection(
-            array_map(function ($data) {
+            array_map(static function ($data) {
                 return new WorldHeritageEntity(
                     $data['id'],
                     $data['official_name'],

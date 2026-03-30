@@ -10,7 +10,7 @@ class WorldHeritageViewModelCollectionFactory
     public static function build(WorldHeritageDtoCollection $collection): WorldHeritageViewModelCollection
     {
         $items = array_map(
-            fn($dto) => WorldHeritageSummaryViewModelFactory::build($dto),
+            static fn($dto) => WorldHeritageSummaryViewModelFactory::build($dto),
             $collection->getHeritages()
 
         );
