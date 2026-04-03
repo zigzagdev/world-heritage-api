@@ -64,3 +64,61 @@ php artisan world-heritage:import-japanese-names --force
 ```bash
 php artisan test
 ```
+
+## Architecture Overview
+```
+[Browser]
+    │
+    ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Frontend (world-heritage-frontend)                         │
+│  React + TypeScript + Vite / TailwindCSS                    │
+└─────────────────────────────────────────────────────────────┘
+    │  REST API (HTTP)
+    ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Backend (world-heritage-api) / Laravel 11                  │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ Presentation Layer                                   │   │
+│  │ Controller / FormRequest                             │   │
+│  └───────────────────┬──────────────────────────────────┘   │
+│                      │                                      │
+│          ┌───────────┴────────────┐                         │
+│          │ Write                  │ Read                     │
+│          ▼                        ▼                         │
+│  ┌───────────────┐      ┌─────────────────┐                 │
+│  │  Application  │      │   Application   │                 │
+│  │  UseCommand   │      │   ListQuery     │                 │
+│  └───────┬───────┘      └────────┬────────┘                 │
+│          │                       │                          │
+│          ▼                       ▼                          │
+│  ┌───────────────┐      ┌─────────────────┐                 │
+│  │  Domain Layer │      │  QueryService   │                 │
+│  │  UseCase      │      │  DTO            │                 │
+│  │  Entity       │      └────────┬────────┘                 │
+│  │  ValueObject  │               │                          │
+│  │  Repository   │               │                          │
+│  └───────┬───────┘               │                          │
+│          │                       │                          │
+│  ┌───────▼───────┐               │                          │
+│  │Infrastructure │               │                          │
+│  │ Eloquent      │               │                          │
+│  │ Repository    │               │                          │
+│  └───────┬───────┘               │                          │
+│          │                       │                          │
+└──────────┼───────────────────────┼──────────────────────────┘
+           │ 一覧 / 詳細取得        │ キーワード検索
+           ▼                       ▼
+      ┌─────────┐            ┌───────────┐
+      │  MySQL  │◀─── ID ───│  Algolia  │
+      │  (DB)   │            │ (Search)  │
+      └─────────┘            └───────────┘
+```
+
+## Related Repositories
+
+| Role | Repository |
+|---|---|
+| Frontend | https://github.com/zigzagdev/world-heritage-frontend |
+| Backend API | https://github.com/zigzagdev/world-heritage-api |
