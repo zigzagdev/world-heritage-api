@@ -45,25 +45,26 @@ php artisan key:generate
 php artisan migrate
 ```
 
+## Building Data in Production / 本番データ構築
+Run the follwoing commands from the Koyeb console.
+以下のコマンドをKoyebのコンソールから実行をしてください。
+
 ### Initial / Full rebuild / 初回・フル再構築
 ```bash
 php artisan app:world-heritage-build --force --dump --jp --pretty
 ```
 
-| Option | Description / 説明 |
-|---|---|
+| Option | Description / 説明                                            |
+|---|-------------------------------------------------------------|
 | `--force` | Allow execution outside local/testing / ローカル・テスト環境以外での実行を許可 |
-| `--dump` | Dump JSON from UNESCO / UNESCOからJSONをダンプ |
-| `--jp` | Import Japanese names / 日本語名をインポート |
-| `--pretty` | Pretty print JSON output / JSON出力を整形 |
+| `--dump` | Dump JSON from UNESCO / UNESCOからJSONをダンプ                    |
+| `--jp` | Import Japanese names / 日本語名をインポート                          |
+| `--pretty` | Pretty print JSON output / 見やすくするためのJSON出力を整形                          |
 
 ### Full rebuild including DB and Algolia / DBとAlgoliaを含むフル再構築
 ```bash
 php artisan app:world-heritage-build --fresh --jp --pretty --algolia --algolia-truncate --force
 ```
-
-> :warning: `--fresh` drops and recreates all tables. All existing data will be lost.
-> :warning: `--fresh` は全テーブルを削除して再作成します。
 
 ### Re-import Japanese names only / 日本語名のみ再インポート
 ```bash
@@ -78,17 +79,17 @@ php artisan world-heritage:import-japanese-names --force
 ## Architecture Overview / アーキテクチャ概要
 
 ```
-[Browser]
-    │
-    ▼
+                   [Browser]
+                       │
+                       ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Frontend (world-heritage-frontend)                         │
 │  React + TypeScript + Vite / TailwindCSS                    │
 └─────────────────────────────────────────────────────────────┘
-    │  REST API (HTTP)
-    ▼
+                       │  REST API (HTTP)
+                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Backend (world-heritage-api) / Laravel 11                  │
+│  Backend (world-heritage-api)                 │
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ Presentation Layer                                   │   │
@@ -131,3 +132,7 @@ Flow: ListQuery → Domain(Entity) → DTO → ViewModel → Presentation
 |---|---|
 | Frontend / フロントエンド | https://github.com/zigzagdev/world-heritage-frontend |
 | Backend API / バックエンドAPI | https://github.com/zigzagdev/world-heritage-api |
+
+## Roadmap / 今後の予定
+Currently, the app is available in English only. Japanese language support is planned for a future release. 
+現在、英語だけの表記となっておりますが、次のフェーズにて、日本語訳の対応もする予定です。
