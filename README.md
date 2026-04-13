@@ -72,7 +72,7 @@ php artisan world-heritage:import-japanese-names --force
 
 ## Testing / テスト
 ```bash
-./vendor/bin/phpunit ./
+./vendor/bin/phpunit ./app
 ```
 
 ## Architecture Overview / アーキテクチャ概要
