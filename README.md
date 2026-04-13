@@ -37,14 +37,6 @@ She needs a tool where she can check the location on a map along with the catego
 - Algolia (Full-text search / 全文検索)
 - Koyeb (Production hosting / 本番ホスティング)
 
-## Getting Started / はじめに
-```bash
-cp .env.example .env
-composer install
-php artisan key:generate
-php artisan migrate
-```
-
 ## Building Data in Production / 本番データ構築
 Run the follwoing commands from the Koyeb console.
 以下のコマンドをKoyebのコンソールから実行をしてください。
