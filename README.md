@@ -19,10 +19,10 @@ The app targets anyone interested in the certification, regardless of age or exp
 
 **Example User / ユーザー例**
 
-Tanaka-san, 28, office worker. 
-Decided to take the World Heritage Certification Exam (Level 2). 
-During her commutation, she wants to quickly look up heritage sites on her phone, 
-but the official textbook is too heavy to carry around. 
+Tanaka-san, 28, office worker.
+Decided to take the World Heritage Certification Exam (Level 2).
+During her commutation, she wants to quickly look up heritage sites on her phone,
+but the official textbook is too heavy to carry around.
 She needs a tool where she can check the location on a map along with the category and year of inscription — all in one place.
 
 田中さん、28歳、会社員。
@@ -37,8 +37,19 @@ She needs a tool where she can check the location on a map along with the catego
 - Algolia (Full-text search / 全文検索)
 - Koyeb (Production hosting / 本番ホスティング)
 
+## Challenge & Solution / 課題と解決策
+### 検索の「ストレス」を排除し、「学び」を支える
+
+Challenge / 課題 (Algoliaを選んだ理由):
+Japanese search faces challenges with "notation fluctuations" (e.g., presence of middle dots or long vowels). Standard database queries often fail if even one character is different.
+日本語には「中黒（・）」や「長音（ー）」の有無など、表記の揺れが多く、通常のDB検索では「一文字違うだけでヒットしない」というストレスが発生します。
+
+Solution(Why I choose Algolia) / 解決 (Algoliaを採用した理由):
+So, by implementing Algolia, the system automatically handles these fluctuations. This ensures users find the information they need instantly without being penalized for minor input variations.
+なので全文検索エンジンを採用し、表記の揺れをシステム側で自動吸収するようにしました。ユーザーは細かい入力を気にせず、情報に最短でたどり着けます。
+
 ## Building Data in Production / 本番データ構築
-Run the follwoing commands from the Koyeb console.
+Run the following commands from the Koyeb console.
 以下のコマンドをKoyebのコンソールから実行をしてください。
 
 ### Initial / Full rebuild / 初回・フル再構築
@@ -126,5 +137,5 @@ Flow: ListQuery → Domain(Entity) → DTO → ViewModel → Presentation
 | Backend API / バックエンドAPI | https://github.com/zigzagdev/world-heritage-api |
 
 ## Roadmap / 今後の予定
-Currently, the app is available in English only. Japanese language support is planned for a future release. 
+Currently, the app is available in English only. Japanese language support is planned for a future release.
 現在、英語だけの表記となっておりますが、次のフェーズにて、日本語訳の対応もする予定です。
