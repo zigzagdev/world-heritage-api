@@ -60,6 +60,11 @@ class WorldHeritage extends Model
             ->orderBy('sort_order', 'asc');
     }
 
+    public function worldHeritageDescriptions(): HasMany
+    {
+        return $this->hasMany(WorldHeritageDescription::class, 'world_heritage_site_id', 'id');
+    }
+
     protected function casts(): array
     {
         return [
