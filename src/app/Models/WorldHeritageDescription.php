@@ -26,7 +26,7 @@ class WorldHeritageDescription extends Model
         'updated_at',
     ];
 
-    public function worldHeritageSite(): BelongsTo
+    public function heritageSite(): BelongsTo
     {
         return $this->belongsTo(WorldHeritage::class, 'world_heritage_site_id', 'id');
     }
