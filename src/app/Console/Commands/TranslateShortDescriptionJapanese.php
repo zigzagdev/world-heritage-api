@@ -15,7 +15,8 @@ class TranslateShortDescriptionJapanese extends Command
      */
     protected $signature = 'world-heritage:translate-short-description-japanese
                         {--force : Allow execution outside local environment}
-                        {--dry-run : Skip DB writes and API calls}';
+                        {--dry-run : Skip DB writes and API calls}
+                        {--from-json : Use translation JSON instead of calling API}';
 
     /**
      * The console command description.
@@ -46,6 +47,23 @@ class TranslateShortDescriptionJapanese extends Command
         $total    = count($sites);
         $this->info("Total sites: {$total}");
 
+        $fromJson = (bool) $this->option('from-json');
+
+        // Load translation map from JSON if --from-json is specified
+        $translationMap = [];
+        if ($fromJson) {
+            $translationPath = storage_path('app/private/unesco/world_heritage_sites_translation.json');
+            if (!file_exists($translationPath)) {
+                $this->error("Translation JSON not found: {$translationPath}");
+                return 1;
+            }
+            $translationData = json_decode(file_get_contents($translationPath), true);
+            foreach ($translationData['results'] as $item) {
+                $translationMap[$item['id_no']] = $item;
+            }
+            $this->info("Loaded translation JSON: " . count($translationMap) . " records");
+        }
+
         $bar = $this->output->createProgressBar($total);
         $bar->start();
 
@@ -59,16 +77,45 @@ class TranslateShortDescriptionJapanese extends Command
                 continue;
             }
 
-            // DBに翻訳済みのものがあればそこから取得してJSONに反映
-            // if translated columns are existed in DB, fetching from there and reflected on Json File
+            // If already translated in DB, fetch from there and reflect on JSON file
             $record = WorldHeritageDescription::where('world_heritage_site_id', $idNo)
                 ->whereNotNull('short_description_ja')
-                ->whereNotNull('description_ja')
                 ->first();
 
             if ($record) {
                 $sites[$index]['short_description_ja'] = $record->short_description_ja;
                 $sites[$index]['description_ja']       = $record->description_ja;
+                $bar->advance();
+                continue;
+            }
+
+            // If --from-json is specified, use translation JSON instead of calling API
+            if ($fromJson) {
+                $translated = $translationMap[$idNo] ?? null;
+                if (!$translated) {
+                    $this->newLine();
+                    $this->warn("No translation found in JSON for id_no={$idNo}, skipping.");
+                    $bar->advance();
+                    continue;
+                }
+
+                $shortDescriptionJa = $translated['short_description_ja'] ?? null;
+                $descriptionJa      = $translated['description_ja'] ?? null;
+
+                if (!$this->option('dry-run')) {
+                    WorldHeritageDescription::updateOrCreate(
+                        ['world_heritage_site_id' => $idNo],
+                        [
+                            'short_description_en' => $shortDescriptionEn,
+                            'short_description_ja' => $shortDescriptionJa,
+                            'description_en'       => $descriptionEn,
+                            'description_ja'       => $descriptionJa,
+                        ]
+                    );
+                }
+
+                $sites[$index]['short_description_ja'] = $shortDescriptionJa;
+                $sites[$index]['description_ja']       = $descriptionJa;
                 $bar->advance();
                 continue;
             }
@@ -79,6 +126,7 @@ class TranslateShortDescriptionJapanese extends Command
                 continue;
             }
 
+            // Call Google Translate API
             $texts  = $shortDescriptionEn === $descriptionEn
                 ? [$shortDescriptionEn]
                 : [$shortDescriptionEn, $descriptionEn];
@@ -123,8 +171,9 @@ class TranslateShortDescriptionJapanese extends Command
         $bar->finish();
         $this->newLine();
 
+        // Write translation results back to JSON as a backup
         if (!$this->option('dry-run')) {
-            $outputDir  = storage_path('app/private/unesco/normalized');
+            $outputDir  = storage_path('app/private/unesco');
             $outputPath = $outputDir . '/world_heritage_sites_translation.json';
 
             if (!is_dir($outputDir)) {
