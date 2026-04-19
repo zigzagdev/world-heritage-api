@@ -6,6 +6,7 @@
 /storage/app/data
 /storage/app/public
 /storage/app/private/unesco/world-heritage-sites.json
+/storage/app/private/unesco/normalized/world_heritage_sites_translation.json
 
 /vendor
 .env

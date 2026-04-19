@@ -39,4 +39,7 @@ return [
         'key' => env('DEEPL_API_KEY'),
     ],
 
+    'google' => [
+        'translate_key' => env('GOOGLE_TRANSLATE_KEY'),
+    ]
 ];
