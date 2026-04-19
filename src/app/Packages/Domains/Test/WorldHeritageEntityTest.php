@@ -54,6 +54,7 @@ class WorldHeritageEntityTest extends TestCase
             'latitude' => 34.6851,
             'longitude' => 135.8048,
             'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
+            'short_description_jp' => 'これはテストです',
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
             'state_parties' => null,
@@ -85,6 +86,7 @@ class WorldHeritageEntityTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
+            'short_description_jp' => 'これはテストです',
             'image_url' => '',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
             'state_parties' => [
@@ -133,6 +135,7 @@ class WorldHeritageEntityTest extends TestCase
             $this->arraySingleData()['area_hectares'],
             $this->arraySingleData()['buffer_zone_hectares'],
             $this->arraySingleData()['short_description'],
+            $this->arraySingleData()['short_description_jp'],
             null, // collection (ImageEntityCollection)
             $this->arraySingleData()['unesco_site_url'],
             $this->arraySingleData()['state_parties'] ?? [],
@@ -162,6 +165,7 @@ class WorldHeritageEntityTest extends TestCase
             $this->arraySingleData()['area_hectares'],
             $this->arraySingleData()['buffer_zone_hectares'],
             $this->arraySingleData()['short_description'],
+            $this->arraySingleData()['short_description_jp'],
             null,
             $this->arraySingleData()['unesco_site_url'],
             $this->arraySingleData()['state_parties'] ?: [],
@@ -183,6 +187,7 @@ class WorldHeritageEntityTest extends TestCase
         $this->assertEquals($this->arraySingleData()['area_hectares'], $entity->getAreaHectares());
         $this->assertEquals($this->arraySingleData()['buffer_zone_hectares'], $entity->getBufferZoneHectares());
         $this->assertEquals($this->arraySingleData()['short_description'], $entity->getShortDescription());
+        $this->assertEquals($this->arraySingleData()['short_description_jp'], $entity->getShortDescriptionJp());
         $this->assertEquals($this->arraySingleData()['unesco_site_url'], $entity->getUnescoSiteUrl());
         $this->assertSame(['JPN'], $entity->getStatePartyCodes());
         $this->assertSame($this->arraySingleData()['state_parties_meta'], $entity->getStatePartyMeta());
@@ -208,6 +213,7 @@ class WorldHeritageEntityTest extends TestCase
             $this->arrayMultiData()['area_hectares'],
             $this->arrayMultiData()['buffer_zone_hectares'],
             $this->arrayMultiData()['short_description'],
+            $this->arrayMultiData()['short_description_jp'],
             null,
             $this->arrayMultiData()['unesco_site_url'],
             $this->arrayMultiData()['state_parties'] ?? [],
@@ -237,6 +243,7 @@ class WorldHeritageEntityTest extends TestCase
             $this->arrayMultiData()['area_hectares'],
             $this->arrayMultiData()['buffer_zone_hectares'],
             $this->arrayMultiData()['short_description'],
+            $this->arrayMultiData()['short_description_jp'],
             null, // collection
             $this->arrayMultiData()['unesco_site_url'],
             $this->arrayMultiData()['state_parties'] ?? [],
@@ -257,6 +264,7 @@ class WorldHeritageEntityTest extends TestCase
         $this->assertEquals($this->arrayMultiData()['area_hectares'], $entity->getAreaHectares());
         $this->assertEquals($this->arrayMultiData()['buffer_zone_hectares'], $entity->getBufferZoneHectares());
         $this->assertEquals($this->arrayMultiData()['short_description'], $entity->getShortDescription());
+        $this->assertEquals($this->arrayMultiData()['short_description_jp'], $entity->getShortDescriptionJp());
         $this->assertEquals($this->arrayMultiData()['unesco_site_url'], $entity->getUnescoSiteUrl());
         $this->assertEquals($this->arrayMultiData()['state_parties'], $entity->getStatePartyCodes());
         $this->assertEquals($this->arrayMultiData()['state_parties_meta'], $entity->getStatePartyMeta());
