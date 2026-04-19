@@ -19,6 +19,9 @@ class WorldHeritageBuild extends Command
         {--dump-max=0 : 0 means no limit}
         {--dump-out=unesco/world-heritage-sites.json : Output path in local disk root (storage/app/private relative)}
         {--dump-dry-run : Do not write dump file}
+        
+        {--translate-jp : Also translate short_description to Japanese}
+        {--translate-jp-dry-run : Dry run for Japanese translation}
 
         {--jp : Also import Japanese names}
         {--jp-path=unesco/world-heritage-japanese-name-sorted.json : Japanese name JSON path in local disk root (storage/app/private relative)}
@@ -99,6 +102,13 @@ class WorldHeritageBuild extends Command
         $this->callOrFail('world-heritage:import-sites-split', [
             '--in' => self::NORM_DIR . '/world_heritage_sites.json',
         ]);
+
+        if ((bool) $this->option('translate-jp')) {
+            $this->callOrFail('world-heritage:translate-short-description-japanese', array_filter([
+                '--force' => true,
+                '--dry-run' => (bool) $this->option('translate-jp-dry-run') ? true : null,
+            ], static fn ($v) => $v !== null));
+        }
 
         // 4) Import pivot (FK depends on countries + sites)
         $this->callOrFail('world-heritage:import-site-state-parties-split', [
