@@ -60,6 +60,7 @@ class WorldHeritageSummaryFactory
             images: null,
             imageUrl: $thumbnail,
             unescoSiteUrl: $data['unesco_site_url'] ?? null,
+            shortDescriptionJp: $data['short_description_jp'] ?? null,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta,
         );

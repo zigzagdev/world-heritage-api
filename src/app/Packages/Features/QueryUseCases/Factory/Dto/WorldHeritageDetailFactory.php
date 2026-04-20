@@ -45,6 +45,7 @@ class WorldHeritageDetailFactory
             images: $imageCollection,
             imageUrl: $imageUrl ?? null,
             unescoSiteUrl: $data['unesco_site_url'] ?? null,
+            shortDescriptionJp: $data['short_description_jp'] ?? null,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta,
         );
