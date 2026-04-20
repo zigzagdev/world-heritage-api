@@ -41,6 +41,7 @@ class WorldHeritageSummaryViewModelFactoryTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
+                'short_description_jp' => 'あいうえお',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
                 'thumbnail_url' => 'https://example.com/thumbnail.jpg',
                 'state_parties_codes' => [
@@ -146,6 +147,9 @@ class WorldHeritageSummaryViewModelFactoryTest extends TestCase
         $mock->shouldReceive('getCountryNameJp')
             ->andReturn($this->arrayData()['country_name_jp']);
 
+        $mock->shouldReceive('getShortDescriptionJp')
+            ->andReturn($this->arrayData()['short_description_jp']);
+
         $mock->shouldReceive('getPrimaryStatePartyCode')
             ->andReturn($this->arrayData()['state_parties_codes'][4]);
 
@@ -198,6 +202,7 @@ class WorldHeritageSummaryViewModelFactoryTest extends TestCase
         $this->assertEquals($this->arrayData()['area_hectares'], $resultArray['area_hectares']);
         $this->assertEquals($this->arrayData()['buffer_zone_hectares'], $resultArray['buffer_zone_hectares']);
         $this->assertEquals($this->arrayData()['short_description'], $resultArray['short_description']);
+        $this->assertEquals($this->arrayData()['short_description_jp'], $resultArray['short_description_jp']);
         $this->assertEquals($this->arrayData()['state_parties_codes'], $resultArray['state_party_codes']);
         $this->assertEquals($this->arrayData()['state_parties_meta'], $resultArray['state_parties_meta']);
         $this->assertEquals($this->arrayData()['thumbnail_url'], $resultArray['thumbnail_url']);

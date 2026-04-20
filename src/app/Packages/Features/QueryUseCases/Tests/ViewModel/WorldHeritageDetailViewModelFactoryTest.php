@@ -38,6 +38,7 @@ class WorldHeritageDetailViewModelFactoryTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
+            'short_description_jp' => 'あいうえお',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
             'state_parties' => [
                 'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -148,6 +149,10 @@ class WorldHeritageDetailViewModelFactoryTest extends TestCase
         $dto
             ->shouldReceive('getShortDescription')
             ->andReturn($this->arrayData()['short_description']);
+
+        $dto
+            ->shouldReceive('getShortDescriptionJp')
+            ->andReturn($this->arrayData()['short_description_jp']);
 
         $dto
             ->shouldReceive('getUnescoSiteUrl')
