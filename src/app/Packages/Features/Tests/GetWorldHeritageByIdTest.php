@@ -74,6 +74,7 @@ class GetWorldHeritageByIdTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
+            'short_description_jp' => 'あいうえお',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
             'state_parties_codes' => [
                 'ALB','AUT','BEL','BIH','BGR','HRV','CZE','FRA','DEU','ITA','MKD','POL','ROU','SVK','SVN','ESP','CHE','UKR'
@@ -157,6 +158,7 @@ class GetWorldHeritageByIdTest extends TestCase
                     'latitude',
                     'longitude',
                     'short_description',
+                    'short_description_jp',
                     'images' => [
                         '*' => [
                             'id',

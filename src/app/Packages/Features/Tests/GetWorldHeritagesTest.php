@@ -3,6 +3,7 @@
 namespace App\Packages\Features\Tests;
 
 use App\Models\Image;
+use App\Models\WorldHeritageDescription;
 use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
 use App\Packages\Domains\Ports\WorldHeritageSearchPort;
 use Database\Seeders\DatabaseSeeder;
@@ -44,6 +45,7 @@ class GetWorldHeritagesTest extends TestCase
             Country::truncate();
             DB::table('site_state_parties')->truncate();
             Image::truncate();
+            WorldHeritageDescription::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -70,6 +72,7 @@ class GetWorldHeritagesTest extends TestCase
                 'latitude' => 34.8394,
                 'longitude' => 134.6939,
                 'short_description' => "白鷺城の名で知られる城郭建築の傑作。天守群と縄張りが良好に保存される。",
+                'short_description_jp' => 'あいうえお',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/661',
             ],
             [
@@ -90,6 +93,7 @@ class GetWorldHeritagesTest extends TestCase
                 'latitude' => null,
                 'longitude' => null,
                 'short_description' => "巨樹・照葉樹林に代表される生態系と景観が特筆される島。",
+                'short_description_jp' => 'あいうえお',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/662',
             ],
             [
@@ -110,6 +114,7 @@ class GetWorldHeritagesTest extends TestCase
                 'latitude' => null,
                 'longitude' => null,
                 'short_description' => "日本最大級のブナ天然林を中心とする山地生態系。",
+                'short_description_jp' => 'あいうえお',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/663',
             ],
             [
@@ -130,6 +135,7 @@ class GetWorldHeritagesTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => '中国・カザフスタン・キルギスにまたがるオアシス都市や遺跡群で構成され、東西交流の歴史を物証する文化遺産群。',
+                'short_description_jp' => 'あいうえお',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442',
             ]
         ];
@@ -163,6 +169,7 @@ class GetWorldHeritagesTest extends TestCase
                         'area_hectares',
                         'buffer_zone_hectares',
                         'short_description',
+                        'short_description_jp',
                         'unesco_site_url',
                         'state_party_codes',
                         'state_parties_meta',
