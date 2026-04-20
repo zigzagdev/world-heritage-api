@@ -6,6 +6,7 @@ use App\Models\Country;
 use App\Models\WorldHeritage;
 use App\Models\Image;
 
+use App\Models\WorldHeritageDescription;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use App\Packages\Features\QueryUseCases\UseCase\GetWorldHeritageByIdUseCase;
@@ -40,6 +41,7 @@ class GetWorldHeritageByIdUseCaseTest extends TestCase
             Country::truncate();
             DB::table('site_state_parties')->truncate();
             Image::truncate();
+            WorldHeritageDescription::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
@@ -71,6 +73,7 @@ class GetWorldHeritageByIdUseCaseTest extends TestCase
                 null,
                 null,
                 $this->arrayData()['unesco_site_url'],
+                $this->arrayData()['short_description_jp'],
                 $this->arrayData()['state_party_codes'],
                 $this->arrayData()['state_parties_meta'],
             ));
@@ -97,6 +100,7 @@ class GetWorldHeritageByIdUseCaseTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
+            'short_description_jp' => 'あいうえお',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
             'state_party_codes' => [
                 'ALB',
