@@ -37,6 +37,7 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
             'latitude' => 0.0,
             'longitude' => 0.0,
             'short_description' => '氷期後のブナの自然拡散史を示すヨーロッパ各地の原生的ブナ林群から成る越境・連続資産。',
+            'short_description_jp' => 'あいうえお',
             'unesco_site_url' => 'https://whc.unesco.org/en/list/1133',
             'state_party_codes' => [
                 'ALB',
@@ -123,6 +124,7 @@ class WorldHeritageDtoDetailFactoryTest extends TestCase
         $this->assertSame($input['latitude'], $result->getLatitude());
         $this->assertSame($input['longitude'], $result->getLongitude());
         $this->assertSame($input['short_description'], $result->getShortDescription());
+        $this->assertSame($input['short_description_jp'], $result->getShortDescriptionJp());
         $this->assertSame($input['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertSame($input['state_party_codes'], $result->getStatePartyCodes());
         $this->assertSame($input['state_parties_meta'], $result->getStatePartiesMeta());

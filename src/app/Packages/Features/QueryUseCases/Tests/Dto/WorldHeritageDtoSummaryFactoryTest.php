@@ -71,51 +71,49 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
     }
 
     private function assertNullOrZeroEquivalent(
-        float|int|string|null $expected,
-        float|int|string|null $actual,
+        mixed $expected,
+        mixed $actual,
         string $fieldName
     ): void {
-        $e = $this->normalizeNullableFloat($expected);
-        $a = $this->normalizeNullableFloat($actual);
+        $expectedValue = $this->normalizeNullableFloat($expected);
+        $actualValue = $this->normalizeNullableFloat($actual);
 
-        if ($e === null && $a === null) {
+        if ($expectedValue === null && $actualValue === null) {
             $this->assertTrue(true);
             return;
         }
 
-        if ($e === null && $a === 0.0) {
+        if ($expectedValue === null && $actualValue === 0.0) {
             $this->assertTrue(true, "{$fieldName}: expected null, got 0.0 (allowed)");
             return;
         }
 
-        if ($e === 0.0 && $a === null) {
+        if ($expectedValue === 0.0 && $actualValue === null) {
             $this->assertTrue(true, "{$fieldName}: expected 0.0, got null (allowed)");
             return;
         }
 
-        // それ以外は厳密に一致（float比較はデルタ不要なはずの値なのでそのまま）
-        $this->assertSame($e, $a, "{$fieldName}: expected {$e}, got {$a}");
+        $this->assertSame($expectedValue, $actualValue, "{$fieldName}: expected {$expectedValue}, got {$actualValue}");
     }
 
-    private function normalizeNullableFloat(float|int|string|null $v): ?float
+    private function normalizeNullableFloat(mixed $vaule): ?float
     {
-        if ($v === null) {
+        if ($vaule === null) {
             return null;
         }
 
-        // 数値文字列も許容（DB/配列が文字列で来るケース対策）
-        if (is_string($v)) {
-            $s = trim($v);
-            if ($s === '') {
+        if (is_string($vaule)) {
+            $expectString = trim($vaule);
+            if ($expectString === '') {
                 return null;
             }
-            if (!is_numeric($s)) {
+            if (!is_numeric($expectString)) {
                 return null;
             }
-            return (float) $s;
+            return (float) $expectString;
         }
 
-        return (float) $v;
+        return (float) $vaule;
     }
 
     public static function provideSummaryFactoryCases(): array
@@ -215,6 +213,7 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
             'latitude' => 31.777_777_8,
             'longitude' => 35.231_666_7,
             'short_description' => "As a holy city for Judaism, Christianity and Islam, Jerusalem has always been of great symbolic importance. Among its 220 historic monuments, the Dome of the Rock stands out: built in the 7th century, it is decorated with beautiful geometric and floral motifs. It is recognized by all three religions as the site of Abraham's sacrifice. The Wailing Wall delimits the quarters of the different religious communities, while the Resurrection rotunda in the Church of the Holy Sepulchre houses Christ's tomb.",
+            'short_description_jp' => '',
             'thumbnail_id' => null,
             'unesco_site_url' => null,
             'state_parties' => [],
@@ -269,6 +268,7 @@ class WorldHeritageDtoSummaryFactoryTest extends TestCase
             'latitude' => 48.9,
             'longitude' => 22.183_333_3,
             'short_description' => 'This transnational property includes 93 component parts in 18 countries. Since the end of the last Ice Age, European Beech spread from a few isolated refuge areas in the Alps, Carpathians, Dinarides, Mediterranean and Pyrenees over a short period of a few thousand years in a process that is still ongoing. The successful expansion across a whole continent is related to the tree’s adaptability and tolerance of different climatic, geographical and physical conditions.',
+            'short_description_jp' => '',
             'thumbnail_id' => null,
             'unesco_site_url' => null,
             'state_parties' => $codes,
