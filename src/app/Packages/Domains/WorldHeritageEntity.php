@@ -23,6 +23,7 @@ class WorldHeritageEntity
         public ?float $areaHectares = null,
         public ?float $bufferZoneHectares = null,
         public ?string $shortDescription = null,
+        public ?string $shortDescriptionJp = null,
         public ?ImageEntityCollection $collection = null,
         public ?string $unescoSiteUrl = null,
         private array $statePartyCodes = [],
@@ -109,6 +110,11 @@ class WorldHeritageEntity
         return $this->shortDescription;
     }
 
+    public function getShortDescriptionJp(): ?string
+    {
+        return $this->shortDescriptionJp;
+    }
+
     public function getImageCollection(): ?ImageEntityCollection
     {
         return $this->collection;
@@ -137,11 +143,6 @@ class WorldHeritageEntity
     public function getStatePartyMeta(): array
     {
         return $this->statePartyMeta;
-    }
-
-    public function isTransnational(): bool
-    {
-        return count($this->statePartyCodes) > 1;
     }
 
     public function getPrimaryStatePartyCode(): ?string

@@ -33,7 +33,9 @@ class WorldHeritageBuild extends Command
         {--jp-missing-limit=200 : Max missing ids to print to console}
 
         {--algolia : Also import records into Algolia}
-        {--algolia-truncate : Clear Algolia index before import}';
+        {--algolia-truncate : Clear Algolia index before import}
+
+        {--translate-jp-from-json : Use translation JSON for Japanese translation}';
 
     protected $description = 'Rebuild local DB and import UNESCO World Heritage data (dump -> split -> import)';
 
@@ -105,8 +107,9 @@ class WorldHeritageBuild extends Command
 
         if ((bool) $this->option('translate-jp')) {
             $this->callOrFail('world-heritage:translate-short-description-japanese', array_filter([
-                '--force' => true,
-                '--dry-run' => (bool) $this->option('translate-jp-dry-run') ? true : null,
+                '--force'     => true,
+                '--dry-run'   => (bool) $this->option('translate-jp-dry-run') ? true : null,
+                '--from-json' => (bool) $this->option('translate-jp-from-json') ? true : null,
             ], static fn ($v) => $v !== null));
         }
 

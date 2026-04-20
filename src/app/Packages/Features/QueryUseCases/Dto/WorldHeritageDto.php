@@ -24,6 +24,7 @@ class WorldHeritageDto
         private readonly ?ImageDtoCollection $images = null,
         private readonly ?ImageDto $imageUrl = null,
         private readonly ?string $unescoSiteUrl = null,
+        private readonly ?string $shortDescriptionJp = null,
         private readonly array $statePartyCodes = [],
         private readonly array $statePartiesMeta = [],
     ){}
@@ -178,6 +179,11 @@ class WorldHeritageDto
         return $this->imageUrl?->getUrl();
     }
 
+    public function getShortDescriptionJp(): ?string
+    {
+        return $this->shortDescriptionJp;
+    }
+
     public function toArray(): array
     {
         $value = [
@@ -198,6 +204,7 @@ class WorldHeritageDto
             'area_hectares' => $this->getAreaHectares(),
             'buffer_zone_hectares' => $this->getBufferZoneHectares(),
             'short_description' => $this->getShortDescription(),
+            'short_description_jp' => $this->getShortDescriptionJp(),
             'unesco_site_url' => $this->getUnescoSiteUrl(),
             'state_party_codes' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),

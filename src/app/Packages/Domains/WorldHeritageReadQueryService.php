@@ -43,6 +43,12 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
                 'images' => static function ($imageQuery): void {
                     $imageQuery->where('is_primary', true)->limit(1);
                 },
+                'descriptions' => static function ($descriptionQuery): void {
+                    $descriptionQuery->select([
+                        'world_heritage_descriptions.world_heritage_site_id',
+                        'world_heritage_descriptions.short_description_ja',
+                    ]);
+                }
             ])
             ->whereIn('world_heritage_sites.id', $ids)
             ->get()

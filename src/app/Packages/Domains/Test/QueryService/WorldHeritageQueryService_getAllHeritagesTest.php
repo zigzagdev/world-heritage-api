@@ -6,6 +6,7 @@ use App\Common\Pagination\PaginationDto;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
+use App\Models\WorldHeritageDescription;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -57,6 +58,7 @@ class WorldHeritageQueryService_getAllHeritagesTest extends TestCase
             Country::truncate();
             DB::table('site_state_parties')->truncate();
             Image::truncate();
+            WorldHeritageDescription::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
