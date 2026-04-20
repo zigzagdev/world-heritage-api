@@ -115,6 +115,11 @@ class WorldHeritageDto
         return $this->shortDescription;
     }
 
+    public function getShortDescriptionJp(): ?string
+    {
+        return $this->shortDescriptionJp;
+    }
+
     public function getUnescoSiteUrl(): ?string
     {
         return $this->unescoSiteUrl;
@@ -177,11 +182,6 @@ class WorldHeritageDto
     public function getThumbnailUrl(): ?string
     {
         return $this->imageUrl?->getUrl();
-    }
-
-    public function getShortDescriptionJp(): ?string
-    {
-        return $this->shortDescriptionJp;
     }
 
     public function toArray(): array

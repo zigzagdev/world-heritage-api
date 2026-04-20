@@ -10,11 +10,12 @@ class WorldHeritageDetailViewModelFactory
 {
     public static function build(WorldHeritageDto $dto): array
     {
+
         return [
             'id' => $dto->getId(),
             'official_name' => $dto->getOfficialName(),
             'name' => $dto->getName(),
-            'name_jp' => $dto->getNameJp(),
+            'name_jp' => $dto->getCountryNameJp(),
             'country' => $dto->getCountry(),
             'region' => $dto->getRegion(),
             'category' => $dto->getCategory(),
@@ -27,6 +28,7 @@ class WorldHeritageDetailViewModelFactory
             'longitude' => $dto->getLongitude(),
             'short_description' => $dto->getShortDescription(),
             'unesco_site_url' => $dto->getUnescoSiteUrl(),
+            'short_description_jp' => $dto->getShortDescriptionJp(),
             'state_party' => $dto->getStateParty(),
             'state_party_codes' => $dto->getStatePartyCodes(),
             'state_parties_meta' => $dto->getStatePartiesMeta(),

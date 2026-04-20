@@ -5,6 +5,7 @@ namespace App\Packages\Features\Tests;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
+use App\Models\WorldHeritageDescription;
 use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
 use App\Packages\Domains\Ports\WorldHeritageSearchPort;
 
@@ -47,6 +48,7 @@ class SearchWorldHeritagesTest extends TestCase
         Country::truncate();
         DB::table('site_state_parties')->truncate();
         Image::truncate();
+        WorldHeritageDescription::truncate();
         DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
