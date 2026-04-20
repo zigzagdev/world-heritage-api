@@ -40,6 +40,7 @@ class WorldHeritageDtoCollection
                 'area_hectares' => $heritage->getAreaHectares(),
                 'buffer_zone_hectares' => $heritage->getBufferZoneHectares(),
                 'short_description' => $heritage->getShortDescription(),
+                'short_description_jp' => $heritage->getShoertDescriptionJp(),
                 'unesco_site_url' => $heritage->getUnescoSiteUrl(),
                 'state_party_codes' => $heritage->getStatePartyCodes(),
                 'state_parties_meta' => $heritage->getStatePartiesMeta(),
