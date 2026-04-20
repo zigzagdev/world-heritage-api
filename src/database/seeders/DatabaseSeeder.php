@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             SiteStatePartySeeder::class,
             ImageSeeder::class,
             WorldHeritageThumbnailSeeder::class,
+            WorldHeritageDescriptionSeeder::class,
         ]);
     }
 }
