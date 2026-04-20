@@ -4,6 +4,7 @@ namespace App\Packages\Domains\Test;
 
 use App\Models\Country;
 use App\Models\WorldHeritage;
+use App\Models\WorldHeritageDescription;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Packages\Domains\WorldHeritageEntity;
@@ -31,6 +32,7 @@ class WorldHeritageEntityTest extends TestCase
             WorldHeritage::truncate();
             Country::truncate();
             DB::table('site_state_parties')->truncate();
+            WorldHeritageDescription::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }

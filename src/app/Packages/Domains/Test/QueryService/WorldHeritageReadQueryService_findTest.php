@@ -4,6 +4,7 @@ namespace App\Packages\Domains\Test\QueryService;
 
 use App\Models\Country;
 use App\Models\Image;
+use App\Models\WorldHeritageDescription;
 use App\Packages\Domains\WorldHeritageReadQueryService;
 use App\Models\WorldHeritage;
 use Database\Seeders\DatabaseSeeder;
@@ -39,6 +40,7 @@ class WorldHeritageReadQueryService_findTest extends TestCase
             Country::truncate();
             DB::table('site_state_parties')->truncate();
             Image::truncate();
+            WorldHeritageDescription::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }

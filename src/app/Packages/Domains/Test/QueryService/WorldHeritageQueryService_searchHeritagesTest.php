@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
 use Illuminate\Support\Collection;
+use App\Models\WorldHeritageDescription;
 
 final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
 {
@@ -81,6 +82,7 @@ final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
             Country::truncate();
             DB::table('site_state_parties')->truncate();
             Image::truncate();
+            WorldHeritageDescription::truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }
