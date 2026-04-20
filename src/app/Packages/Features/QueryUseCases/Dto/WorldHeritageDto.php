@@ -179,7 +179,7 @@ class WorldHeritageDto
         return $this->imageUrl?->getUrl();
     }
 
-    public function getShoertDescriptionJp(): ?string
+    public function getShortDescriptionJp(): ?string
     {
         return $this->shortDescriptionJp;
     }
@@ -204,7 +204,7 @@ class WorldHeritageDto
             'area_hectares' => $this->getAreaHectares(),
             'buffer_zone_hectares' => $this->getBufferZoneHectares(),
             'short_description' => $this->getShortDescription(),
-            'short_description_jp' => $this->getShoertDescriptionJp(),
+            'short_description_jp' => $this->getShortDescriptionJp(),
             'unesco_site_url' => $this->getUnescoSiteUrl(),
             'state_party_codes' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),

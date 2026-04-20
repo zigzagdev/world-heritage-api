@@ -160,7 +160,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($this->arrayData()['latitude'], $result->getLatitude());
         $this->assertEquals($this->arrayData()['longitude'], $result->getLongitude());
         $this->assertEquals($this->arrayData()['short_description'], $result->getShortDescription());
-        $this->assertEquals($this->arrayData()['short_description_jp'], $result->getShoertDescriptionJp());
+        $this->assertEquals($this->arrayData()['short_description_jp'], $result->getShortDescriptionJp());
         $this->assertEquals($this->arrayData()['unesco_site_url'], $result->getUnescoSiteUrl());
         $this->assertEquals($expectedCodes, $result->getStatePartyCodes());
         $this->assertEquals($orderedExpected, $result->getStatePartiesMeta());
