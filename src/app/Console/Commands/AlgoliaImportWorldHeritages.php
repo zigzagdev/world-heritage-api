@@ -57,9 +57,6 @@ class AlgoliaImportWorldHeritages extends Command
                 'countries' => static function ($query): void {
                     $query->select(['countries.state_party_code', 'countries.name_en', 'countries.name_jp']);
                 },
-                'descriptions' => static function ($query): void {
-                    $query->select(['world_heritage_site_id', 'short_description_ja']);
-                },
             ])
             ->select([
                 'world_heritage_sites.id',
@@ -140,7 +137,6 @@ class AlgoliaImportWorldHeritages extends Command
                         'thumbnail_url' => $row->images->first()?->url,
                         'state_party_codes' => $statePartyCodes,
                         'country_names_jp' => $countryCount > 1 ? $countryNamesJp : [],
-                        'short_description_ja' => $row->descriptions->first()?->short_description_ja,
                     ];
                 }
 
