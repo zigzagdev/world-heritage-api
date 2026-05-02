@@ -22,6 +22,7 @@ class SearchWorldHeritagesWithAlgoliaUseCase
         ?string $category,
         ?int $yearInscribedFrom,
         ?int $yearInscribedTo,
+        ?array $criteria,
         int $currentPage,
         int $perPage
     ): PaginationDto {
@@ -69,6 +70,7 @@ class SearchWorldHeritagesWithAlgoliaUseCase
             category: $category,
             yearFrom: $yearInscribedFrom,
             yearTo: $yearInscribedTo,
+            criteria: $criteria,
             currentPage: $currentPage,
             perPage: $perPage,
         );
