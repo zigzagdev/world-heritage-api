@@ -125,6 +125,11 @@ class WorldHeritageViewModel
         return $this->dto->getImages();
     }
 
+    public function getShortDescriptionJp(): ?string
+    {
+        return $this->dto->getShortDescriptionJp();
+    }
+
     public function toArray(): array
     {
         return [
@@ -146,6 +151,7 @@ class WorldHeritageViewModel
             'buffer_zone_hectares' => $this->getBufferZoneHectares(),
             'short_description' => $this->getShortDescription(),
             'unesco_site_url' => $this->getUnescoSiteUrl(),
+            'short_description_jp' => $this->getShortDescriptionJp(),
             'state_party_codes' => $this->getStatePartyCodes(),
             'state_parties_meta' => $this->getStatePartiesMeta(),
             'primary_state_party_code' => $this->getPrimaryStatePartyCode(),

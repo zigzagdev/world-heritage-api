@@ -42,6 +42,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
+                'short_description_jp' => 'あいうえお',
                 'thumbnail_url' => 'https://example.com/en/list/1133/',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
                 'state_parties' => [
@@ -86,6 +87,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
+                'short_description_jp' => 'あいうえお',
                 'thumbnail_url' => 'https://example.com/en/list/1442/',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
                 'state_parties' => ['CN','KZ','KG'],
@@ -131,6 +133,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 images: null,
                 imageUrl: $thumbnail,
                 unescoSiteUrl: $data['unesco_site_url'] ?? null,
+                shortDescriptionJp: $data['short_description_jp'] ?? null,
                 statePartyCodes: $data['state_party_codes'] ?? ($data['state_parties'] ?? []),
                 statePartiesMeta: $data['state_parties_meta'] ?? []
             );
@@ -178,6 +181,7 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
             $this->assertEquals($this->arrayData()[$key]['latitude'], $value['latitude']);
             $this->assertEquals($this->arrayData()[$key]['longitude'], $value['longitude']);
             $this->assertEquals($this->arrayData()[$key]['short_description'], $value['short_description']);
+            $this->assertEquals($this->arrayData()[$key]['short_description_jp'], $value['short_description_jp']);
             $this->assertEquals($this->arrayData()[$key]['thumbnail_url'], $value['thumbnail_url']);
             $this->assertSame($expectedCodes, $value['state_party_codes']);
             $this->assertEquals($this->arrayData()[$key]['state_parties_meta'], $value['state_parties_meta']);

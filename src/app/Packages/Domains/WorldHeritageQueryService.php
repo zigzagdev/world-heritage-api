@@ -60,6 +60,12 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'images' => static function ($imagesQuery): void {
                     $imagesQuery->where('is_primary', true)->limit(1);
                 },
+                'descriptions' => static function ($descriptionsQuery): void {
+                    $descriptionsQuery->select([
+                        'world_heritage_descriptions.world_heritage_site_id',
+                        'world_heritage_descriptions.short_description_ja',
+                    ]);
+                }
             ])
             ->orderBy('world_heritage_sites.id', $order)
             ->paginate($perPage, page: $currentPage);
@@ -100,6 +106,12 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'images' => static function ($imagesQuery): void {
                     $imagesQuery->orderBy('sort_order', 'asc');
                 },
+                'descriptions' => static function ($descriptionsQuery): void {
+                $descriptionsQuery->select([
+                    'world_heritage_descriptions.world_heritage_site_id',
+                    'world_heritage_descriptions.short_description_ja',
+                ]);
+                }
             ])
             ->findOrFail($id);
 
@@ -184,6 +196,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'state_party_code' => $statePartyCodes,
             'state_party_codes' => $statePartyCodesCompat,
             'state_parties_meta' => $statePartiesMeta,
+            'short_description_jp' => $heritage->descriptions->short_description_ja,
             'images' => $imageCollection->toArray(),
         ]);
     }
@@ -308,6 +321,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'short_description' => $heritage->short_description,
             'image_url' => $heritage->images->first()?->url,
             'unesco_site_url' => $heritage->unesco_site_url,
+            'short_description_jp' => $heritage->descriptions?->short_description_ja,
             'state_parties' => $statePartyCodeList,
             'state_parties_meta' => $statePartiesMeta,
         ];

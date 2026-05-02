@@ -5,6 +5,7 @@ namespace App\Packages\Domains\Test;
 use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
+use App\Models\WorldHeritageDescription;
 use App\Packages\Domains\WorldHeritageEntityCollection;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +35,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
             WorldHeritage::truncate();
             Country::truncate();
             Image::truncate();
+            WorldHeritageDescription::truncate();
             DB::table('site_state_parties')->truncate();
             DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
         }
@@ -63,6 +65,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                 'latitude' => 34.6851,
                 'longitude' => 135.8048,
                 'short_description' => 'Temples and shrines of the first permanent capital of Japan.',
+                'short_description_jp' => 'あいうえお',
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/668/',
             ],
@@ -89,6 +92,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => 'Transnational serial property of European beech forests illustrating post-glacial expansion and ecological processes across Europe.',
+                'short_description_jp' => 'あいうえお',
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1133/',
                 'state_parties' => [
@@ -132,6 +136,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                 'latitude' => 0.0,
                 'longitude' => 0.0,
                 'short_description' => 'Transnational Silk Road corridor across China, Kazakhstan and Kyrgyzstan illustrating exchange of goods, ideas and beliefs.',
+                'short_description_jp' => 'あいうえお',
                 'image_url' => '',
                 'unesco_site_url' => 'https://whc.unesco.org/en/list/1442/',
                 'state_parties' => ['CHN','KAZ','KGZ'],
@@ -166,6 +171,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['area_hectares'],
                     $data['buffer_zone_hectares'],
                     $data['short_description'],
+                    $data['short_description_jp'],
                     null,
                     $data['unesco_site_url'],
                     $data['state_parties'] ?? [],
@@ -205,6 +211,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['area_hectares'],
                     $data['buffer_zone_hectares'],
                     $data['short_description'],
+                    $data['short_description_jp'],
                     null,
                     $data['unesco_site_url'],
                     $data['state_parties'] ?? [],
@@ -238,6 +245,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['area_hectares'],
                     $data['buffer_zone_hectares'],
                     $data['short_description'],
+                    $data['short_description_jp'],
                     null,
                     $data['unesco_site_url'],
                     $data['state_parties'] ?? [],
@@ -271,6 +279,7 @@ class WorldHeritageEntityCollectionTest extends TestCase
                     $data['area_hectares'],
                     $data['buffer_zone_hectares'],
                     $data['short_description'],
+                    $data['short_description_jp'],
                     null,
                     $data['unesco_site_url'],
                     $data['state_parties'] ?? [],

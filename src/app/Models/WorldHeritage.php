@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorldHeritage extends Model
@@ -58,6 +58,11 @@ class WorldHeritage extends Model
     {
         return $this->hasMany(Image::class, 'world_heritage_site_id', 'id')
             ->orderBy('sort_order', 'asc');
+    }
+
+    public function descriptions(): HasOne
+    {
+        return $this->hasOne(WorldHeritageDescription::class, 'world_heritage_site_id', 'id');
     }
 
     protected function casts(): array
