@@ -23,7 +23,7 @@ class TranslateShortDescriptionJapanese extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Translate UNESCO world heritage short_description and description into Japanese, and persist them into world_heritage_descriptions.';
 
     /**
      * Execute the console command.
@@ -102,20 +102,15 @@ class TranslateShortDescriptionJapanese extends Command
                 $shortDescriptionJa = $translated['short_description_ja'] ?? null;
                 $descriptionJa      = $translated['description_ja'] ?? null;
 
-                if (!$this->option('dry-run')) {
-                    WorldHeritageDescription::updateOrCreate(
-                        ['world_heritage_site_id' => $idNo],
-                        [
-                            'short_description_en' => $shortDescriptionEn,
-                            'short_description_ja' => $shortDescriptionJa,
-                            'description_en'       => $descriptionEn,
-                            'description_ja'       => $descriptionJa,
-                        ]
-                    );
-                }
-
-                $sites[$index]['short_description_ja'] = $shortDescriptionJa;
-                $sites[$index]['description_ja']       = $descriptionJa;
+                $this->persistTranslation(
+                    $idNo,
+                    $shortDescriptionEn,
+                    $shortDescriptionJa,
+                    $descriptionEn,
+                    $descriptionJa,
+                    $sites,
+                    $index,
+                );
                 $bar->advance();
                 continue;
             }
@@ -151,18 +146,15 @@ class TranslateShortDescriptionJapanese extends Command
                 ? $shortDescriptionJa
                 : $translations[1]['translatedText'];
 
-            WorldHeritageDescription::updateOrCreate(
-                ['world_heritage_site_id' => $idNo],
-                [
-                    'short_description_en' => $shortDescriptionEn,
-                    'short_description_ja' => $shortDescriptionJa,
-                    'description_en'       => $descriptionEn,
-                    'description_ja'       => $descriptionJa,
-                ]
+            $this->persistTranslation(
+                $idNo,
+                $shortDescriptionEn,
+                $shortDescriptionJa,
+                $descriptionEn,
+                $descriptionJa,
+                $sites,
+                $index,
             );
-
-            $sites[$index]['short_description_ja'] = $shortDescriptionJa;
-            $sites[$index]['description_ja']       = $descriptionJa;
 
             $bar->advance();
             usleep(200000);
@@ -188,5 +180,30 @@ class TranslateShortDescriptionJapanese extends Command
         $this->info('Translation completed successfully.');
 
         return 0;
+    }
+
+    private function persistTranslation(
+        $idNo,
+        string $shortDescriptionEn,
+        ?string $shortDescriptionJa,
+        string $descriptionEn,
+        ?string $descriptionJa,
+        array &$sites,
+        int $index,
+    ): void {
+        if (!$this->option('dry-run')) {
+            WorldHeritageDescription::updateOrCreate(
+                ['world_heritage_site_id' => $idNo],
+                [
+                    'short_description_en' => $shortDescriptionEn,
+                    'short_description_ja' => $shortDescriptionJa,
+                    'description_en'       => $descriptionEn,
+                    'description_ja'       => $descriptionJa,
+                ]
+            );
+        }
+
+        $sites[$index]['short_description_ja'] = $shortDescriptionJa;
+        $sites[$index]['description_ja']       = $descriptionJa;
     }
 }
