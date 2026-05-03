@@ -70,6 +70,10 @@ class WorldHeritageController extends Controller
             default => null,
         };
 
+        $isEndangered = $request->has('is_endangered')
+            ? $request->boolean('is_endangered')
+            : null;
+
         $dto = $useCase->handle(
             $keyword,
             $request->query('country_name'),
@@ -79,6 +83,7 @@ class WorldHeritageController extends Controller
             $request->query('year_inscribed_from'),
             $request->query('year_inscribed_to'),
             $criteria,
+            $isEndangered,
             $currentPage,
             $perPage,
         );

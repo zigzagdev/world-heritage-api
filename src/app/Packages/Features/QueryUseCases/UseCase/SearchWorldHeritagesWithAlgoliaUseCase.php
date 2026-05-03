@@ -23,6 +23,7 @@ class SearchWorldHeritagesWithAlgoliaUseCase
         ?int $yearInscribedFrom,
         ?int $yearInscribedTo,
         ?array $criteria,
+        ?bool $isEndangered,
         int $currentPage,
         int $perPage
     ): PaginationDto {
@@ -71,6 +72,7 @@ class SearchWorldHeritagesWithAlgoliaUseCase
             yearFrom: $yearInscribedFrom,
             yearTo: $yearInscribedTo,
             criteria: $criteria,
+            isEndangered: $isEndangered,
             currentPage: $currentPage,
             perPage: $perPage,
         );

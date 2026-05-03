@@ -109,6 +109,7 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
             2000,
             2020,
             null,
+            null,
             self::CURRENT_PAGE,
             self::PER_PAGE
         );
@@ -149,6 +150,7 @@ class SearchWorldHeritagesWithAlgoliaUseCaseTest extends TestCase
 
         $result = $useCase->handle(
             null, null, null, null, null, null, null,
+            null,
             null,
             self::CURRENT_PAGE,
             self::PER_PAGE
