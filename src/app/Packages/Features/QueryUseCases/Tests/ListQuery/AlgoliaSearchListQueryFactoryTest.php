@@ -21,6 +21,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
             yearFrom: 1978,
             yearTo: 2000,
             criteria: null,
+            isEndangered: null,
             currentPage: 1,
             perPage: 30,
         );
@@ -40,6 +41,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
             yearFrom: 1978,
             yearTo: 2000,
             criteria: null,
+            isEndangered: null,
             currentPage: 1,
             perPage: 30,
         );
@@ -66,6 +68,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
             yearFrom: null,
             yearTo: null,
             criteria: null,
+            isEndangered: null,
             currentPage: 1,
             perPage: 30,
         );
@@ -93,6 +96,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
             yearFrom: null,
             yearTo: null,
             criteria: null,
+            isEndangered: null,
             currentPage: 1,
             perPage: 30,
         );
@@ -110,6 +114,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
                 yearFrom: null,
                 yearTo: null,
                 criteria: null,
+                isEndangered: null,
                 currentPage: 1,
                 perPage: 30,
             );
