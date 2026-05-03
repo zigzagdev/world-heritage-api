@@ -52,7 +52,7 @@ class TranslateShortDescriptionJapanese extends Command
         // Load translation map from JSON if --from-json is specified
         $translationMap = [];
         if ($fromJson) {
-            $translationPath = storage_path('app/private/unesco/world_heritage_sites_translation.json');
+            $translationPath = storage_path('app/private/unesco/short_description_ja.json');
             if (!file_exists($translationPath)) {
                 $this->error("Translation JSON not found: {$translationPath}");
                 return 1;
