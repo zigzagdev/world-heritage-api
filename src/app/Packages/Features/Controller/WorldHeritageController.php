@@ -66,7 +66,7 @@ class WorldHeritageController extends Controller
         $criteriaParam = $request->query('criteria');
         $criteria = match (true) {
             is_array($criteriaParam) => $criteriaParam,
-            is_string($criteriaParam) && $criteriaParam !== '' => [$criteriaParam],
+            is_string($criteriaParam) && $criteriaParam !== '' => explode(',', $criteriaParam),
             default => null,
         };
 
