@@ -94,6 +94,13 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
         }
 
         /**
+         * Endangered status filter (boolean facet).
+         */
+        if ($query->isEndangered !== null) {
+            $filters[] = 'is_endangered:' . ($query->isEndangered ? 'true' : 'false');
+        }
+
+        /**
          * Guardrail:
          * Never execute Algolia with query='' AND no filters,
          * otherwise you will get "top results" unrelated to the user input.
