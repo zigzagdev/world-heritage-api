@@ -37,6 +37,7 @@ final class WorldHeritageQueryService_searchHeritagesTest extends TestCase
             category: null,
             yearFrom: null,
             yearTo: null,
+            criteria: [],
             currentPage: 1,
             perPage: 10,
         );

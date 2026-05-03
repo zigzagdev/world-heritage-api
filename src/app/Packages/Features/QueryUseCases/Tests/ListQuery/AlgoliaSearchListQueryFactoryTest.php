@@ -20,6 +20,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
             category: 'Natural',
             yearFrom: 1978,
             yearTo: 2000,
+            criteria: null,
             currentPage: 1,
             perPage: 30,
         );
@@ -38,6 +39,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
             category: 'Natural',
             yearFrom: 1978,
             yearTo: 2000,
+            criteria: null,
             currentPage: 1,
             perPage: 30,
         );
@@ -63,6 +65,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
             category: null,
             yearFrom: null,
             yearTo: null,
+            criteria: null,
             currentPage: 1,
             perPage: 30,
         );
@@ -89,6 +92,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
             category: null,
             yearFrom: null,
             yearTo: null,
+            criteria: null,
             currentPage: 1,
             perPage: 30,
         );
@@ -105,6 +109,7 @@ class AlgoliaSearchListQueryFactoryTest extends TestCase
                 category: null,
                 yearFrom: null,
                 yearTo: null,
+                criteria: null,
                 currentPage: 1,
                 perPage: 30,
             );

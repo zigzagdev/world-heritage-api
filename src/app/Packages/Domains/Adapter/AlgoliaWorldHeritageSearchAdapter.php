@@ -82,6 +82,18 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
         }
 
         /**
+         * Inscription criteria filter (OR within criteria).
+         * Values are pre-validated by AlgoliaSearchListQueryFactory against the i–x whitelist.
+         */
+        if ($query->criteria !== null && $query->criteria !== []) {
+            $orParts = array_map(
+                static fn (string $criterion) => 'criteria:' . $criterion,
+                $query->criteria,
+            );
+            $filters[] = '(' . implode(' OR ', $orParts) . ')';
+        }
+
+        /**
          * Guardrail:
          * Never execute Algolia with query='' AND no filters,
          * otherwise you will get "top results" unrelated to the user input.
