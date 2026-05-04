@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('world_heritage_sites', function (Blueprint $table) {
-            $table->string('main_image_url', 2048)->nullable();
+            $table->string('main_image_url', 2048)->nullable()->after('short_description');
         });
     }
 
