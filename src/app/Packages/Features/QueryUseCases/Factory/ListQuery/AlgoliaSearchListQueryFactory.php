@@ -19,6 +19,7 @@ class AlgoliaSearchListQueryFactory
         ?int $yearFrom,
         ?int $yearTo,
         ?array $criteria,
+        ?bool $isEndangered,
         int $currentPage,
         int $perPage,
     ): AlgoliaSearchListQuery {
@@ -55,6 +56,7 @@ class AlgoliaSearchListQueryFactory
             yearFrom: $yearFrom,
             yearTo: $yearTo,
             criteria: $criteria,
+            isEndangered: $isEndangered,
             currentPage: $currentPage,
             perPage: $perPage,
         );

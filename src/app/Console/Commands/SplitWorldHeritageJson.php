@@ -736,6 +736,7 @@ class SplitWorldHeritageJson extends Command
             'category' => $category,
             'criteria' => $criteria,
             'year_inscribed' => (isset($row['date_inscribed']) && is_numeric($row['date_inscribed'])) ? (int) $row['date_inscribed'] : null,
+            'is_endangered' => $this->boolFromDanger($row['danger'] ?? null),
             'area_hectares' => isset($row['area_hectares']) ? (is_numeric($row['area_hectares']) ? (float) $row['area_hectares'] : null) : null,
             'buffer_zone_hectares' => isset($row['buffer_zone_hectares']) ? (is_numeric($row['buffer_zone_hectares']) ? (float) $row['buffer_zone_hectares'] : null) : null,
             'latitude' => isset($lat) ? (is_numeric($lat) ? (float) $lat : null) : null,
@@ -781,6 +782,10 @@ class SplitWorldHeritageJson extends Command
             $existing['year_inscribed'] = (isset($incoming['date_inscribed']) && is_numeric($incoming['date_inscribed']))
                 ? (int) $incoming['date_inscribed']
                 : 0;
+        }
+
+        if (($existing['is_endangered'] ?? false) === false) {
+            $existing['is_endangered'] = $this->boolFromDanger($incoming['danger'] ?? null);
         }
 
         if (($existing['state_party'] ?? null) === null) {
@@ -1023,6 +1028,20 @@ class SplitWorldHeritageJson extends Command
         }
 
         return $out;
+    }
+
+    private function boolFromDanger(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+        if (is_int($value)) {
+            return $value === 1;
+        }
+        if (is_string($value)) {
+            return in_array(strtolower(trim($value)), ['true', '1', 'yes'], true);
+        }
+        return false;
     }
 
     private function toIso3OrNull(string $code): ?string

@@ -66,9 +66,13 @@ class WorldHeritageController extends Controller
         $criteriaParam = $request->query('criteria');
         $criteria = match (true) {
             is_array($criteriaParam) => $criteriaParam,
-            is_string($criteriaParam) && $criteriaParam !== '' => [$criteriaParam],
+            is_string($criteriaParam) && $criteriaParam !== '' => explode(',', $criteriaParam),
             default => null,
         };
+
+        $isEndangered = $request->has('is_endangered')
+            ? $request->boolean('is_endangered')
+            : null;
 
         $dto = $useCase->handle(
             $keyword,
@@ -79,6 +83,7 @@ class WorldHeritageController extends Controller
             $request->query('year_inscribed_from'),
             $request->query('year_inscribed_to'),
             $criteria,
+            $isEndangered,
             $currentPage,
             $perPage,
         );
