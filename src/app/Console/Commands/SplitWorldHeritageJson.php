@@ -819,6 +819,8 @@ class SplitWorldHeritageJson extends Command
             $existing['unesco_site_url'] = $unescoUrl;
         }
 
+        $fill('main_image_url', $incoming['image_url'] ?? ($incoming['main_image_url'] ?? null));
+
         return $existing;
     }
 
