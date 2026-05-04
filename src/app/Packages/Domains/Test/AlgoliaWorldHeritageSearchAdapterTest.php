@@ -38,6 +38,8 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
             category: 'Natural',
             yearFrom: 1978,
             yearTo: 1980,
+            criteria: [],
+            isEndangered: null,
             currentPage: 2,
             perPage: 30,
         );

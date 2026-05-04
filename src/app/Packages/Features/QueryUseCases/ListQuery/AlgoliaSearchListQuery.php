@@ -14,6 +14,8 @@ class AlgoliaSearchListQuery
         public readonly ?string $category,
         public readonly ?int $yearFrom,
         public readonly ?int $yearTo,
+        public readonly ?array $criteria,
+        public readonly ?bool $isEndangered,
         public readonly int $currentPage,
         public readonly int $perPage,
     ) {}

@@ -66,6 +66,7 @@ class AlgoliaImportWorldHeritages extends Command
                 'world_heritage_sites.region',
                 'world_heritage_sites.study_region',
                 'world_heritage_sites.category',
+                'world_heritage_sites.criteria',
                 'world_heritage_sites.year_inscribed',
                 'world_heritage_sites.is_endangered',
             ])
@@ -132,6 +133,7 @@ class AlgoliaImportWorldHeritages extends Command
                         'study_region' => $primaryStudyRegion,
                         'study_regions' => $studyRegions,
                         'category' => (string) $row->category,
+                        'criteria' => $row->criteria,
                         'year_inscribed' => $row->year_inscribed !== null ? (int) $row->year_inscribed : null,
                         'is_endangered' => (bool) $row->is_endangered,
                         'thumbnail_url' => $row->images->first()?->url,
