@@ -12,7 +12,8 @@ class WorldHeritageViewModel
 
     public function getThumbnailUrl(): ?string
     {
-        return $this->dto->getThumbnailUrl();
+        return $this->dto->getMainImageUrl()
+            ?? ($this->dto->getImages()[0]['url'] ?? null);
     }
 
     public function getId(): int

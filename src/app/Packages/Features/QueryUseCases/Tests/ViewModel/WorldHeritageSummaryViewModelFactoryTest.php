@@ -141,7 +141,7 @@ class WorldHeritageSummaryViewModelFactoryTest extends TestCase
         $mock->shouldReceive('getStatePartiesMeta')
             ->andReturn($this->arrayData()['state_parties_meta']);
 
-        $mock->shouldReceive('getThumbnailUrl')
+        $mock->shouldReceive('getMainImageUrl')
             ->andReturn($this->arrayData()['thumbnail_url']);
 
         $mock->shouldReceive('getCountryNameJp')

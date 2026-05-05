@@ -27,6 +27,7 @@ class WorldHeritageDto
         private readonly ?string $shortDescriptionJp = null,
         private readonly array $statePartyCodes = [],
         private readonly array $statePartiesMeta = [],
+        private readonly ?string $mainImageUrl = null,
     ){}
 
 
@@ -123,6 +124,11 @@ class WorldHeritageDto
     public function getUnescoSiteUrl(): ?string
     {
         return $this->unescoSiteUrl;
+    }
+
+    public function getMainImageUrl(): ?string
+    {
+        return $this->mainImageUrl;
     }
 
     public function getStatePartyCodes(): array

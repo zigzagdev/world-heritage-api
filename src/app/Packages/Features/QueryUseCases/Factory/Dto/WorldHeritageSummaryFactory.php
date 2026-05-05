@@ -63,6 +63,7 @@ class WorldHeritageSummaryFactory
             shortDescriptionJp: $data['short_description_jp'] ?? null,
             statePartyCodes: $statePartyCodes,
             statePartiesMeta: $statePartiesMeta,
+            mainImageUrl: $data['main_image_url'] ?? null,
         );
     }
 
