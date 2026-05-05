@@ -44,7 +44,8 @@ class WorldHeritageDtoCollection
                 'unesco_site_url' => $heritage->getUnescoSiteUrl(),
                 'state_party_codes' => $heritage->getStatePartyCodes(),
                 'state_parties_meta' => $heritage->getStatePartiesMeta(),
-                'thumbnail' => $heritage->getThumbnailUrl(),
+                'thumbnail_url' => $heritage->getMainImageUrl()
+                    ?? ($heritage->getImages()[0]['url'] ?? null),
             ];
         }, $this->heritages);
     }
