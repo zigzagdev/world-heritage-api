@@ -69,6 +69,7 @@ class AlgoliaImportWorldHeritages extends Command
                 'world_heritage_sites.criteria',
                 'world_heritage_sites.year_inscribed',
                 'world_heritage_sites.is_endangered',
+                'world_heritage_sites.main_image_url',
             ])
             ->chunkById($chunk, function ($rows) use ($client, $indexName, $dryRun, &$processed): void {
                 $objects = [];
