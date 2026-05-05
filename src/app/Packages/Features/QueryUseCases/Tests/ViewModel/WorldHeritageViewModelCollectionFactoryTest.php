@@ -7,7 +7,6 @@ use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 use App\Packages\Features\QueryUseCases\Factory\ViewModel\WorldHeritageViewModelCollectionFactory;
 use App\Packages\Features\QueryUseCases\ViewModel\WorldHeritageViewModelCollection;
 use Tests\TestCase;
-use App\Packages\Features\QueryUseCases\Dto\ImageDto;
 
 class WorldHeritageViewModelCollectionFactoryTest extends TestCase
 {
@@ -103,15 +102,6 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
     private function mockDtoCollection(): WorldHeritageDtoCollection
     {
         $dtos = array_map(static function (array $data) {
-            $thumbnail = isset($data['thumbnail_url']) && $data['thumbnail_url']
-                ? new ImageDto(
-                    id: $data['id'] ?? 0,
-                    url: $data['thumbnail_url'],
-                    sortOrder: 0,
-                    isPrimary: true,
-                )
-                : null;
-
             return new WorldHeritageDto(
                 id: $data['id'],
                 officialName: $data['official_name'],
@@ -131,11 +121,12 @@ class WorldHeritageViewModelCollectionFactoryTest extends TestCase
                 bufferZoneHectares: $data['buffer_zone_hectares'] ?? null,
                 shortDescription: $data['short_description'] ?? null,
                 images: null,
-                imageUrl: $thumbnail,
+                imageUrl: null,
                 unescoSiteUrl: $data['unesco_site_url'] ?? null,
                 shortDescriptionJp: $data['short_description_jp'] ?? null,
                 statePartyCodes: $data['state_party_codes'] ?? ($data['state_parties'] ?? []),
-                statePartiesMeta: $data['state_parties_meta'] ?? []
+                statePartiesMeta: $data['state_parties_meta'] ?? [],
+                mainImageUrl: $data['thumbnail_url'] ?? null,
             );
         }, $this->arrayData());
 

@@ -211,8 +211,8 @@ class WorldHeritageDtoCollectionTest extends TestCase
             $this->assertArrayNotHasKey('images', $item);
             $this->assertArrayNotHasKey('imageUrl', $item);
             $this->assertArrayNotHasKey('state_parties', $item);
-            $this->assertArrayHasKey('thumbnail', $item);
-            $this->assertTrue(is_string($item['thumbnail']) || is_null($item['thumbnail']));
+            $this->assertArrayHasKey('thumbnail_url', $item);
+            $this->assertTrue(is_string($item['thumbnail_url']) || is_null($item['thumbnail_url']));
 
             return collect($item)->keyBy(static fn($v, $k) => Str::snake($k))->toArray();
         })->toArray();
