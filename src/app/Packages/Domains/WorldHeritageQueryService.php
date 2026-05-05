@@ -322,6 +322,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'short_description' => $heritage->short_description,
             'image_url' => $heritage->images->first()?->url,
             'unesco_site_url' => $heritage->unesco_site_url,
+            'main_image_url' => $heritage->main_image_url,
             'short_description_jp' => $heritage->descriptions?->short_description_ja,
             'state_parties' => $statePartyCodeList,
             'state_parties_meta' => $statePartiesMeta,
