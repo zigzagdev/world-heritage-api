@@ -199,6 +199,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
             'state_parties_meta' => $statePartiesMeta,
             'short_description_jp' => $heritage->descriptions->short_description_ja,
             'images' => $imageCollection->toArray(),
+            'main_image_url' => $heritage->main_image_url,
         ]);
     }
 
