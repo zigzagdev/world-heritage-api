@@ -137,6 +137,7 @@ class AlgoliaImportWorldHeritages extends Command
                         'criteria' => $row->criteria,
                         'year_inscribed' => $row->year_inscribed !== null ? (int) $row->year_inscribed : null,
                         'is_endangered' => (bool) $row->is_endangered,
+                        'main_image_url' => $row->main_image_url,
                         'thumbnail_url' => $row->images->first()?->url,
                         'state_party_codes' => $statePartyCodes,
                         'country_names_jp' => $countryCount > 1 ? $countryNamesJp : [],
