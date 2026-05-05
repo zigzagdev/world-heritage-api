@@ -35,6 +35,7 @@ class WorldHeritage extends Model
         'longitude',
         'short_description',
         'unesco_site_url',
+        'main_image_url',
     ];
 
     protected $hidden = [

@@ -47,6 +47,7 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                 'world_heritage_sites.longitude',
                 'world_heritage_sites.short_description',
                 'world_heritage_sites.unesco_site_url',
+                'world_heritage_sites.main_image_url',
             ])
             ->with([
                 'countries' => static function ($q): void {
