@@ -66,8 +66,15 @@ php artisan app:world-heritage-build --force --dump --jp --pretty
 
 ### Full rebuild including DB and Algolia / DBとAlgoliaを含むフル再構築
 ```bash
-php artisan app:world-heritage-build --fresh --jp --pretty --algolia --algolia-truncate --force
+php artisan app:world-heritage-build \
+  --fresh --jp --pretty \
+  --translate-jp --translate-jp-from-json \
+  --algolia --algolia-truncate \
+  --force
 ```
+
+`--fresh` wipes `world_heritage_descriptions`, so `--translate-jp --translate-jp-from-json` are required to repopulate Japanese descriptions from the cached translation JSON without calling the external translate API.
+`--fresh` で `world_heritage_descriptions` が空になるため、外部翻訳 API を叩かずキャッシュ JSON から日本語訳を再投入する `--translate-jp --translate-jp-from-json` が必須です。
 
 ### Re-import Japanese names only / 日本語名のみ再インポート
 ```bash
