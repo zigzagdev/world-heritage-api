@@ -137,5 +137,12 @@ Flow: ListQuery → Domain(Entity) → DTO → ViewModel → Presentation
 | Backend API / バックエンドAPI | https://github.com/zigzagdev/world-heritage-api |
 
 ## Roadmap / 今後の予定
-Currently, the app is available in English only. Japanese language support is planned for a future release.
-現在、英語だけの表記となっておりますが、次のフェーズにて、日本語訳の対応もする予定です。
+Planned next steps for the API (study-app-oriented):
+学習アプリ向け API の今後の予定:
+
+- Quiz endpoints for self-assessment toward the certification exam.
+  検定対策のための自己採点クイズ用エンドポイント。
+- Per-user favorites / bookmark of heritage sites.
+  ユーザーごとのお気に入り・ブックマーク機能。
+- Offline-first sync support for commute use.
+  通勤利用を想定したオフライン同期サポート。
