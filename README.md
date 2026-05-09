@@ -88,53 +88,62 @@ php artisan world-heritage:import-japanese-names --force
 
 ## Architecture Overview / アーキテクチャ概要
 
+Three arrow types, each one-way:
+矢印は 3 種類で、それぞれ一方通行です:
+
+- `▼` Vertical down — request flow through layers (top → bottom).
+- `▼` 縦下向き — レイヤー間のリクエスト方向（上→下）。
+- `▲` Vertical up — response flow back up the layers (bottom → top), transformed at each step.
+- `▲` 縦上向き — レイヤー間のレスポンスの戻り（下→上）。各層で形を変えながら戻る。
+- `◀` Horizontal — data lookup from Algolia into MySQL (search → DB).
+- `◀` 横向き — Algolia から MySQL への ID 引き当て（検索→DB）。
+
 ```
-                   [Browser]
-                       │
-                       ▼
+                          [Browser]
+                              │       ▲
+                              ▼       │   HTTP request / JSON response
 ┌─────────────────────────────────────────────────────────────┐
 │  Frontend (world-heritage-frontend)                         │
 │  React + TypeScript + Vite / TailwindCSS                    │
 └─────────────────────────────────────────────────────────────┘
-                       │  REST API (HTTP)
-                       ▼
+                              │       ▲
+                              ▼       │   REST call / JSON response
 ┌─────────────────────────────────────────────────────────────┐
-│  Backend (world-heritage-api)                 │
+│  Backend (world-heritage-api)                               │
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ Presentation Layer                                   │   │
 │  │ Controller / ViewModel                               │   │
-│  └───────────────────┬──────────────────────────────────┘   │
-│                      ▲ ViewModel                            │
-│                      │                                      │
-│  ┌───────────────────┴───────────────────────────────┐      │
-│  │  Application Layer                                │      │
-│  │  ListQuery / UseCase / DTO                        │      │
-│  └───────────────────┬───────────────────────────────┘      │
-│                      │                                      │
-│                      ▼                                      │
-│  ┌───────────────────────────────────────────────────┐      │
-│  │  Domain Layer                                     │      │
-│  │  Entity                                           │      │
-│  └───────────────────┬───────────────────────────────┘      │
-│                      │                                      │
-│                      ▼                                      │
-│  ┌───────────────────────────────────────────────────┐      │
-│  │  Infrastructure Layer                             │      │
-│  │  Eloquent Repository / QueryService               │      │
-│  └───────────┬─────────────────────┬─────────────────┘      │
-│              │                     │                        │
-└──────────────┼─────────────────────┼────────────────────────┘
-               │ 一覧 / 詳細取得       │ キーワード検索
-               ▼                     ▼
-          ┌─────────┐          ┌───────────┐
-          │  MySQL  │◀─ ID ────│  Algolia  │
-          │  (DB)   │          │ (Search)  │
-          └─────────┘          └───────────┘
-
-Flow: ListQuery → Domain(Entity) → DTO → ViewModel → Presentation
-流れ： ListQuery → Domain(Entity) → DTO → ViewModel → Presentation
+│  └─────────────┬────────────────────────────▲───────────┘   │
+│      request   │                            │   ViewModel   │
+│                ▼                            │               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ Application Layer                                    │   │
+│  │ UseCase / ListQuery / DTO                            │   │
+│  └─────────────┬────────────────────────────▲───────────┘   │
+│     ListQuery  │                            │   DTO         │
+│                ▼                            │               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ Domain Layer                                         │   │
+│  │ Entity / QueryService Port                           │   │
+│  └─────────────┬────────────────────────────▲───────────┘   │
+│         query  │                            │   Entity      │
+│                ▼                            │               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ Infrastructure Layer                                 │   │
+│  │ Eloquent Repository / Algolia Adapter                │   │
+│  └────────┬─────────────────────────┬──────────────────┘    │
+│           │                         │                       │
+└───────────┼─────────────────────────┼───────────────────────┘
+            ▼  list / detail          ▼  keyword search
+       ┌─────────┐                ┌───────────┐
+       │  MySQL  │  ◀──── ID ──── │  Algolia  │
+       │  (DB)   │                │ (Search)  │
+       └─────────┘                └───────────┘
 ```
+
+Search path: Algolia returns matched IDs → DB lookup → Entity → DTO → ViewModel → JSON.
+検索経路: Algolia がマッチした ID を返す → DB から本体取得 → Entity → DTO → ViewModel → JSON。
 
 ## Related Repositories / 関連リポジトリ
 
