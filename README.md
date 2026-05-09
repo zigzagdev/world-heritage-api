@@ -42,15 +42,11 @@ She needs a tool where she can check the location on a map along with the catego
 
 Challenge / 課題 (Algoliaを選んだ理由):
 Japanese search faces challenges with "notation fluctuations" (e.g., presence of middle dots or long vowels). Standard database queries often fail if even one character is different.
-日本語には「中黒（・）」や「長音（ー）」の有無など、表記の揺れが多く、通常のDB検索では「一文字違うだけでヒットしない」というストレスが発生します。
+日本語には「中黒（・）」や「長音（ー）」の有無など、表記の揺れが多く、通常のDB検索では「一文字違うだけでヒットしない」という事案が発生する。
 
 Solution(Why I choose Algolia) / 解決 (Algoliaを採用した理由):
 So, by implementing Algolia, the system automatically handles these fluctuations. This ensures users find the information they need instantly without being penalized for minor input variations.
-なので全文検索エンジンを採用し、表記の揺れをシステム側で自動吸収するようにしました。ユーザーは細かい入力を気にせず、情報に最短でたどり着けます。
-
-## Building Data in Production / 本番データ構築
-Run the following commands from the Koyeb console.
-以下のコマンドをKoyebのコンソールから実行をしてください。
+なので、全文検索エンジンを採用し、表記の揺れをシステム側でなくすようにしました。ユーザーはtypoを気にしすぎることなく、検索情報を得ることができる。
 
 ### Initial / Full rebuild / 初回・フル再構築
 ```bash
@@ -80,12 +76,6 @@ php artisan app:world-heritage-build \
 ```bash
 php artisan world-heritage:import-japanese-names --force
 ```
-
-## Testing / テスト
-```bash
-./vendor/bin/phpunit ./app
-```
-
 ## Architecture Overview / アーキテクチャ概要
 
 Three arrow types, each one-way:
@@ -115,19 +105,19 @@ Three arrow types, each one-way:
 │  │ Presentation Layer                                   │   │
 │  │ Controller / ViewModel                               │   │
 │  └─────────────┬────────────────────────────▲───────────┘   │
-│      request   │                            │   ViewModel   │
+│                │                            │               │
 │                ▼                            │               │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ Application Layer                                    │   │
 │  │ UseCase / ListQuery / DTO                            │   │
 │  └─────────────┬────────────────────────────▲───────────┘   │
-│     ListQuery  │                            │   DTO         │
+│                │                            │               │
 │                ▼                            │               │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ Domain Layer                                         │   │
 │  │ Entity / QueryService Port                           │   │
 │  └─────────────┬────────────────────────────▲───────────┘   │
-│         query  │                            │   Entity      │
+│                │                            │               │
 │                ▼                            │               │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ Infrastructure Layer                                 │   │
@@ -156,9 +146,5 @@ Search path: Algolia returns matched IDs → DB lookup → Entity → DTO → Vi
 Planned next steps for the API (study-app-oriented):
 学習アプリ向け API の今後の予定:
 
-- Quiz endpoints for self-assessment toward the certification exam.
-  検定対策のための自己採点クイズ用エンドポイント。
 - Per-user favorites / bookmark of heritage sites.
-  ユーザーごとのお気に入り・ブックマーク機能。
-- Offline-first sync support for commute use.
-  通勤利用を想定したオフライン同期サポート。
+  ユーザー作成を行い、それぞれのユーザーごとのお気に入り・ブックマーク機能を追記。
