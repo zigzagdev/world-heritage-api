@@ -28,7 +28,6 @@ class HeritageImageController extends Controller
         }
 
         return response($upstream->body(), 200)
-            ->header('Content-Type', $upstream->header('Content-Type'))
-            ->header('Access-Control-Allow-Origin', '*');
+            ->header('Content-Type', $upstream->header('Content-Type'));
     }
 }
