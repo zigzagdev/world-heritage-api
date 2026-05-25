@@ -13,7 +13,10 @@ class HeritageImageController extends Controller
 {
     public function proxyImage(Request $request, int $id): Response|JsonResponse
     {
-        $image = Image::find($id);
+        $image = Image::where('world_heritage_site_id', $id)
+            ->orderByDesc('is_primary')
+            ->orderBy('sort_order')
+            ->first();
 
         if ($image === null) {
             return response()->json(['error' => 'Image not found'], 404);
