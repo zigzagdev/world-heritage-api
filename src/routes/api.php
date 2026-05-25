@@ -10,4 +10,5 @@ Route::prefix('v1')->group(function (): void {
     Route::get('heritages/region-count', [WorldHeritageController::class, 'getWorldHeritagesCountByRegion']);
     Route::get('/heritages/{id}', [WorldHeritageController::class, 'getWorldHeritageById']);
     Route::get('/heritage-image/{id}', [HeritageImageController::class, 'proxyImage']);
+    Route::get('/heritage-image/image/{imageId}', [HeritageImageController::class, 'proxyImageById']);
 });
