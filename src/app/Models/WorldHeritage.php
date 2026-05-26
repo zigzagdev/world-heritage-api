@@ -36,6 +36,7 @@ class WorldHeritage extends Model
         'short_description',
         'unesco_site_url',
         'main_image_url',
+        'main_video_url',
     ];
 
     protected $hidden = [

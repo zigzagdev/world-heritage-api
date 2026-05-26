@@ -4,6 +4,7 @@ namespace App\Packages\Features\Controller;
 
 use App\Http\Controllers\Controller;
 use App\Models\Image;
+use App\Models\WorldHeritage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
@@ -37,20 +38,9 @@ class HeritageImageController extends Controller
 
     private function fetchVideoUrlFromUnesco(int $idNo): ?string
     {
-        $response = Http::acceptJson()
-            ->get('https://data.unesco.org/api/explore/v2.1/catalog/datasets/whc001/records', [
-                'where' => "id_no={$idNo}",
-                'limit' => 1,
-                'select' => 'main_video_url',
-            ]);
+        $site = WorldHeritage::find($idNo);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        $results = $response->json('results');
-
-        return $results[0]['main_video_url'] ?? null;
+        return $site?->main_video_url;
     }
 
     private function buildYoutubeThumbnailUrl(string $videoUrl): ?string
