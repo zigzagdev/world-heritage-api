@@ -163,17 +163,20 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         $statePartyCodesCompat = $codes->all();
 
         $displayCountry = null;
+        $countryNameJp = null;
         if ($codes->count() === 1) {
-            $displayCountry = $heritage->countries->first()?->name_en;
+            $singleCountry = $heritage->countries->first();
+            $displayCountry = $singleCountry?->name_en;
+            $countryNameJp = $singleCountry?->name_jp;
         } elseif ($codes->count() > 1) {
-            $primary = $heritage->countries->first(
-                static fn ($c) => (bool) data_get($c, 'pivot.is_primary', false),
+            $primaryCountry = $heritage->countries->first(
+                static fn ($country) => (bool) data_get($country, 'pivot.is_primary', false),
             );
-            $displayCountry = $primary?->name_en;
+            $displayCountry = $primaryCountry?->name_en;
+            $countryNameJp = $primaryCountry?->name_jp;
         }
 
         $displayCountry ??= $heritage->country;
-        $countryNameJp = $heritage->countries->first()?->name_jp;
 
         return WorldHeritageDetailFactory::build([
             'id' => $heritage->id,
