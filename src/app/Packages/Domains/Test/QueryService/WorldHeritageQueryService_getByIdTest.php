@@ -199,4 +199,15 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertIsArray($result->getImages());
         $this->assertEmpty($result->getImages());
     }
+
+    public function test_short_description_jp_is_null_when_no_description(): void
+    {
+        DB::table('world_heritage_descriptions')
+            ->where('world_heritage_site_id', 1133)
+            ->delete();
+
+        $result = $this->queryService->getHeritageById(1133);
+
+        $this->assertNull($result->getShortDescriptionJp());
+    }
 }
