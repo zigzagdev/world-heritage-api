@@ -63,6 +63,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
             'name' => "Ancient and Primeval Beech Forests",
             'heritage_name_jp' => "カルパティア山脈とヨーロッパ各地の古代及び原生ブナ林",
             'country' => 'Slovakia',
+            'country_name_jp' => 'スロバキア',
             'study_region' => 'Europe',
             'category' => 'Natural',
             'criteria' => ['ix'],
@@ -149,6 +150,7 @@ class WorldHeritageQueryService_getByIdTest extends TestCase
         $this->assertEquals($this->arrayData()['name'], $result->getName());
         $this->assertEquals($this->arrayData()['heritage_name_jp'], $result->getHeritageNameJp());
         $this->assertEquals($this->arrayData()['country'], $result->getCountry());
+        $this->assertEquals($this->arrayData()['country_name_jp'], $result->getCountryNameJp());
         $this->assertEquals($this->arrayData()['study_region'], $result->getRegion());
         $this->assertEquals($this->arrayData()['category'], $result->getCategory());
         $this->assertEquals($this->arrayData()['criteria'], $result->getCriteria());
