@@ -56,7 +56,7 @@ class WorldHeritageBuild extends Command
         }
 
         if ((bool) $this->option('fresh')) {
-            $this->callOrFail('migrate:fresh');
+            $this->callOrFail('migrate:fresh', ['--force' => true]);
         }
 
         $pretty = (bool) $this->option('pretty');
