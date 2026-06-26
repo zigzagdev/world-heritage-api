@@ -41,9 +41,6 @@ class WorldHeritageReadQueryService implements WorldHeritageReadQueryServiceInte
                     $q->select('countries.state_party_code', 'countries.name_en', 'countries.name_jp', 'countries.region')
                         ->orderBy('countries.state_party_code', 'asc');
                 },
-                'images' => static function ($imageQuery): void {
-                    $imageQuery->where('is_primary', true)->limit(1);
-                },
                 'descriptions' => static function ($descriptionQuery): void {
                     $descriptionQuery->select([
                         'world_heritage_descriptions.world_heritage_site_id',

@@ -58,9 +58,6 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
                         'countries.region',
                     ]);
                 },
-                'images' => static function ($imagesQuery): void {
-                    $imagesQuery->where('is_primary', true)->limit(1);
-                },
                 'descriptions' => static function ($descriptionsQuery): void {
                     $descriptionsQuery->select([
                         'world_heritage_descriptions.world_heritage_site_id',
