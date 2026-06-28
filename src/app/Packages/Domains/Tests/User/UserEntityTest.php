@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Packages\Domains\User;
+namespace App\Packages\Domains\Tests\User;
 
 use App\Packages\Domains\User\AgeRange;
 use App\Packages\Domains\User\Subscription\Subscription;
@@ -13,8 +13,7 @@ class UserEntityTest extends TestCase
 {
     private function buildEntity(array $overrides = []): UserEntity
     {
-        $faker = FakerFactory::create();
-
+        $faker        = FakerFactory::create();
         $subscription = new Subscription(SubscriptionTier::Free, null);
 
         return new UserEntity(

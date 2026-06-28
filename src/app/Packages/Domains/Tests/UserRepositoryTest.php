@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Packages\Domains;
+namespace App\Packages\Domains\Tests;
 
 use App\Models\User;
 use App\Packages\Domains\UserRepository;
@@ -64,7 +64,7 @@ class UserRepositoryTest extends TestCase
     public function test_createUser_returns_user_dto_on_success(): void
     {
         $repository = new UserRepository($this->buildUserModelMock(wasRecentlyCreated: true));
-        $result = $repository->createUser($this->buildCommand());
+        $result     = $repository->createUser($this->buildCommand());
 
         $this->assertInstanceOf(UserDto::class, $result);
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Packages\Features\CommandUseCases\Factory\ViewModel;
+namespace App\Packages\Features\Tests\CommandUseCases;
 
 use App\Packages\Features\CommandUseCases\Factory\ViewModel\UserViewModelFactory;
 use App\Packages\Features\CommandUseCases\ViewModel\User\UserViewModel;

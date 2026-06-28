@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Packages\Features\CommandUseCases\UseCommand;
+namespace App\Packages\Features\Tests\CommandUseCases;
 
 use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
 use Faker\Factory as FakerFactory;
@@ -25,8 +25,7 @@ class CreateUserCommandTest extends TestCase
 
     public function test_fromArray_creates_command_with_valid_data(): void
     {
-        $data = $this->validData();
-
+        $data    = $this->validData();
         $command = CreateUserCommand::fromArray($data);
 
         $this->assertSame($data['first_name'], $command->firstName);

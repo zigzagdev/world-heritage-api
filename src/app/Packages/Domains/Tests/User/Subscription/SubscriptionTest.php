@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Packages\Domains\User\Subscription;
+namespace App\Packages\Domains\Tests\User\Subscription;
 
 use App\Packages\Domains\User\Subscription\Subscription;
 use App\Packages\Domains\User\Subscription\SubscriptionTier;
