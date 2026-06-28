@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Packages\Domains\User\Subscription;
+namespace App\Packages\Domains\User\Factory;
 
+use App\Packages\Domains\User\Subscription\Subscription;
+use App\Packages\Domains\User\Subscription\SubscriptionTier;
 use DateTimeImmutable;
 
 final class SubscriptionFactory

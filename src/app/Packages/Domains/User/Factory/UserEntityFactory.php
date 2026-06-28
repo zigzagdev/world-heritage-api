@@ -2,7 +2,7 @@
 
 namespace App\Packages\Domains\User\Factory;
 
-use App\Packages\Domains\User\Subscription\SubscriptionFactory;
+use App\Packages\Domains\User\Factory\SubscriptionFactory;
 use App\Packages\Domains\User\UserEntity;
 use App\Packages\Domains\User\AgeRange;
 
