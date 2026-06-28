@@ -48,6 +48,7 @@ jobs:
         with:
           php-version: "8.2"
           tools: composer:v2
+          coverage: pcov
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4
@@ -102,5 +103,12 @@ jobs:
           APP_ENV: testing
 
       - name: Run tests
-        run: ./vendor/bin/phpunit --stop-on-failure --testdox
+        run: ./vendor/bin/phpunit --stop-on-failure --testdox --coverage-clover coverage/clover.xml
         working-directory: ./src
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./src/coverage/clover.xml
+          fail_ci_if_error: false
