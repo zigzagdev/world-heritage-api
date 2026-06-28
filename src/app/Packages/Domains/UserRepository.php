@@ -21,6 +21,7 @@ class UserRepository implements UserRepositroyInterface
             'email'                   => $command->email,
             'first_name'              => $command->firstName,
             'last_name'               => $command->lastName,
+            'password'                => bcrypt($command->password),
             'age_range'               => $command->ageRange,
             'subscription_tier'       => $command->subscriptionTier,
             'subscription_expires_at' => $command->subscriptionExpiresAt,
