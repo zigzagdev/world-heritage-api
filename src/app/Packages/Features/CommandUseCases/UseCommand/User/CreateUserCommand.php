@@ -10,6 +10,7 @@ final class CreateUserCommand
         'first_name',
         'last_name',
         'email',
+        'password',
         'age_range',
         'subscription_tier',
     ];
@@ -18,6 +19,7 @@ final class CreateUserCommand
         public readonly string  $firstName,
         public readonly string  $lastName,
         public readonly string  $email,
+        public readonly string  $password,
         public readonly string  $ageRange,
         public readonly string  $subscriptionTier,
         public readonly ?string $subscriptionExpiresAt,
@@ -37,6 +39,7 @@ final class CreateUserCommand
             firstName: $data['first_name'],
             lastName: $data['last_name'],
             email: $data['email'],
+            password: $data['password'],
             ageRange: $data['age_range'],
             subscriptionTier: $data['subscription_tier'],
             subscriptionExpiresAt: $data['subscription_expires_at'] ?? null,
