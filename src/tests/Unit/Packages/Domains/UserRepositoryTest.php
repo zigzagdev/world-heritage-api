@@ -10,13 +10,14 @@ use Exception;
 use Faker\Factory as FakerFactory;
 use Mockery;
 use Mockery\MockInterface;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class UserRepositoryTest extends TestCase
 {
     protected function tearDown(): void
     {
         Mockery::close();
+        parent::tearDown();
     }
 
     private function buildCommand(): CreateUserCommand
@@ -27,6 +28,7 @@ class UserRepositoryTest extends TestCase
             'first_name'              => $faker->firstName(),
             'last_name'               => $faker->lastName(),
             'email'                   => $faker->unique()->safeEmail(),
+            'password'                => $faker->password(8),
             'age_range'               => $faker->randomElement(['teens', '20s', '30s', '40s', '50s', '60plus']),
             'subscription_tier'       => $faker->randomElement(['free', 'premium']),
             'subscription_expires_at' => null,
