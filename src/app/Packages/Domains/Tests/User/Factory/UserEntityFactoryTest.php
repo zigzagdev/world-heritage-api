@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Packages\Domains\User\Factory;
+namespace App\Packages\Domains\Tests\User\Factory;
 
 use App\Packages\Domains\User\AgeRange;
 use App\Packages\Domains\User\Factory\UserEntityFactory;

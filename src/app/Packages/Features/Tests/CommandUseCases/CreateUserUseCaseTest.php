@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Packages\Features\CommandUseCases\UseCase;
+namespace App\Packages\Features\Tests\CommandUseCases;
 
 use App\Packages\Domains\Interface\UserRepositroyInterface;
 use App\Packages\Features\CommandUseCases\UseCase\User\CreateUserUseCase;

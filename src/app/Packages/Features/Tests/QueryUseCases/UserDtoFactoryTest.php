@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Packages\Features\QueryUseCases\Factory\Dto;
+namespace App\Packages\Features\Tests\QueryUseCases;
 
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 use App\Packages\Features\QueryUseCases\Factory\Dto\UserDtoFactory;
