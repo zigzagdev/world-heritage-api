@@ -3,8 +3,8 @@
 namespace Tests\Unit\Packages\Domains;
 
 use App\Models\User;
-use App\Packages\Domains\User\Factory\UserEntityFactory;
 use App\Packages\Domains\UserRepository;
+use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 use Exception;
 use Faker\Factory as FakerFactory;
@@ -19,12 +19,11 @@ class UserRepositoryTest extends TestCase
         Mockery::close();
     }
 
-    private function buildUserEntity(): \App\Packages\Domains\User\UserEntity
+    private function buildCommand(): CreateUserCommand
     {
         $faker = FakerFactory::create();
 
-        return UserEntityFactory::build([
-            'id'                      => $faker->unique()->randomNumber(5),
+        return CreateUserCommand::fromArray([
             'first_name'              => $faker->firstName(),
             'last_name'               => $faker->lastName(),
             'email'                   => $faker->unique()->safeEmail(),
@@ -36,9 +35,22 @@ class UserRepositoryTest extends TestCase
 
     private function buildUserModelMock(bool $wasRecentlyCreated): User
     {
+        $faker = FakerFactory::create();
+
+        $attributes = [
+            'id'                      => $faker->unique()->randomNumber(5),
+            'first_name'              => $faker->firstName(),
+            'last_name'               => $faker->lastName(),
+            'email'                   => $faker->unique()->safeEmail(),
+            'age_range'               => $faker->randomElement(['teens', '20s', '30s', '40s', '50s', '60plus']),
+            'subscription_tier'       => 'free',
+            'subscription_expires_at' => null,
+        ];
+
         /** @var User|MockInterface $createdUser */
         $createdUser = Mockery::mock(User::class);
         $createdUser->wasRecentlyCreated = $wasRecentlyCreated;
+        $createdUser->shouldReceive('toArray')->andReturn($attributes);
 
         /** @var User|MockInterface $userModel */
         $userModel = Mockery::mock(User::class);
@@ -50,7 +62,7 @@ class UserRepositoryTest extends TestCase
     public function test_createUser_returns_user_dto_on_success(): void
     {
         $repository = new UserRepository($this->buildUserModelMock(wasRecentlyCreated: true));
-        $result = $repository->createUser($this->buildUserEntity());
+        $result = $repository->createUser($this->buildCommand());
 
         $this->assertInstanceOf(UserDto::class, $result);
     }
@@ -62,6 +74,6 @@ class UserRepositoryTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Failed to create user.');
 
-        $repository->createUser($this->buildUserEntity());
+        $repository->createUser($this->buildCommand());
     }
 }
