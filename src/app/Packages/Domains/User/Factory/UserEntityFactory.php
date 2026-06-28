@@ -17,12 +17,13 @@ final class UserEntityFactory
         ]);
 
         return new UserEntity(
-            $data['id'],
-            $data['first_name'],
-            $data['last_name'],
-            $data['email'],
-            AgeRange::from($data['age_range']),
-            $subscription,
+            id: isset($data['id']) ? (int) $data['id'] : null,
+            firstName: $data['first_name'],
+            lastName: $data['last_name'],
+            email: $data['email'],
+            ageRange: AgeRange::from($data['age_range']),
+            subscription: $subscription,
+            passwordHash: $data['password_hash'] ?? null,
         );
     }
 }
