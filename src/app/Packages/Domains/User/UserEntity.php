@@ -7,17 +7,23 @@ use App\Packages\Domains\User\Subscription\Subscription;
 final readonly class UserEntity
 {
     public function __construct(
-        private readonly int $id,
+        private readonly ?int $id,
         private readonly string $firstName,
         private readonly string $lastName,
         private readonly string $email,
         private readonly AgeRange $ageRange,
         private readonly Subscription $subscription,
+        private readonly ?string $passwordHash = null,
     ) {}
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getPasswordHash(): ?string
+    {
+        return $this->passwordHash;
     }
 
     public function getFirstName(): string

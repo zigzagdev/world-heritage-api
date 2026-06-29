@@ -3,19 +3,21 @@
 namespace App\Packages\Features\Tests\CommandUseCases;
 
 use App\Packages\Domains\Interface\UserRepositroyInterface;
+use App\Packages\Domains\User\UserEntity;
 use App\Packages\Features\CommandUseCases\UseCase\User\CreateUserUseCase;
 use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 use Faker\Factory as FakerFactory;
 use Mockery;
 use Mockery\MockInterface;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class CreateUserUseCaseTest extends TestCase
 {
     protected function tearDown(): void
     {
         Mockery::close();
+        parent::tearDown();
     }
 
     private function buildCommand(): CreateUserCommand
@@ -47,14 +49,17 @@ class CreateUserUseCaseTest extends TestCase
         );
     }
 
-    public function test_handle_returns_user_dto_from_repository(): void
+    public function test_handle_passes_entity_to_repository_and_returns_dto(): void
     {
         $command = $this->buildCommand();
         $dto     = $this->buildDto();
 
         /** @var UserRepositroyInterface|MockInterface $repository */
         $repository = Mockery::mock(UserRepositroyInterface::class);
-        $repository->shouldReceive('createUser')->with($command)->andReturn($dto);
+        $repository->shouldReceive('createUser')
+            ->once()
+            ->with(Mockery::type(UserEntity::class))
+            ->andReturn($dto);
 
         $useCase = new CreateUserUseCase($repository);
         $result  = $useCase->handle($command);

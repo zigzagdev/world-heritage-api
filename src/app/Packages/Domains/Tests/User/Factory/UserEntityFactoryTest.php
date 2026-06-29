@@ -33,6 +33,26 @@ class UserEntityFactoryTest extends TestCase
         $this->assertSame($data['email'], $entity->getEmail());
         $this->assertSame(AgeRange::Teens, $entity->getAgeRange());
         $this->assertTrue($entity->getSubscription()->isFree());
+        $this->assertNull($entity->getPasswordHash());
+    }
+
+    public function test_build_sets_password_hash_when_provided(): void
+    {
+        $faker = FakerFactory::create();
+
+        $entity = UserEntityFactory::build([
+            'id'                      => null,
+            'first_name'              => $faker->firstName(),
+            'last_name'               => $faker->lastName(),
+            'email'                   => $faker->unique()->safeEmail(),
+            'age_range'               => '20s',
+            'subscription_tier'       => 'free',
+            'subscription_expires_at' => null,
+            'password_hash'           => 'hashed_value',
+        ]);
+
+        $this->assertNull($entity->getId());
+        $this->assertSame('hashed_value', $entity->getPasswordHash());
     }
 
     public function test_build_passes_expires_at_to_subscription(): void
