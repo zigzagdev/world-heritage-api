@@ -8,4 +8,6 @@ use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 interface UserRepositroyInterface
 {
     public function createUser(UserEntity $entity): UserDto;
+
+    public function updateUser(UserEntity $entity): UserDto;
 }
