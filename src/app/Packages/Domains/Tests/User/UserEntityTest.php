@@ -17,12 +17,12 @@ class UserEntityTest extends TestCase
         $subscription = new Subscription(SubscriptionTier::Free, null);
 
         return new UserEntity(
-            id:           $overrides['id']           ?? $faker->unique()->randomNumber(5),
-            firstName:    $overrides['first_name']   ?? $faker->firstName(),
-            lastName:     $overrides['last_name']    ?? $faker->lastName(),
-            email:        $overrides['email']        ?? $faker->unique()->safeEmail(),
-            ageRange:     $overrides['age_range']    ?? AgeRange::Twenties,
-            subscription: $overrides['subscription'] ?? $subscription,
+            id:           $overrides['id']            ?? $faker->unique()->randomNumber(5),
+            firstName:    $overrides['first_name']    ?? $faker->firstName(),
+            lastName:     $overrides['last_name']     ?? $faker->lastName(),
+            email:        $overrides['email']         ?? $faker->unique()->safeEmail(),
+            ageRange:     $overrides['age_range']     ?? AgeRange::Twenties,
+            subscription: $overrides['subscription']  ?? $subscription,
             passwordHash: $overrides['password_hash'] ?? null,
         );
     }
