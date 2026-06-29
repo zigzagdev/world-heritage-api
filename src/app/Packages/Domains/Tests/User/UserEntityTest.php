@@ -17,7 +17,7 @@ class UserEntityTest extends TestCase
         $subscription = new Subscription(SubscriptionTier::Free, null);
 
         return new UserEntity(
-            id:           $overrides['id']            ?? $faker->unique()->randomNumber(5),
+            id:           array_key_exists('id', $overrides) ? $overrides['id'] : $faker->unique()->randomNumber(5),
             firstName:    $overrides['first_name']    ?? $faker->firstName(),
             lastName:     $overrides['last_name']     ?? $faker->lastName(),
             email:        $overrides['email']         ?? $faker->unique()->safeEmail(),
