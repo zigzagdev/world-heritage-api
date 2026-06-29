@@ -17,12 +17,13 @@ class UserEntityTest extends TestCase
         $subscription = new Subscription(SubscriptionTier::Free, null);
 
         return new UserEntity(
-            $overrides['id']           ?? $faker->unique()->randomNumber(5),
-            $overrides['first_name']   ?? $faker->firstName(),
-            $overrides['last_name']    ?? $faker->lastName(),
-            $overrides['email']        ?? $faker->unique()->safeEmail(),
-            $overrides['age_range']    ?? AgeRange::Twenties,
-            $overrides['subscription'] ?? $subscription,
+            id:           array_key_exists('id', $overrides) ? $overrides['id'] : $faker->unique()->randomNumber(5),
+            firstName:    $overrides['first_name']    ?? $faker->firstName(),
+            lastName:     $overrides['last_name']     ?? $faker->lastName(),
+            email:        $overrides['email']         ?? $faker->unique()->safeEmail(),
+            ageRange:     $overrides['age_range']     ?? AgeRange::Twenties,
+            subscription: $overrides['subscription']  ?? $subscription,
+            passwordHash: $overrides['password_hash'] ?? null,
         );
     }
 
@@ -30,6 +31,12 @@ class UserEntityTest extends TestCase
     {
         $entity = $this->buildEntity(['id' => 42]);
         $this->assertSame(42, $entity->getId());
+    }
+
+    public function test_getId_returns_null_when_not_yet_persisted(): void
+    {
+        $entity = $this->buildEntity(['id' => null]);
+        $this->assertNull($entity->getId());
     }
 
     public function test_getFirstName_returns_correct_value(): void
@@ -67,5 +74,17 @@ class UserEntityTest extends TestCase
         $subscription = new Subscription(SubscriptionTier::Premium, null);
         $entity       = $this->buildEntity(['subscription' => $subscription]);
         $this->assertSame($subscription, $entity->getSubscription());
+    }
+
+    public function test_getPasswordHash_returns_hashed_value(): void
+    {
+        $entity = $this->buildEntity(['password_hash' => 'hashed_secret']);
+        $this->assertSame('hashed_secret', $entity->getPasswordHash());
+    }
+
+    public function test_getPasswordHash_returns_null_when_not_set(): void
+    {
+        $entity = $this->buildEntity(['password_hash' => null]);
+        $this->assertNull($entity->getPasswordHash());
     }
 }

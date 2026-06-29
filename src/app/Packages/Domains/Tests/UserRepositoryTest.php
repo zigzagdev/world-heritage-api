@@ -4,13 +4,14 @@ namespace App\Packages\Domains\Tests;
 
 use App\Models\User;
 use App\Packages\Domains\UserRepository;
-use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
+use App\Packages\Domains\User\Factory\UserEntityFactory;
+use App\Packages\Domains\User\UserEntity;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 use Exception;
 use Faker\Factory as FakerFactory;
 use Mockery;
 use Mockery\MockInterface;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class UserRepositoryTest extends TestCase
 {
@@ -20,18 +21,19 @@ class UserRepositoryTest extends TestCase
         parent::tearDown();
     }
 
-    private function buildCommand(): CreateUserCommand
+    private function buildEntity(): UserEntity
     {
         $faker = FakerFactory::create();
 
-        return CreateUserCommand::fromArray([
+        return UserEntityFactory::build([
+            'id'                      => null,
             'first_name'              => $faker->firstName(),
             'last_name'               => $faker->lastName(),
             'email'                   => $faker->unique()->safeEmail(),
-            'password'                => $faker->password(8),
             'age_range'               => $faker->randomElement(['teens', '20s', '30s', '40s', '50s', '60plus']),
             'subscription_tier'       => $faker->randomElement(['free', 'premium']),
             'subscription_expires_at' => null,
+            'password_hash'           => 'hashed_password',
         ]);
     }
 
@@ -64,7 +66,7 @@ class UserRepositoryTest extends TestCase
     public function test_createUser_returns_user_dto_on_success(): void
     {
         $repository = new UserRepository($this->buildUserModelMock(wasRecentlyCreated: true));
-        $result     = $repository->createUser($this->buildCommand());
+        $result     = $repository->createUser($this->buildEntity());
 
         $this->assertInstanceOf(UserDto::class, $result);
     }
@@ -76,6 +78,6 @@ class UserRepositoryTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Failed to create user.');
 
-        $repository->createUser($this->buildCommand());
+        $repository->createUser($this->buildEntity());
     }
 }

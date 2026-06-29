@@ -4,7 +4,7 @@ namespace App\Packages\Domains;
 
 use App\Models\User;
 use App\Packages\Domains\Interface\UserRepositroyInterface;
-use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
+use App\Packages\Domains\User\UserEntity;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 use App\Packages\Features\QueryUseCases\Factory\Dto\UserDtoFactory;
 use Exception;
@@ -15,16 +15,16 @@ class UserRepository implements UserRepositroyInterface
         private User $userModel
     ) {}
 
-    public function createUser(CreateUserCommand $command): UserDto
+    public function createUser(UserEntity $entity): UserDto
     {
         $insertUser = $this->userModel->create([
-            'email'                   => $command->email,
-            'first_name'              => $command->firstName,
-            'last_name'               => $command->lastName,
-            'password'                => bcrypt($command->password),
-            'age_range'               => $command->ageRange,
-            'subscription_tier'       => $command->subscriptionTier,
-            'subscription_expires_at' => $command->subscriptionExpiresAt,
+            'email'                   => $entity->getEmail(),
+            'first_name'              => $entity->getFirstName(),
+            'last_name'               => $entity->getLastName(),
+            'password'                => $entity->getPasswordHash(),
+            'age_range'               => $entity->getAgeRange()->value,
+            'subscription_tier'       => $entity->getSubscription()->getTier()->value,
+            'subscription_expires_at' => $entity->getSubscription()->getExpiresAt()?->format('Y-m-d H:i:s'),
         ]);
 
         if (!$insertUser->wasRecentlyCreated) {
