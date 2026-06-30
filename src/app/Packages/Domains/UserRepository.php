@@ -33,4 +33,37 @@ class UserRepository implements UserRepositroyInterface
 
         return UserDtoFactory::build($insertUser->toArray());
     }
+
+    public function findById(int $id): ?UserDto
+    {
+        $user = $this->userModel->find($id);
+
+        if ($user === null) {
+            return null;
+        }
+
+        return UserDtoFactory::build($user->toArray());
+    }
+
+    public function updateUser(UserEntity $entity): UserDto
+    {
+        $user = $this->userModel->find($entity->getId());
+
+        if ($user === null) {
+            throw new Exception('User not found.');
+        }
+
+        $user->update([
+            'first_name'              => $entity->getFirstName(),
+            'last_name'               => $entity->getLastName(),
+            'email'                   => $entity->getEmail(),
+            'age_range'               => $entity->getAgeRange()->value,
+            'subscription_tier'       => $entity->getSubscription()->getTier()->value,
+            'subscription_expires_at' => $entity->getSubscription()->getExpiresAt()?->format('Y-m-d H:i:s'),
+        ]);
+
+        $user->refresh();
+
+        return UserDtoFactory::build($user->toArray());
+    }
 }
