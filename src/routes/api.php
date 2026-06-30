@@ -10,5 +10,6 @@ Route::prefix('v1')->group(function (): void {
     Route::get('heritages/region-count', [WorldHeritageController::class, 'getWorldHeritagesCountByRegion']);
     Route::get('/heritages/{id}', [WorldHeritageController::class, 'getWorldHeritageById']);
 
+    Route::get('/users/{id}', [UserController::class, 'getUserById']);
     Route::post('/user/create', [UserController::class, 'createUser']);
 });
