@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Packages\Features\CommandUseCases\ViewModel\User;
+namespace App\Packages\Features\QueryUseCases\ViewModel\User;
 
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 
