@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Packages\Features\Tests\CommandUseCases;
+namespace App\Packages\Features\QueryUseCases\Tests\ViewModel;
 
-use App\Packages\Features\CommandUseCases\ViewModel\User\UserViewModel;
+use App\Packages\Features\QueryUseCases\ViewModel\User\UserViewModel;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 use Faker\Factory as FakerFactory;
 use PHPUnit\Framework\TestCase;
