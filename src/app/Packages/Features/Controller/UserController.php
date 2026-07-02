@@ -5,7 +5,9 @@ namespace App\Packages\Features\Controller;
 use App\Http\Controllers\Controller;
 use App\Packages\Features\QueryUseCases\Factory\ViewModel\UserViewModelFactory;
 use App\Packages\Features\CommandUseCases\UseCase\User\CreateUserUseCase;
+use App\Packages\Features\CommandUseCases\UseCase\User\UpdateUserUseCase;
 use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
+use App\Packages\Features\CommandUseCases\UseCommand\User\UpdateUserCommand;
 use App\Packages\Features\QueryUseCases\UseCase\User\GetUserByIdUseCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -33,6 +35,41 @@ class UserController extends Controller
             }
 
             Log::error('Failed to get user by id', [
+                'message' => $exception->getMessage(),
+                'trace'   => $exception->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
+    }
+
+    public function updateUser(
+        Request $request,
+        UpdateUserUseCase $useCase,
+    ): JsonResponse {
+        try {
+            $command = UpdateUserCommand::fromArray(array_merge(
+                $request->all(),
+                ['id' => $request->route('id')],
+            ));
+            $dto = $useCase->handle($command);
+
+            return response()->json([
+                'status' => 'success',
+                'data'   => UserViewModelFactory::build($dto)->toArray(),
+            ], 200);
+        } catch (\Exception $exception) {
+            if ($exception->getMessage() === 'User not found.') {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'User not found.',
+                ], 404);
+            }
+
+            Log::error('Failed to update user', [
                 'message' => $exception->getMessage(),
                 'trace'   => $exception->getTraceAsString(),
             ]);
