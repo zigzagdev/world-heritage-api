@@ -3,7 +3,7 @@
 namespace App\Packages\Features\Controller;
 
 use App\Http\Controllers\Controller;
-use App\Packages\Features\CommandUseCases\Factory\ViewModel\UserViewModelFactory;
+use App\Packages\Features\QueryUseCases\Factory\ViewModel\UserViewModelFactory;
 use App\Packages\Features\CommandUseCases\UseCase\User\CreateUserUseCase;
 use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
 use App\Packages\Features\QueryUseCases\UseCase\User\GetUserByIdUseCase;

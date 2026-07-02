@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Packages\Features\CommandUseCases\Factory\ViewModel;
+namespace App\Packages\Features\QueryUseCases\Factory\ViewModel;
 
-use App\Packages\Features\CommandUseCases\ViewModel\User\UserViewModel;
+use App\Packages\Features\QueryUseCases\ViewModel\User\UserViewModel;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 
 class UserViewModelFactory
