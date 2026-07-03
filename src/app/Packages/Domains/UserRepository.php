@@ -66,4 +66,15 @@ class UserRepository implements UserRepositroyInterface
 
         return UserDtoFactory::build($user->toArray());
     }
+
+    public function deleteUser(int $id): void
+    {
+        $user = $this->userModel->find($id);
+
+        if ($user === null) {
+            throw new Exception('User not found.');
+        }
+
+        $user->delete();
+    }
 }
