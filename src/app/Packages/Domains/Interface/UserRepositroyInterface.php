@@ -12,4 +12,6 @@ interface UserRepositroyInterface
     public function findById(int $id): ?UserDto;
 
     public function updateUser(UserEntity $entity): UserDto;
+
+    public function deleteUser(int $id): void;
 }
