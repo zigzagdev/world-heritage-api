@@ -12,5 +12,6 @@ Route::prefix('v1')->group(function (): void {
 
     Route::get('/users/{id}', [UserController::class, 'getUserById']);
     Route::patch('/users/{id}', [UserController::class, 'updateUser']);
+    Route::delete('/users/{id}', [UserController::class, 'deleteUser']);
     Route::post('/user/create', [UserController::class, 'createUser']);
 });

@@ -5,6 +5,7 @@ namespace App\Packages\Features\Controller;
 use App\Http\Controllers\Controller;
 use App\Packages\Features\QueryUseCases\Factory\ViewModel\UserViewModelFactory;
 use App\Packages\Features\CommandUseCases\UseCase\User\CreateUserUseCase;
+use App\Packages\Features\CommandUseCases\UseCase\User\DeleteUserUseCase;
 use App\Packages\Features\CommandUseCases\UseCase\User\UpdateUserUseCase;
 use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
 use App\Packages\Features\CommandUseCases\UseCommand\User\UpdateUserCommand;
@@ -70,6 +71,36 @@ class UserController extends Controller
             }
 
             Log::error('Failed to update user', [
+                'message' => $exception->getMessage(),
+                'trace'   => $exception->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
+    }
+
+    public function deleteUser(
+        Request $request,
+        DeleteUserUseCase $useCase,
+    ): JsonResponse {
+        try {
+            $useCase->handle((int) $request->route('id'));
+
+            return response()->json([
+                'status' => 'success',
+            ], 200);
+        } catch (\Exception $exception) {
+            if ($exception->getMessage() === 'User not found.') {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'User not found.',
+                ], 404);
+            }
+
+            Log::error('Failed to delete user', [
                 'message' => $exception->getMessage(),
                 'trace'   => $exception->getTraceAsString(),
             ]);
