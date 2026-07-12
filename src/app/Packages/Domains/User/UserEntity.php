@@ -3,6 +3,7 @@
 namespace App\Packages\Domains\User;
 
 use App\Packages\Domains\User\Subscription\Subscription;
+use App\Packages\Domains\User\ValueObject\Email;
 
 final readonly class UserEntity
 {
@@ -10,7 +11,7 @@ final readonly class UserEntity
         private readonly ?int $id,
         private readonly string $firstName,
         private readonly string $lastName,
-        private readonly string $email,
+        private readonly Email $email,
         private readonly AgeRange $ageRange,
         private readonly Subscription $subscription,
         private readonly ?string $passwordHash = null,
@@ -41,7 +42,7 @@ final readonly class UserEntity
         return $this->firstName . ' ' . $this->lastName;
     }
 
-    public function getEmail(): string
+    public function getEmail(): Email
     {
         return $this->email;
     }
