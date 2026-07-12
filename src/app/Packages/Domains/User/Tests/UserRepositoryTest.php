@@ -9,6 +9,7 @@ use App\Packages\Domains\User\Subscription\Subscription;
 use App\Packages\Domains\User\Subscription\SubscriptionTier;
 use App\Packages\Domains\User\UserEntity;
 use App\Packages\Domains\User\UserRepository;
+use App\Packages\Domains\User\ValueObject\Email;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 use Faker\Factory as FakerFactory;
 use Illuminate\Support\Facades\DB;
@@ -138,4 +139,38 @@ class UserRepositoryTest extends TestCase
 
         $this->repository()->deleteUser(999999);
     }
+
+    public function test_findByEmail_returns_user_entity_when_user_exists(): void
+    {
+        $user = $this->seedUser(['email' => 'john@example.com']);
+
+        $result = $this->repository()->findByEmail(new Email('john@example.com'));
+
+        $this->assertInstanceOf(UserEntity::class, $result);
+        $this->assertSame($user->email, $result->getEmail()->value());
+        $this->assertSame($user->first_name, $result->getFirstName());
+        $this->assertSame($user->last_name, $result->getLastName());
+    }
+
+    public function test_findByEmail_returns_null_when_user_does_not_exist(): void
+    {
+        $result = $this->repository()->findByEmail(new Email('notfound@example.com'));
+
+        $this->assertNull($result);
+    }
+
+    public function test_findByEmail_returns_correct_password_hash(): void
+    {
+        $plainPassword = 'secret123';
+        $this->seedUser([
+            'email'    => 'hash@example.com',
+            'password' => bcrypt($plainPassword),
+        ]);
+
+        $result = $this->repository()->findByEmail(new Email('hash@example.com'));
+
+        $this->assertNotNull($result->getPasswordHash());
+        $this->assertTrue(password_verify($plainPassword, $result->getPasswordHash()));
+    }
+
 }
