@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\CommandUseCases\UseCase\User;
 
-use App\Packages\Domains\Interface\UserRepositroyInterface;
+use App\Packages\Domains\User\Interface\UserRepositroyInterface;
 
 final class DeleteUserUseCase
 {

@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\Tests\CommandUseCases;
 
-use App\Packages\Domains\Interface\UserRepositroyInterface;
+use App\Packages\Domains\User\Interface\UserRepositroyInterface;
 use App\Packages\Domains\User\UserEntity;
 use App\Packages\Features\CommandUseCases\UseCase\User\CreateUserUseCase;
 use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;

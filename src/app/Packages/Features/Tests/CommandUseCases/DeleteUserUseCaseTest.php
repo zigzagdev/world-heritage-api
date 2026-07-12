@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\Tests\CommandUseCases;
 
-use App\Packages\Domains\Interface\UserRepositroyInterface;
+use App\Packages\Domains\User\Interface\UserRepositroyInterface;
 use App\Packages\Features\CommandUseCases\UseCase\User\DeleteUserUseCase;
 use Mockery;
 use Mockery\MockInterface;

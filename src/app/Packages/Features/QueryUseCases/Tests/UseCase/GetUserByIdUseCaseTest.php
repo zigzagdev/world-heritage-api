@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\Tests\UseCase;
 
-use App\Packages\Domains\Interface\UserRepositroyInterface;
+use App\Packages\Domains\User\Interface\UserRepositroyInterface;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 use App\Packages\Features\QueryUseCases\UseCase\User\GetUserByIdUseCase;
 use Exception;

@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\CommandUseCases\UseCase\User;
 
-use App\Packages\Domains\Interface\UserRepositroyInterface;
+use App\Packages\Domains\User\Interface\UserRepositroyInterface;
 use App\Packages\Domains\User\Factory\UserEntityFactory;
 use App\Packages\Features\CommandUseCases\UseCommand\User\UpdateUserCommand;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Packages\Domains\Interface\UserRepositroyInterface;
-use App\Packages\Domains\UserRepository;
+use App\Packages\Domains\User\Interface\UserRepositroyInterface;
+use App\Packages\Domains\User\UserRepository;
 use App\Packages\Domains\WorldHeritageRepository;
 use App\Packages\Domains\WorldHeritageRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
