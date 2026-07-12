@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use Algolia\AlgoliaSearch\Api\SearchClient;
-use App\Packages\Domains\Adapter\AlgoliaWorldHeritageSearchAdapter;
-use App\Packages\Domains\Ports\WorldHeritageSearchPort;
+use App\Packages\Domains\WorldHeritage\Adapter\AlgoliaWorldHeritageSearchAdapter;
+use App\Packages\Domains\WorldHeritage\Ports\WorldHeritageSearchPort;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;

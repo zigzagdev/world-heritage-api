@@ -4,8 +4,8 @@ namespace App\Packages\Features\Tests;
 
 use App\Models\Image;
 use App\Models\WorldHeritageDescription;
-use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
-use App\Packages\Domains\Ports\WorldHeritageSearchPort;
+use App\Packages\Domains\WorldHeritage\Ports\Dto\HeritageSearchResult;
+use App\Packages\Domains\WorldHeritage\Ports\WorldHeritageSearchPort;
 use Database\Seeders\DatabaseSeeder;
 use Tests\TestCase;
 use Illuminate\Support\Facades\DB;

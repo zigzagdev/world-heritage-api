@@ -2,7 +2,7 @@
 
 namespace App\Packages\Features\QueryUseCases\UseCase;
 
-use App\Packages\Domains\Infra\CountryResolver;
+use App\Packages\Domains\WorldHeritage\Infra\CountryResolver;
 use App\Packages\Features\QueryUseCases\Factory\ListQuery\AlgoliaSearchListQueryFactory;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use App\Common\Pagination\PaginationDto;

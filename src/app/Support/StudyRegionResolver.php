@@ -2,10 +2,10 @@
 
 namespace App\Support;
 
-use App\Packages\Domains\StudyRegion\CountryAliases;
-use App\Packages\Domains\StudyRegion\ExceptionalStudyRegions;
-use App\Packages\Domains\StudyRegion\Iso3ToStudyRegionMap;
-use App\Packages\Domains\StudyRegion\CountryToStudyRegionMap;
+use App\Packages\Domains\WorldHeritage\StudyRegion\CountryAliases;
+use App\Packages\Domains\WorldHeritage\StudyRegion\ExceptionalStudyRegions;
+use App\Packages\Domains\WorldHeritage\StudyRegion\Iso3ToStudyRegionMap;
+use App\Packages\Domains\WorldHeritage\StudyRegion\CountryToStudyRegionMap;
 use App\Enums\StudyRegion;
 
 class StudyRegionResolver

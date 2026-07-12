@@ -5,13 +5,13 @@ namespace App\Providers;
 use App\Packages\Domains\Adapter\GcsObjectStorageAdapter;
 use App\Packages\Domains\Adapter\GcsSignedUrlAdapter;
 use App\Packages\Domains\Infra\GcsImageObjectRemover;
-use App\Packages\Domains\Ports\ObjectRemovePort;
-use App\Packages\Domains\Ports\ObjectStoragePort;
-use App\Packages\Domains\Ports\SignedUrlPort;
+use App\Packages\Domains\WorldHeritage\Ports\ObjectRemovePort;
+use App\Packages\Domains\WorldHeritage\Ports\ObjectStoragePort;
+use App\Packages\Domains\WorldHeritage\Ports\SignedUrlPort;
 use Illuminate\Support\ServiceProvider;
 use Google\Cloud\Storage\StorageClient;
-use App\Packages\Domains\Ports\WorldHeritageSearchPort;
-use App\Packages\Domains\Adapter\AlgoliaWorldHeritageSearchAdapter;
+use App\Packages\Domains\WorldHeritage\Ports\WorldHeritageSearchPort;
+use App\Packages\Domains\WorldHeritage\Adapter\AlgoliaWorldHeritageSearchAdapter;
 
 class PortsServiceProvider extends ServiceProvider
 {
