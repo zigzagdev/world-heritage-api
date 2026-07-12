@@ -121,4 +121,21 @@ class UserRepositoryTest extends TestCase
 
         $this->repository()->updateUser($entity);
     }
+
+    public function test_deleteUser_removes_user_when_exists(): void
+    {
+        $user = $this->seedUser();
+
+        $this->repository()->deleteUser($user->id);
+
+        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    }
+
+    public function test_deleteUser_throws_exception_when_user_not_found(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('User not found.');
+
+        $this->repository()->deleteUser(999999);
+    }
 }
