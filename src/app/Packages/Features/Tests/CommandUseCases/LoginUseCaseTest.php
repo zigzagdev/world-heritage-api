@@ -7,7 +7,7 @@ use App\Packages\Domains\User\Interface\TokenServiceInterface;
 use App\Packages\Domains\User\Interface\UserRepositroyInterface;
 use App\Packages\Domains\User\UserEntity;
 use App\Packages\Features\CommandUseCases\UseCase\User\LoginUseCase;
-use App\Packages\Features\QueryUseCases\Dto\User\TokenDto;
+use App\Packages\Features\QueryUseCases\Dto\User\AuthTokenDto;
 use InvalidArgumentException;
 use Mockery;
 use Mockery\MockInterface;
@@ -54,8 +54,9 @@ class LoginUseCaseTest extends TestCase
 
         $result = (new LoginUseCase($userRepository, $tokenService))->handle('john@example.com', 'secret');
 
-        $this->assertInstanceOf(TokenDto::class, $result);
+        $this->assertInstanceOf(AuthTokenDto::class, $result);
         $this->assertSame('plain-text-token', $result->token);
+        $this->assertSame('Bearer', $result->tokenType);
     }
 
     public function test_handle_throws_when_user_not_found(): void
@@ -91,7 +92,7 @@ class LoginUseCaseTest extends TestCase
         $tokenService->shouldNotReceive('createToken');
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid credentials.');
+        $this->expectExceptionMessage('Invalid user data. Please try again.');
 
         (new LoginUseCase($userRepository, $tokenService))->handle('john@example.com', 'wrong-password');
     }
