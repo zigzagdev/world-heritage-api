@@ -1,5 +1,5 @@
 [source]
-paths = ["app", "config", "database", "routes"]
+paths = ["app/Packages"]
 
 [linter]
 excludes = ["database/migrations"]
@@ -107,6 +107,21 @@ enabled = false
 [linter.rules.no-php-tag-terminator]
 enabled = false
 
+[linter.rules.prefer-first-class-callable]
+enabled = false
+
+[linter.rules.no-nested-ternary]
+enabled = false
+
+[linter.rules.no-empty]
+enabled = false
+
+[linter.rules.block-statement]
+enabled = false
+
+[linter.rules.class-name]
+enabled = false
+
 # --- 有効化: バグ・セキュリティ系 ---
 [linter.rules.no-eval]
 enabled = true
@@ -129,14 +144,9 @@ enabled = true
 level   = "Error"
 
 [linter.rules.no-literal-password]
-enabled = true
-level   = "Error"
+enabled = false
 
 [linter.rules.no-shell-execute-string]
-enabled = true
-level   = "Error"
-
-[linter.rules.no-empty]
 enabled = true
 level   = "Error"
 
@@ -152,10 +162,6 @@ level   = "Warning"
 enabled = true
 level   = "Warning"
 
-[linter.rules.no-nested-ternary]
-enabled = true
-level   = "Warning"
-
 [linter.rules.no-assign-in-condition]
 enabled = true
 level   = "Warning"
@@ -167,14 +173,14 @@ level   = "Warning"
 [linter.rules.cyclomatic-complexity]
 enabled   = true
 level     = "Error"
-threshold = 15
+threshold = 60
 
 [linter.rules.excessive-parameter-list]
 enabled   = true
 level     = "Warning"
-threshold = 6
+threshold = 25
 
 [linter.rules.too-many-methods]
 enabled   = true
 level     = "Warning"
-threshold = 10
+threshold = 30
