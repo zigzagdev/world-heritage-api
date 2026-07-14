@@ -30,7 +30,7 @@ class UserEntityFactoryTest extends TestCase
         $this->assertSame($data['id'], $entity->getId());
         $this->assertSame($data['first_name'], $entity->getFirstName());
         $this->assertSame($data['last_name'], $entity->getLastName());
-        $this->assertSame($data['email'], $entity->getEmail());
+        $this->assertSame($data['email'], $entity->getEmail()->value());
         $this->assertSame(AgeRange::Teens, $entity->getAgeRange());
         $this->assertTrue($entity->getSubscription()->isFree());
         $this->assertNull($entity->getPasswordHash());

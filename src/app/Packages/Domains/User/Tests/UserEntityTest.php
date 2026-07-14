@@ -6,6 +6,7 @@ use App\Packages\Domains\User\AgeRange;
 use App\Packages\Domains\User\Subscription\Subscription;
 use App\Packages\Domains\User\Subscription\SubscriptionTier;
 use App\Packages\Domains\User\UserEntity;
+use App\Packages\Domains\User\ValueObject\Email;
 use Faker\Factory as FakerFactory;
 use PHPUnit\Framework\TestCase;
 
@@ -20,7 +21,7 @@ class UserEntityTest extends TestCase
             id:           array_key_exists('id', $overrides) ? $overrides['id'] : $faker->unique()->randomNumber(5),
             firstName:    $overrides['first_name']    ?? $faker->firstName(),
             lastName:     $overrides['last_name']     ?? $faker->lastName(),
-            email:        $overrides['email']         ?? $faker->unique()->safeEmail(),
+            email:        isset($overrides['email']) ? new Email($overrides['email']) : new Email($faker->unique()->safeEmail()),
             ageRange:     $overrides['age_range']     ?? AgeRange::Twenties,
             subscription: $overrides['subscription']  ?? $subscription,
             passwordHash: $overrides['password_hash'] ?? null,
@@ -60,7 +61,7 @@ class UserEntityTest extends TestCase
     public function test_getEmail_returns_correct_value(): void
     {
         $entity = $this->buildEntity(['email' => 'john@example.com']);
-        $this->assertSame('john@example.com', $entity->getEmail());
+        $this->assertSame('john@example.com', $entity->getEmail()->value());
     }
 
     public function test_getAgeRange_returns_correct_enum(): void

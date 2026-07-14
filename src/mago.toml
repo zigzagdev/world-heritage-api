@@ -1,0 +1,186 @@
+[source]
+paths = ["app/Packages"]
+
+[linter]
+excludes = ["database/migrations"]
+
+# --- 無効化: スタイル・冗長性系（厳しすぎるため外す） ---
+[linter.rules.strict-types]
+enabled = false
+
+[linter.rules.no-else-clause]
+enabled = false
+
+[linter.rules.no-redundant-write-visibility]
+enabled = false
+
+[linter.rules.no-redundant-method-override]
+enabled = false
+
+[linter.rules.no-redundant-parentheses]
+enabled = false
+
+[linter.rules.no-redundant-string-concat]
+enabled = false
+
+[linter.rules.no-redundant-isset]
+enabled = false
+
+[linter.rules.no-redundant-final]
+enabled = false
+
+[linter.rules.no-redundant-readonly]
+enabled = false
+
+[linter.rules.no-redundant-block]
+enabled = false
+
+[linter.rules.no-redundant-continue]
+enabled = false
+
+[linter.rules.no-redundant-use]
+enabled = false
+
+[linter.rules.no-redundant-nullsafe]
+enabled = false
+
+[linter.rules.no-redundant-label]
+enabled = false
+
+[linter.rules.no-redundant-literal-return]
+enabled = false
+
+[linter.rules.prefer-arrow-function]
+enabled = false
+
+[linter.rules.prefer-early-continue]
+enabled = false
+
+[linter.rules.prefer-static-closure]
+enabled = false
+
+[linter.rules.inline-variable-return]
+enabled = false
+
+[linter.rules.no-boolean-flag-parameter]
+enabled = false
+
+[linter.rules.no-isset]
+enabled = false
+
+[linter.rules.halstead]
+enabled = false
+
+[linter.rules.readable-literal]
+enabled = false
+
+[linter.rules.literal-named-argument]
+enabled = false
+
+[linter.rules.no-shorthand-ternary]
+enabled = false
+
+[linter.rules.kan-defect]
+enabled = false
+
+[linter.rules.sensitive-parameter]
+enabled = false
+
+[linter.rules.explicit-nullable-param]
+enabled = false
+
+[linter.rules.tagged-todo]
+enabled = false
+
+[linter.rules.tagged-fixme]
+enabled = false
+
+[linter.rules.valid-docblock]
+enabled = false
+
+[linter.rules.no-trailing-space]
+enabled = false
+
+[linter.rules.no-closing-tag]
+enabled = false
+
+[linter.rules.no-php-tag-terminator]
+enabled = false
+
+[linter.rules.prefer-first-class-callable]
+enabled = false
+
+[linter.rules.no-nested-ternary]
+enabled = false
+
+[linter.rules.no-empty]
+enabled = false
+
+[linter.rules.block-statement]
+enabled = false
+
+[linter.rules.class-name]
+enabled = false
+
+# --- 有効化: バグ・セキュリティ系 ---
+[linter.rules.no-eval]
+enabled = true
+level   = "Error"
+
+[linter.rules.no-global]
+enabled = true
+level   = "Error"
+
+[linter.rules.no-error-control-operator]
+enabled = true
+level   = "Error"
+
+[linter.rules.no-empty-catch-clause]
+enabled = true
+level   = "Error"
+
+[linter.rules.no-insecure-comparison]
+enabled = true
+level   = "Error"
+
+[linter.rules.no-literal-password]
+enabled = false
+
+[linter.rules.no-shell-execute-string]
+enabled = true
+level   = "Error"
+
+[linter.rules.no-debug-symbols]
+enabled = true
+level   = "Warning"
+
+[linter.rules.loop-does-not-iterate]
+enabled = true
+level   = "Warning"
+
+[linter.rules.no-self-assignment]
+enabled = true
+level   = "Warning"
+
+[linter.rules.no-assign-in-condition]
+enabled = true
+level   = "Warning"
+
+[linter.rules.identity-comparison]
+enabled = true
+level   = "Warning"
+
+[linter.rules.cyclomatic-complexity]
+enabled   = true
+level     = "Error"
+threshold = 60
+
+[linter.rules.excessive-parameter-list]
+enabled   = true
+level     = "Warning"
+threshold = 25
+
+[linter.rules.too-many-methods]
+enabled   = true
+level     = "Warning"
+threshold = 30
