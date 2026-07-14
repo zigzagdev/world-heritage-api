@@ -3,7 +3,9 @@
 namespace App\Packages\Features\Tests;
 
 use App\Models\User;
+use App\Packages\Features\CommandUseCases\UseCase\User\LoginUseCase;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
@@ -85,5 +87,23 @@ class LoginTest extends TestCase
 
         $response->assertStatus(401)
             ->assertJsonFragment(['status' => 'error']);
+    }
+
+    public function test_login_returns_500_on_unexpected_error(): void
+    {
+        $this->mock(LoginUseCase::class)
+            ->shouldReceive('handle')
+            ->andThrow(new RuntimeException('Unexpected error'));
+
+        $response = $this->postJson('/api/v1/user/login', [
+            'email'    => 'john@example.com',
+            'password' => 'secret123',
+        ]);
+
+        $response->assertStatus(500)
+            ->assertJsonFragment([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ]);
     }
 }
