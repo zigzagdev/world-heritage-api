@@ -8,7 +8,7 @@ use App\Packages\Domains\User\ValueObject\Email;
 use App\Packages\Features\QueryUseCases\Dto\User\AuthTokenDto;
 use InvalidArgumentException;
 
-final class LoginUseCase
+class LoginUseCase
 {
     public function __construct(
         private readonly UserRepositroyInterface $userRepository,
