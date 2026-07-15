@@ -133,4 +133,26 @@ class SanctumTokenServiceTest extends TestCase
 
         $this->service()->revokeAllTokens($entity);
     }
+
+    public function test_revokeCurrentToken_deletes_the_given_token(): void
+    {
+        $user      = $this->seedUser();
+        $plainText = $user->createToken('auth-token')->plainTextToken;
+
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_id' => $user->id,
+        ]);
+
+        $this->service()->revokeCurrentToken($plainText);
+
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_id' => $user->id,
+        ]);
+    }
+
+    #[\PHPUnit\Framework\Attributes\DoesNotPerformAssertions]
+    public function test_revokeCurrentToken_does_nothing_when_token_not_found(): void
+    {
+        $this->service()->revokeCurrentToken('invalid-token-that-does-not-exist');
+    }
 }
