@@ -5,6 +5,7 @@ namespace App\Packages\Domains\User\Service;
 use App\Models\User;
 use App\Packages\Domains\User\Interface\TokenServiceInterface;
 use App\Packages\Domains\User\UserEntity;
+use Laravel\Sanctum\PersonalAccessToken;
 use RuntimeException;
 
 class SanctumTokenService implements TokenServiceInterface
@@ -29,5 +30,16 @@ class SanctumTokenService implements TokenServiceInterface
         }
 
         $user->tokens()->delete();
+    }
+
+    // Logout lives here rather than in UserRepository because it operates on personal_access_tokens,
+    // not on user data. No user lookup is needed — the plain-text token alone identifies the session to end.
+    public function revokeCurrentToken(string $plainTextToken): void
+    {
+        $token = PersonalAccessToken::findToken($plainTextToken);
+
+        if ($token !== null) {
+            $token->delete();
+        }
     }
 }
