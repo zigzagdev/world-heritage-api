@@ -14,7 +14,11 @@ Route::prefix('v1')->group(function (): void {
     });
 
     Route::post('/user/create', [UserController::class, 'createUser']);
-    Route::post('/user/login', [AuthController::class, 'login']);
+
+    Route::controller(AuthController::class)->prefix('user')->group(function (): void {
+        Route::post('/login', 'login');
+        Route::post('/logout', 'logout')->middleware('auth:sanctum');
+    });
 
     Route::controller(UserController::class)->prefix('users')->group(function (): void {
         Route::get('/{id}', 'getUserById');
