@@ -4,6 +4,7 @@ namespace App\Packages\Features\Controller;
 
 use App\Http\Controllers\Controller;
 use App\Packages\Features\CommandUseCases\UseCase\User\LoginUseCase;
+use App\Packages\Features\CommandUseCases\UseCase\User\LogoutUseCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -36,6 +37,27 @@ class AuthController extends Controller
             ], 401);
         } catch (Throwable $throw) {
             Log::error('Failed to login', [
+                'message' => $throw->getMessage(),
+                'trace'   => $throw->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
+    }
+
+    public function logout(Request $request, LogoutUseCase $useCase): JsonResponse
+    {
+        try {
+            $useCase->handle($request->bearerToken() ?? '');
+
+            return response()->json([
+                'status' => 'success',
+            ], 200);
+        } catch (Throwable $throw) {
+            Log::error('Failed to logout', [
                 'message' => $throw->getMessage(),
                 'trace'   => $throw->getTraceAsString(),
             ]);
