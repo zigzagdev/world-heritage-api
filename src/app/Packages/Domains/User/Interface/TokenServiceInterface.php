@@ -9,4 +9,6 @@ interface TokenServiceInterface
     public function createToken(UserEntity $entity): string;
 
     public function revokeAllTokens(UserEntity $entity): void;
+
+    public function revokeCurrentToken(string $plainTextToken): void;
 }
