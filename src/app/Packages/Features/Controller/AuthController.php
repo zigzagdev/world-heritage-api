@@ -5,6 +5,8 @@ namespace App\Packages\Features\Controller;
 use App\Http\Controllers\Controller;
 use App\Packages\Features\CommandUseCases\UseCase\User\LoginUseCase;
 use App\Packages\Features\CommandUseCases\UseCase\User\LogoutUseCase;
+use App\Packages\Features\QueryUseCases\Factory\ViewModel\UserViewModelFactory;
+use App\Packages\Features\QueryUseCases\UseCase\User\GetUserByIdUseCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -58,6 +60,35 @@ class AuthController extends Controller
             ], 200);
         } catch (Throwable $throw) {
             Log::error('Failed to logout', [
+                'message' => $throw->getMessage(),
+                'trace'   => $throw->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
+    }
+
+    public function me(Request $request, GetUserByIdUseCase $useCase): JsonResponse
+    {
+        try {
+            $dto = $useCase->handle($request->user()->id);
+
+            return response()->json([
+                'status' => 'success',
+                'data'   => UserViewModelFactory::build($dto)->toArray(),
+            ], 200);
+        } catch (Throwable $throw) {
+            if ($throw->getMessage() === 'User not found.') {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'User not found.',
+                ], 404);
+            }
+
+            Log::error('Failed to get current user', [
                 'message' => $throw->getMessage(),
                 'trace'   => $throw->getTraceAsString(),
             ]);

@@ -18,6 +18,7 @@ Route::prefix('v1')->group(function (): void {
     Route::controller(AuthController::class)->prefix('user')->group(function (): void {
         Route::post('/login', 'login');
         Route::post('/logout', 'logout')->middleware('auth:sanctum');
+        Route::get('/me', 'me')->middleware('auth:sanctum');
     });
 
     Route::controller(UserController::class)->prefix('users')->group(function (): void {
