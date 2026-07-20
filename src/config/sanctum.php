@@ -5,6 +5,15 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Laravel\Sanctum\Http\Middleware\AuthenticateSession;
 use Laravel\Sanctum\Sanctum;
 
+$frontendUrl  = env('FRONTEND_URL', 'http://localhost:3876');
+$frontendHost = parse_url($frontendUrl, PHP_URL_HOST);
+$frontendPort = parse_url($frontendUrl, PHP_URL_PORT);
+
+// Sanctum only treats requests from a listed domain/host as cookie-based SPA
+// requests; anything else falls back to requiring a bearer token. The frontend
+// (FRONTEND_URL) must be listed here or its session cookie is never checked.
+$frontendStatefulDomain = $frontendPort ? "{$frontendHost}:{$frontendPort}" : $frontendHost;
+
 return [
 
     /*
@@ -19,8 +28,9 @@ return [
     */
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
+        '%s,%s%s',
         'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+        $frontendStatefulDomain,
         Sanctum::currentApplicationUrlWithPort(),
         // Sanctum::currentRequestHost(),
     ))),
