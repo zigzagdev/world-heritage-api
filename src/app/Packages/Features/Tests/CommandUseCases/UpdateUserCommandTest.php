@@ -46,27 +46,41 @@ class UpdateUserCommandTest extends TestCase
         $this->assertSame('2027-01-01 00:00:00', $command->subscriptionExpiresAt);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('missingKeyProvider')]
-    public function test_fromArray_throws_when_required_key_is_missing(string $missingKey): void
+    public function test_fromArray_throws_when_id_is_missing(): void
     {
         $data = $this->validData();
-        unset($data[$missingKey]);
+        unset($data['id']);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Missing required key: {$missingKey}");
+        $this->expectExceptionMessage('Missing required key: id');
 
         UpdateUserCommand::fromArray($data);
     }
 
-    public static function missingKeyProvider(): array
+    #[\PHPUnit\Framework\Attributes\DataProvider('optionalKeyProvider')]
+    public function test_fromArray_allows_optional_key_to_be_omitted(string $optionalKey): void
+    {
+        $data = $this->validData();
+        unset($data[$optionalKey]);
+
+        $command = UpdateUserCommand::fromArray($data);
+
+        $this->assertNull($command->{$this->toCommandProperty($optionalKey)});
+    }
+
+    public static function optionalKeyProvider(): array
     {
         return [
-            ['id'],
             ['first_name'],
             ['last_name'],
             ['email'],
             ['age_range'],
             ['subscription_tier'],
         ];
+    }
+
+    private function toCommandProperty(string $key): string
+    {
+        return lcfirst(str_replace('_', '', ucwords($key, '_')));
     }
 }
