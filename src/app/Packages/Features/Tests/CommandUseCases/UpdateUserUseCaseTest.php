@@ -7,6 +7,7 @@ use App\Packages\Domains\User\UserEntity;
 use App\Packages\Features\CommandUseCases\UseCase\User\UpdateUserUseCase;
 use App\Packages\Features\CommandUseCases\UseCommand\User\UpdateUserCommand;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
+use Exception;
 use Faker\Factory as FakerFactory;
 use Mockery;
 use Mockery\MockInterface;
@@ -20,26 +21,26 @@ class UpdateUserUseCaseTest extends TestCase
         parent::tearDown();
     }
 
-    private function buildCommand(): UpdateUserCommand
+    private function buildCommand(array $overrides = []): UpdateUserCommand
     {
         $faker = FakerFactory::create();
 
-        return UpdateUserCommand::fromArray([
+        return UpdateUserCommand::fromArray(array_merge([
             'id'                => $faker->unique()->randomNumber(5),
             'first_name'        => $faker->firstName(),
             'last_name'         => $faker->lastName(),
             'email'             => $faker->unique()->safeEmail(),
             'age_range'         => $faker->randomElement(['teens', '20s', '30s', '40s', '50s', '60plus']),
             'subscription_tier' => 'free',
-        ]);
+        ], $overrides));
     }
 
-    private function buildDto(): UserDto
+    private function buildDto(int $id): UserDto
     {
         $faker = FakerFactory::create();
 
         return new UserDto(
-            id:                    $faker->unique()->randomNumber(5),
+            id:                    $id,
             firstName:             $faker->firstName(),
             lastName:              $faker->lastName(),
             email:                 $faker->unique()->safeEmail(),
@@ -52,17 +53,66 @@ class UpdateUserUseCaseTest extends TestCase
     public function test_handle_passes_entity_to_repository_and_returns_dto(): void
     {
         $command = $this->buildCommand();
-        $dto     = $this->buildDto();
+        $existing = $this->buildDto($command->id);
+        $updated  = $this->buildDto($command->id);
 
         /** @var UserRepositroyInterface|MockInterface $repository */
         $repository = Mockery::mock(UserRepositroyInterface::class);
+        $repository->shouldReceive('findById')
+            ->once()
+            ->with($command->id)
+            ->andReturn($existing);
         $repository->shouldReceive('updateUser')
             ->once()
             ->with(Mockery::type(UserEntity::class))
-            ->andReturn($dto);
+            ->andReturn($updated);
 
         $result = (new UpdateUserUseCase($repository))->handle($command);
 
-        $this->assertSame($dto, $result);
+        $this->assertSame($updated, $result);
+    }
+
+    public function test_handle_keeps_existing_value_when_field_is_omitted(): void
+    {
+        $command  = $this->buildCommand(['first_name' => null]);
+        $existing = $this->buildDto($command->id);
+        $passedEntity = null;
+
+        /** @var UserRepositroyInterface|MockInterface $repository */
+        $repository = Mockery::mock(UserRepositroyInterface::class);
+        $repository->shouldReceive('findById')
+            ->once()
+            ->with($command->id)
+            ->andReturn($existing);
+        $repository->shouldReceive('updateUser')
+            ->once()
+            ->with(Mockery::on(function (UserEntity $entity) use (&$passedEntity) {
+                $passedEntity = $entity;
+
+                return true;
+            }))
+            ->andReturn($existing);
+
+        (new UpdateUserUseCase($repository))->handle($command);
+
+        $this->assertSame($existing->firstName, $passedEntity->getFirstName());
+    }
+
+    public function test_handle_throws_when_user_not_found(): void
+    {
+        $command = $this->buildCommand();
+
+        /** @var UserRepositroyInterface|MockInterface $repository */
+        $repository = Mockery::mock(UserRepositroyInterface::class);
+        $repository->shouldReceive('findById')
+            ->once()
+            ->with($command->id)
+            ->andReturn(null);
+        $repository->shouldNotReceive('updateUser');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('User not found.');
+
+        (new UpdateUserUseCase($repository))->handle($command);
     }
 }

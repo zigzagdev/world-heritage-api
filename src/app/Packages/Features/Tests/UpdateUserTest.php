@@ -95,15 +95,18 @@ class UpdateUserTest extends TestCase
             ]);
     }
 
-    public function test_update_user_returns_500_when_required_key_is_missing(): void
+    public function test_update_user_returns_500_with_json_when_age_range_is_invalid(): void
     {
-        $user    = $this->seedUser();
-        $payload = $this->validPayload();
-        unset($payload['email']);
+        $user = $this->seedUser();
 
-        $response = $this->patchJson("/api/v1/users/{$user->id}", $payload);
+        $response = $this->patchJson("/api/v1/users/{$user->id}", [
+            'age_range' => 'not-a-real-value',
+        ]);
 
         $response->assertStatus(500)
-            ->assertJsonFragment(['status' => 'error']);
+            ->assertJsonFragment([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ]);
     }
 }

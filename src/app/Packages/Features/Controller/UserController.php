@@ -62,7 +62,7 @@ class UserController extends Controller
                 'status' => 'success',
                 'data'   => UserViewModelFactory::build($dto)->toArray(),
             ], 200);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             if ($exception->getMessage() === 'User not found.') {
                 return response()->json([
                     'status'  => 'error',
