@@ -4,6 +4,7 @@ namespace App\Packages\Features\CommandUseCases\UseCase\User;
 
 use App\Packages\Domains\User\Interface\UserRepositroyInterface;
 use App\Packages\Domains\User\Factory\UserEntityFactory;
+use App\Packages\Domains\User\Subscription\SubscriptionTier;
 use App\Packages\Features\CommandUseCases\UseCommand\User\CreateUserCommand;
 use App\Packages\Features\QueryUseCases\Dto\User\UserDto;
 
@@ -21,7 +22,7 @@ final class CreateUserUseCase
             'last_name'               => $command->lastName,
             'email'                   => $command->email,
             'age_range'               => $command->ageRange,
-            'subscription_tier'       => $command->subscriptionTier,
+            'subscription_tier'       => $command->subscriptionTier ?? SubscriptionTier::Free->value,
             'subscription_expires_at' => $command->subscriptionExpiresAt,
             'password_hash'           => bcrypt($command->password),
         ]);
