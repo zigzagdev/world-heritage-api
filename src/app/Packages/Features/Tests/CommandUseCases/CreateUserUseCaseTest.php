@@ -20,18 +20,18 @@ class CreateUserUseCaseTest extends TestCase
         parent::tearDown();
     }
 
-    private function buildCommand(): CreateUserCommand
+    private function buildCommand(array $overrides = []): CreateUserCommand
     {
         $faker = FakerFactory::create();
 
-        return CreateUserCommand::fromArray([
+        return CreateUserCommand::fromArray(array_merge([
             'first_name'        => $faker->firstName(),
             'last_name'         => $faker->lastName(),
             'email'             => $faker->unique()->safeEmail(),
             'password'          => $faker->password(8),
             'age_range'         => $faker->randomElement(['teens', '20s', '30s', '40s', '50s', '60plus']),
             'subscription_tier' => 'free',
-        ]);
+        ], $overrides));
     }
 
     private function buildDto(): UserDto
@@ -65,5 +65,34 @@ class CreateUserUseCaseTest extends TestCase
         $result  = $useCase->handle($command);
 
         $this->assertSame($dto, $result);
+    }
+
+    public function test_handle_defaults_subscription_tier_to_free_when_omitted(): void
+    {
+        $faker = FakerFactory::create();
+        $command = CreateUserCommand::fromArray([
+            'first_name' => $faker->firstName(),
+            'last_name'  => $faker->lastName(),
+            'email'      => $faker->unique()->safeEmail(),
+            'password'   => $faker->password(8),
+            'age_range'  => 'teens',
+        ]);
+        $dto = $this->buildDto();
+        $passedEntity = null;
+
+        /** @var UserRepositroyInterface|MockInterface $repository */
+        $repository = Mockery::mock(UserRepositroyInterface::class);
+        $repository->shouldReceive('createUser')
+            ->once()
+            ->with(Mockery::on(function (UserEntity $entity) use (&$passedEntity) {
+                $passedEntity = $entity;
+
+                return true;
+            }))
+            ->andReturn($dto);
+
+        (new CreateUserUseCase($repository))->handle($command);
+
+        $this->assertSame('free', $passedEntity->getSubscription()->getTier()->value);
     }
 }

@@ -66,7 +66,16 @@ class CreateUserCommandTest extends TestCase
             ['email'],
             ['password'],
             ['age_range'],
-            ['subscription_tier'],
         ];
+    }
+
+    public function test_fromArray_allows_subscription_tier_to_be_omitted(): void
+    {
+        $data = $this->validData();
+        unset($data['subscription_tier']);
+
+        $command = CreateUserCommand::fromArray($data);
+
+        $this->assertNull($command->subscriptionTier);
     }
 }

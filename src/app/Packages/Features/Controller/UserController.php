@@ -16,6 +16,32 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
+    public function createUser(
+        Request $request,
+        CreateUserUseCase $useCase,
+    ): JsonResponse {
+        try {
+            $command  = CreateUserCommand::fromArray($request->all());
+
+            $dto      = $useCase->handle($command);
+
+            return response()->json([
+                'status' => 'success',
+                'data'   => UserViewModelFactory::build($dto)->toArray(),
+            ], 201);
+        } catch (\Throwable $throwable) {
+            Log::error('Failed to create user', [
+                'message' => $throwable->getMessage(),
+                'trace'   => $throwable->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
+    }
+
     public function getUserById(
         Request $request,
         GetUserByIdUseCase $useCase,
@@ -103,31 +129,6 @@ class UserController extends Controller
             Log::error('Failed to delete user', [
                 'message' => $exception->getMessage(),
                 'trace'   => $exception->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Internal Server Error',
-            ], 500);
-        }
-    }
-
-    public function createUser(
-        Request $request,
-        CreateUserUseCase $useCase,
-    ): JsonResponse {
-        try {
-            $command  = CreateUserCommand::fromArray($request->all());
-            $dto      = $useCase->handle($command);
-
-            return response()->json([
-                'status' => 'success',
-                'data'   => UserViewModelFactory::build($dto)->toArray(),
-            ], 201);
-        } catch (\Throwable $throwable) {
-            Log::error('Failed to create user', [
-                'message' => $throwable->getMessage(),
-                'trace'   => $throwable->getTraceAsString(),
             ]);
 
             return response()->json([

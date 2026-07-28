@@ -12,7 +12,6 @@ final class CreateUserCommand
         'email',
         'password',
         'age_range',
-        'subscription_tier',
     ];
 
     private function __construct(
@@ -21,7 +20,7 @@ final class CreateUserCommand
         public readonly string  $email,
         public readonly string  $password,
         public readonly string  $ageRange,
-        public readonly string  $subscriptionTier,
+        public readonly ?string  $subscriptionTier,
         public readonly ?string $subscriptionExpiresAt,
     )
     {
@@ -41,7 +40,7 @@ final class CreateUserCommand
             email: $data['email'],
             password: $data['password'],
             ageRange: $data['age_range'],
-            subscriptionTier: $data['subscription_tier'],
+            subscriptionTier: $data['subscription_tier'] ?? null,
             subscriptionExpiresAt: $data['subscription_expires_at'] ?? null,
         );
     }
