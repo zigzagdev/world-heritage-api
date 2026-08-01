@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use Algolia\AlgoliaSearch\Api\SearchClient;
-use App\Packages\Domains\Adapter\AlgoliaWorldHeritageSearchAdapter;
-use App\Packages\Domains\Ports\WorldHeritageSearchPort;
+use App\Packages\Domains\User\Interface\TokenServiceInterface;
+use App\Packages\Domains\User\Service\SanctumTokenService;
+use App\Packages\Domains\WorldHeritage\Adapter\AlgoliaWorldHeritageSearchAdapter;
+use App\Packages\Domains\WorldHeritage\Ports\WorldHeritageSearchPort;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
@@ -22,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // We bind via a factory closure (instead of a simple class binding) because:
         // - The adapter needs runtime configuration (Algolia app id / API key / index name)
+        $this->app->bind(TokenServiceInterface::class, SanctumTokenService::class);
+
         $this->app->bind(WorldHeritageSearchPort::class, function () {
             $client = SearchClient::create(config('algolia.algolia_app_id'), config('algolia.algolia_search_api_key'));
 

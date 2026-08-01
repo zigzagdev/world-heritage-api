@@ -1,4 +1,5 @@
 /.phpunit.cache
+/.composer
 /node_modules
 /public/build
 /public/hot
@@ -7,6 +8,7 @@
 /storage/app/public
 /storage/app/private/unesco/world-heritage-sites.json
 /storage/app/private/unesco/normalized/world_heritage_sites_translation.json
+/storage/certs/
 
 /vendor
 .env

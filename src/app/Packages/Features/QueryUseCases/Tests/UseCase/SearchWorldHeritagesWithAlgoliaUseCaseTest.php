@@ -10,7 +10,7 @@ use App\Enums\StudyRegion;
 use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
 use App\Packages\Features\QueryUseCases\UseCase\SearchWorldHeritagesWithAlgoliaUseCase;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
-use App\Packages\Domains\Infra\CountryResolver;
+use App\Packages\Domains\WorldHeritage\Infra\CountryResolver;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDto;
 use App\Packages\Features\QueryUseCases\Dto\WorldHeritageDtoCollection;
 

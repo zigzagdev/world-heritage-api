@@ -6,8 +6,8 @@ use App\Models\Country;
 use App\Models\Image;
 use App\Models\WorldHeritage;
 use App\Models\WorldHeritageDescription;
-use App\Packages\Domains\Ports\Dto\HeritageSearchResult;
-use App\Packages\Domains\Ports\WorldHeritageSearchPort;
+use App\Packages\Domains\WorldHeritage\Ports\Dto\HeritageSearchResult;
+use App\Packages\Domains\WorldHeritage\Ports\WorldHeritageSearchPort;
 
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;

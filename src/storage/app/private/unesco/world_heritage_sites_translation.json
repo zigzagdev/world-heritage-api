@@ -4,7 +4,7 @@
         "scope": "ALL",
         "fetched": 1248,
         "total_count": 1248,
-        "dumped_at": "2026-06-22T08:46:36+09:00",
+        "dumped_at": "2026-06-26T08:14:48+09:00",
         "source": "https:\/\/data.unesco.org\/api\/explore\/v2.1\/catalog\/datasets\/whc001\/records",
         "order_by": "id_no asc"
     },

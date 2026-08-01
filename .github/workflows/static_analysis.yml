@@ -1,0 +1,41 @@
+name: Static Analysis
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "src/**/*.php"
+  workflow_dispatch: {}
+
+jobs:
+  mago:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+          tools: composer
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ hashFiles('src/composer.lock') }}
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+        working-directory: ./src
+
+      - name: Setup Mago
+        uses: nhedger/setup-mago@v1
+
+      - name: Run Mago lint
+        run: ./vendor/bin/mago lint
+        working-directory: ./src
