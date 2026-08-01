@@ -21,7 +21,7 @@ final class SubscriptionFactory
         }
 
         return new Subscription(
-            SubscriptionTier::from($data['tier']),
+            SubscriptionTier::from($data['tier'] ?? SubscriptionTier::Free->value),
             $expiresAt,
             $now,
         );
