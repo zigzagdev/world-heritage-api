@@ -12,7 +12,7 @@ final class UserEntityFactory
     public static function build(array $data): UserEntity
     {
         $subscription = SubscriptionFactory::build([
-            'tier' => $data['subscription_tier'],
+            'tier' => $data['subscription_tier'] ?? null,
             'expires_at' => $data['subscription_expires_at'] ?? null,
             'now' => $data['now'] ?? null,
         ]);
