@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Packages\Domains\Favorite\FavoriteRepository;
+use App\Packages\Domains\Favorite\Interface\FavoriteRepositoryInterface;
 use App\Packages\Domains\User\Interface\UserRepositroyInterface;
 use App\Packages\Domains\User\UserRepository;
 use App\Packages\Domains\WorldHeritageRepository;
@@ -20,6 +22,11 @@ class RepositoryProvider extends ServiceProvider
         $this->app->bind(
             UserRepositroyInterface::class,
             UserRepository::class
+        );
+
+        $this->app->bind(
+            FavoriteRepositoryInterface::class,
+            FavoriteRepository::class
         );
     }
 
