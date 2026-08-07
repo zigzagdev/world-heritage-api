@@ -1,6 +1,7 @@
 <?php
 
 use App\Packages\Features\Controller\AuthController;
+use App\Packages\Features\Controller\FavoriteController;
 use App\Packages\Features\Controller\UserController;
 use App\Packages\Features\Controller\WorldHeritageController;
 use Illuminate\Support\Facades\Route;
@@ -25,5 +26,9 @@ Route::prefix('v1')->group(function (): void {
         Route::get('/{id}', 'getUserById');
         Route::patch('/{id}', 'updateUser');
         Route::delete('/{id}', 'deleteUser');
+    });
+
+    Route::controller(FavoriteController::class)->prefix('favorites')->middleware('auth:sanctum')->group(function (): void {
+        Route::post('/', 'addFavorite');
     });
 });
