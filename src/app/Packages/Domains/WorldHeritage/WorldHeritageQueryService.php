@@ -246,6 +246,17 @@ class WorldHeritageQueryService implements WorldHeritageQueryServiceInterface
         );
     }
 
+    public function getHeritagesByIds(array $ids): WorldHeritageDtoCollection
+    {
+        $models = $this->readQueryService->findByIdsPreserveOrder($ids);
+
+        $payloads = $models
+            ->map(fn ($m) => $this->buildWorldHeritagePayload($m))
+            ->all();
+
+        return $this->buildDtoFromCollection($payloads);
+    }
+
     public function getEachRegionsHeritagesCount(): array
     {
         $counts = $this->model
