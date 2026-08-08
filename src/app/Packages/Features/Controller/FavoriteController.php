@@ -4,6 +4,7 @@ namespace App\Packages\Features\Controller;
 
 use App\Http\Controllers\Controller;
 use App\Packages\Features\CommandUseCases\UseCase\Favorite\AddFavoriteUseCase;
+use App\Packages\Features\QueryUseCases\UseCase\Favorite\GetFavoriteHeritagesUseCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +12,30 @@ use Throwable;
 
 class FavoriteController extends Controller
 {
+    public function getFavorites(
+        Request $request,
+        GetFavoriteHeritagesUseCase $useCase,
+    ): JsonResponse {
+        try {
+            $dtoCollection = $useCase->handle($request->user()->id);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $dtoCollection->toSummaryArray(),
+            ], 200);
+        } catch (Throwable $throwable) {
+            Log::error('Failed to get favorites', [
+                'message' => $throwable->getMessage(),
+                'trace'   => $throwable->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
+    }
+
     public function addFavorite(
         Request $request,
         AddFavoriteUseCase $useCase,
