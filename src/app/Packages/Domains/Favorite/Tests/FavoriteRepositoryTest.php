@@ -90,4 +90,35 @@ class FavoriteRepositoryTest extends TestCase
 
         $this->repository()->addFavorite(999999, $worldHeritage->id);
     }
+
+    public function test_getFavoriteWorldHeritageIds_returns_ids_ordered_by_most_recently_favorited(): void
+    {
+        $user           = $this->seedUser();
+        $worldHeritage1 = $this->seedWorldHeritage(1);
+        $worldHeritage2 = $this->seedWorldHeritage(2);
+
+        $user->favorites()->attach($worldHeritage1->id, ['created_at' => now()->subMinute()]);
+        $user->favorites()->attach($worldHeritage2->id, ['created_at' => now()]);
+
+        $result = $this->repository()->getFavoriteWorldHeritageIds($user->id);
+
+        $this->assertSame([$worldHeritage2->id, $worldHeritage1->id], $result);
+    }
+
+    public function test_getFavoriteWorldHeritageIds_returns_empty_array_when_no_favorites(): void
+    {
+        $user = $this->seedUser();
+
+        $result = $this->repository()->getFavoriteWorldHeritageIds($user->id);
+
+        $this->assertSame([], $result);
+    }
+
+    public function test_getFavoriteWorldHeritageIds_throws_exception_when_user_not_found(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('User not found.');
+
+        $this->repository()->getFavoriteWorldHeritageIds(999999);
+    }
 }
