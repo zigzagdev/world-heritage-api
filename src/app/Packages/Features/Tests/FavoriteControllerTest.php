@@ -5,6 +5,8 @@ namespace App\Packages\Features\Tests;
 use App\Models\User;
 use App\Models\WorldHeritage;
 use App\Packages\Domains\Favorite\Interface\FavoriteRepositoryInterface;
+use App\Packages\Domains\WorldHeritage\Ports\Dto\HeritageSearchResult;
+use App\Packages\Domains\WorldHeritage\Ports\WorldHeritageSearchPort;
 use App\Packages\Features\CommandUseCases\UseCase\Favorite\AddFavoriteUseCase;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use App\Packages\Features\QueryUseCases\UseCase\Favorite\GetFavoriteHeritagesUseCase;
@@ -19,6 +21,15 @@ class FavoriteControllerTest extends TestCase
     {
         parent::setUp();
         $this->truncate();
+
+        $this->app->bind(WorldHeritageSearchPort::class, static function () {
+            return new class implements WorldHeritageSearchPort {
+                public function search($query, int $currentPage, int $perPage): HeritageSearchResult
+                {
+                    return new HeritageSearchResult(ids: [], total: 0, currentPage: 1, perPage: $perPage, lastPage: 0);
+                }
+            };
+        });
     }
 
     protected function tearDown(): void
