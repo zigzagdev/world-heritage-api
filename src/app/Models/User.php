@@ -42,6 +42,6 @@ class User extends Authenticatable
             'user_favorite',
             'user_id',
             'world_heritage_site_id'
-        );
+        )->withTimestamps();
     }
 }

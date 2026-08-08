@@ -22,4 +22,18 @@ class FavoriteRepository implements FavoriteRepositoryInterface
 
         $user->favorites()->attach($worldHeritageSiteId);
     }
+
+    public function getFavoriteWorldHeritageIds(int $userId): array
+    {
+        $user = $this->userModel->find($userId);
+
+        if ($user === null) {
+            throw new Exception('User not found.');
+        }
+
+        return $user->favorites()
+            ->orderBy('user_favorite.created_at', 'desc')
+            ->pluck('world_heritage_sites.id')
+            ->all();
+    }
 }
