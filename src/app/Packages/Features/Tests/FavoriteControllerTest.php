@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\WorldHeritage;
 use App\Packages\Domains\Favorite\Interface\FavoriteRepositoryInterface;
 use App\Packages\Features\CommandUseCases\UseCase\Favorite\AddFavoriteUseCase;
+use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
+use App\Packages\Features\QueryUseCases\UseCase\Favorite\GetFavoriteHeritagesUseCase;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use RuntimeException;
@@ -103,6 +105,70 @@ class FavoriteControllerTest extends TestCase
 
         $response = $this->withToken($token)
             ->postJson('/api/v1/favorites', ['world_heritage_id' => 1]);
+
+        $response->assertStatus(500)
+            ->assertJsonFragment([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ]);
+    }
+
+    public function test_getFavorites_returns_200_with_favorite_heritages_when_authenticated(): void
+    {
+        $user           = $this->seedUser();
+        $worldHeritage1 = $this->seedWorldHeritage(1);
+        $worldHeritage2 = $this->seedWorldHeritage(2);
+        $token          = $user->createToken('auth-token')->plainTextToken;
+
+        $user->favorites()->attach($worldHeritage1->id);
+        $user->favorites()->attach($worldHeritage2->id);
+
+        $response = $this->withToken($token)->getJson('/api/v1/favorites');
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['status' => 'success'])
+            ->assertJsonCount(2, 'data');
+
+        $ids = array_column($response->json('data'), 'id');
+        $this->assertEqualsCanonicalizing([$worldHeritage1->id, $worldHeritage2->id], $ids);
+    }
+
+    public function test_getFavorites_returns_200_with_empty_array_when_user_has_no_favorites(): void
+    {
+        $user  = $this->seedUser();
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        $response = $this->withToken($token)->getJson('/api/v1/favorites');
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['status' => 'success'])
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_getFavorites_returns_401_when_unauthenticated(): void
+    {
+        $response = $this->getJson('/api/v1/favorites');
+
+        $response->assertStatus(401);
+    }
+
+    public function test_getFavorites_returns_500_on_unexpected_error(): void
+    {
+        $user  = $this->seedUser();
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        $favoriteRepository = Mockery::mock(FavoriteRepositoryInterface::class);
+        $favoriteRepository->shouldReceive('getFavoriteWorldHeritageIds')
+            ->andThrow(new RuntimeException('Unexpected error'));
+
+        $worldHeritageQueryService = Mockery::mock(WorldHeritageQueryServiceInterface::class);
+
+        $this->app->instance(
+            GetFavoriteHeritagesUseCase::class,
+            new GetFavoriteHeritagesUseCase($favoriteRepository, $worldHeritageQueryService),
+        );
+
+        $response = $this->withToken($token)->getJson('/api/v1/favorites');
 
         $response->assertStatus(500)
             ->assertJsonFragment([
