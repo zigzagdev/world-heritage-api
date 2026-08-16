@@ -91,6 +91,39 @@ class FavoriteRepositoryTest extends TestCase
         $this->repository()->addFavorite(999999, $worldHeritage->id);
     }
 
+    public function test_removeFavorite_detaches_world_heritage_site_from_user(): void
+    {
+        $user          = $this->seedUser();
+        $worldHeritage = $this->seedWorldHeritage(1);
+        $user->favorites()->attach($worldHeritage->id);
+
+        $this->repository()->removeFavorite($user->id, $worldHeritage->id);
+
+        $this->assertDatabaseMissing('user_favorite', [
+            'user_id'                => $user->id,
+            'world_heritage_site_id' => $worldHeritage->id,
+        ]);
+    }
+
+    #[\PHPUnit\Framework\Attributes\DoesNotPerformAssertions]
+    public function test_removeFavorite_does_not_throw_when_not_favorited(): void
+    {
+        $user          = $this->seedUser();
+        $worldHeritage = $this->seedWorldHeritage(1);
+
+        $this->repository()->removeFavorite($user->id, $worldHeritage->id);
+    }
+
+    public function test_removeFavorite_throws_exception_when_user_not_found(): void
+    {
+        $worldHeritage = $this->seedWorldHeritage(1);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('User not found.');
+
+        $this->repository()->removeFavorite(999999, $worldHeritage->id);
+    }
+
     public function test_getFavoriteWorldHeritageIds_returns_ids_ordered_by_most_recently_favorited(): void
     {
         $user           = $this->seedUser();
