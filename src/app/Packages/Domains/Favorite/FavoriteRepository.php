@@ -23,6 +23,17 @@ class FavoriteRepository implements FavoriteRepositoryInterface
         $user->favorites()->attach($worldHeritageSiteId);
     }
 
+    public function removeFavorite(int $userId, int $worldHeritageSiteId): void
+    {
+        $user = $this->userModel->find($userId);
+
+        if ($user === null) {
+            throw new Exception('User not found.');
+        }
+
+        $user->favorites()->detach($worldHeritageSiteId);
+    }
+
     public function getFavoriteWorldHeritageIds(int $userId): array
     {
         $user = $this->userModel->find($userId);
