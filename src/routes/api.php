@@ -31,5 +31,6 @@ Route::prefix('v1')->group(function (): void {
     Route::controller(FavoriteController::class)->prefix('favorites')->middleware('auth:sanctum')->group(function (): void {
         Route::get('/', 'getFavorites');
         Route::post('/', 'addFavorite');
+        Route::delete('/{world_heritage_id}', 'removeFavorite');
     });
 });

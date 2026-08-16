@@ -8,6 +8,7 @@ use App\Packages\Domains\Favorite\Interface\FavoriteRepositoryInterface;
 use App\Packages\Domains\WorldHeritage\Ports\Dto\HeritageSearchResult;
 use App\Packages\Domains\WorldHeritage\Ports\WorldHeritageSearchPort;
 use App\Packages\Features\CommandUseCases\UseCase\Favorite\AddFavoriteUseCase;
+use App\Packages\Features\CommandUseCases\UseCase\Favorite\RemoveFavoriteUseCase;
 use App\Packages\Features\QueryUseCases\QueryServiceInterface\WorldHeritageQueryServiceInterface;
 use App\Packages\Features\QueryUseCases\UseCase\Favorite\GetFavoriteHeritagesUseCase;
 use Illuminate\Support\Facades\DB;
@@ -116,6 +117,68 @@ class FavoriteControllerTest extends TestCase
 
         $response = $this->withToken($token)
             ->postJson('/api/v1/favorites', ['world_heritage_id' => 1]);
+
+        $response->assertStatus(500)
+            ->assertJsonFragment([
+                'status'  => 'error',
+                'message' => 'Internal Server Error',
+            ]);
+    }
+
+    public function test_removeFavorite_returns_200_and_removes_favorite_when_authenticated(): void
+    {
+        $user          = $this->seedUser();
+        $worldHeritage = $this->seedWorldHeritage(1);
+        $token         = $user->createToken('auth-token')->plainTextToken;
+        $user->favorites()->attach($worldHeritage->id);
+
+        $response = $this->withToken($token)
+            ->deleteJson("/api/v1/favorites/{$worldHeritage->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['status' => 'success']);
+
+        $this->assertDatabaseMissing('user_favorite', [
+            'user_id'                => $user->id,
+            'world_heritage_site_id' => $worldHeritage->id,
+        ]);
+    }
+
+    public function test_removeFavorite_returns_200_when_not_favorited(): void
+    {
+        $user          = $this->seedUser();
+        $worldHeritage = $this->seedWorldHeritage(1);
+        $token         = $user->createToken('auth-token')->plainTextToken;
+
+        $response = $this->withToken($token)
+            ->deleteJson("/api/v1/favorites/{$worldHeritage->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['status' => 'success']);
+    }
+
+    public function test_removeFavorite_returns_401_when_unauthenticated(): void
+    {
+        $worldHeritage = $this->seedWorldHeritage(1);
+
+        $response = $this->deleteJson("/api/v1/favorites/{$worldHeritage->id}");
+
+        $response->assertStatus(401);
+    }
+
+    public function test_removeFavorite_returns_500_on_unexpected_error(): void
+    {
+        $user  = $this->seedUser();
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        $repository = Mockery::mock(FavoriteRepositoryInterface::class);
+        $repository->shouldReceive('removeFavorite')
+            ->andThrow(new RuntimeException('Unexpected error'));
+
+        $this->app->instance(RemoveFavoriteUseCase::class, new RemoveFavoriteUseCase($repository));
+
+        $response = $this->withToken($token)
+            ->deleteJson('/api/v1/favorites/1');
 
         $response->assertStatus(500)
             ->assertJsonFragment([
