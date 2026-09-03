@@ -127,6 +127,12 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
                     'page' => $firstPage,
                     'hitsPerPage' => $perPage,
                     'filters' => $hasAnyFilter ? implode(' AND ', $filters) : null,
+                    /**
+                     * Only the id is ever read from the response (see below):
+                     * the full record is re-fetched from the DB via findByIdsPreserveOrder.
+                     * Restrict the payload accordingly.
+                     */
+                    'attributesToRetrieve' => ['objectID', 'id'],
                 ],
                 static fn ($v) => $v !== null,
             ),
@@ -156,12 +162,12 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 
     /**
      * Build an OR-filter that can match different country input shapes:
-     * - English: country / state_party (exact match)
+     * - English: country (exact match)
      * - Japanese: country_name_jp (exact match)
      * - ISO3-like: state_party_codes:<ISO3>
      *
      * Example output:
-     * (country:"Japan" OR state_party:"Japan" OR country_name_jp:"日本" OR state_party_codes:JPN)
+     * (country:"Japan" OR country_name_jp:"日本" OR state_party_codes:JPN)
      */
     private function buildCountryOrFilter(string $raw): string
     {
@@ -170,7 +176,6 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 
         $orParts = [
             'country:"' . $quoted . '"',
-            'state_party:"' . $quoted . '"',
             'country_name_jp:"' . $quoted . '"',
         ];
 
