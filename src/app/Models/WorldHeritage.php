@@ -31,6 +31,7 @@ class WorldHeritage extends Model
         'area_hectares',
         'buffer_zone_hectares',
         'is_endangered',
+        'is_transboundary',
         'latitude',
         'longitude',
         'short_description',

@@ -93,6 +93,7 @@ class ImportWorldHeritageSiteFromSplitFile extends Command
                 'area_hectares' => $this->toNullableFloat($row['area_hectares'] ?? null),
                 'buffer_zone_hectares' => $this->toNullableFloat($row['buffer_zone_hectares'] ?? null),
                 'is_endangered' => $this->toNullableBoolInt($row['is_endangered'] ?? null),
+                'is_transboundary' => $this->toNullableBoolInt($row['is_transboundary'] ?? null),
                 'latitude' => $this->toNullableFloat($row['latitude'] ?? null),
                 'longitude' => $this->toNullableFloat($row['longitude'] ?? null),
                 'short_description' => $this->toNullableString($row['short_description'] ?? null),

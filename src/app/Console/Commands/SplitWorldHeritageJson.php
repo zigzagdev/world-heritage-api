@@ -737,6 +737,7 @@ class SplitWorldHeritageJson extends Command
             'criteria' => $criteria,
             'year_inscribed' => (isset($row['date_inscribed']) && is_numeric($row['date_inscribed'])) ? (int) $row['date_inscribed'] : null,
             'is_endangered' => $this->boolFromDanger($row['danger'] ?? null),
+            'is_transboundary' => $this->boolFromDanger($row['transboundary'] ?? null),
             'area_hectares' => isset($row['area_hectares']) ? (is_numeric($row['area_hectares']) ? (float) $row['area_hectares'] : null) : null,
             'buffer_zone_hectares' => isset($row['buffer_zone_hectares']) ? (is_numeric($row['buffer_zone_hectares']) ? (float) $row['buffer_zone_hectares'] : null) : null,
             'latitude' => isset($lat) ? (is_numeric($lat) ? (float) $lat : null) : null,
@@ -787,6 +788,10 @@ class SplitWorldHeritageJson extends Command
 
         if (($existing['is_endangered'] ?? false) === false) {
             $existing['is_endangered'] = $this->boolFromDanger($incoming['danger'] ?? null);
+        }
+
+        if (($existing['is_transboundary'] ?? false) === false) {
+            $existing['is_transboundary'] = $this->boolFromDanger($incoming['transboundary'] ?? null);
         }
 
         if (($existing['state_party'] ?? null) === null) {
