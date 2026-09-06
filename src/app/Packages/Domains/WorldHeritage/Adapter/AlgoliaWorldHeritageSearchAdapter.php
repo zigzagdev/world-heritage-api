@@ -32,28 +32,28 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 
         /**
          * Country filtering strategy:
-         * - If ISO3 is explicitly provided, use strict ISO3 filtering and disable full-text search.
+         * - If ISO3 is explicitly provided, filter by state_party_codes:<ISO3>.
          * - Otherwise, attempt to treat the provided countryName as one of:
          *   - English country name (e.g. "Japan" / "japan")
          *   - Japanese name (e.g. "日本")
          *   - ISO3 (e.g. "JPN")
          *
          * In that case we build an OR-filter across relevant fields.
+         *
+         * The country filter never blanks out the keyword: like every other filter
+         * (region/category/year/criteria/is_endangered), it narrows the keyword search
+         * via AND rather than replacing it. A keyword that happens to also be a country
+         * name (e.g. "Japan") already matches the same records via full-text search on
+         * the indexed country/country_name_jp/state_party_codes attributes, so keeping
+         * it is harmless; a keyword combined with an explicit country param (e.g.
+         * keyword="temple" & country_iso3=JPN) must narrow by both.
          */
         $queryString = $query->keyword ?? '';
 
         if ($this->hasValue($query->countryIso3)) {
-            // Requirement: ISO3 -> query='' and filter by state_party_codes:<ISO3>
             $filters[] = 'state_party_codes:' . $this->escapeToken($query->countryIso3);
-            $queryString = '';
         } elseif ($this->hasValue($query->countryName)) {
             $filters[] = $this->buildCountryOrFilter($query->countryName);
-            /**
-             * IMPORTANT:
-             * Do not blank out query here.
-             * If the input was not a real country (e.g. "japan" typo / random word),
-             * we still want full-text search to work rather than returning "top hits".
-             */
         }
 
         /**
