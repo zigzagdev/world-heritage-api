@@ -72,6 +72,7 @@ class WorldHeritage extends Model
         return [
             'criteria' => 'array',
             'is_endangered'  => 'boolean',
+            'is_transboundary' => 'boolean',
             'year_inscribed' => 'integer',
             'area_hectares'  => 'float',
             'buffer_zone_hectares' => 'float',
