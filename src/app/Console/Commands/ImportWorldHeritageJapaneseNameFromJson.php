@@ -2,15 +2,17 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\ResolvesLocalDiskPaths;
 use App\Models\WorldHeritage;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class ImportWorldHeritageJapaneseNameFromJson extends Command
 {
+    use ResolvesLocalDiskPaths;
+
     protected $signature = 'world-heritage:import-japanese-names
         {--path=unesco/world-heritage-japanese-name-sorted.json : Path to JSON file (local disk relative)}
         {--dry-run : Do not write to DB}
@@ -25,7 +27,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
     public function handle(): int
     {
         $pathOpt = (string) $this->option('path');
-        $path = $this->resolvePath($pathOpt);
+        $path = $this->resolvePathToFile($pathOpt);
 
         $dryRun = (bool) $this->option('dry-run');
         $strict = (bool) $this->option('strict');
@@ -213,7 +215,7 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
             return;
         }
 
-        $fullOut = $this->resolvePath($missingOut);
+        $fullOut = $this->resolvePathToFile($missingOut);
         $dir = dirname($fullOut);
 
         if (!is_dir($dir)) {
@@ -226,28 +228,4 @@ class ImportWorldHeritageJapaneseNameFromJson extends Command
         $this->info("Wrote missing id_no list: {$fullOut} (count=" . count($missing) . ')');
     }
 
-    private function resolvePath(string $path): string
-    {
-        $path = trim($path);
-
-        if ($path === '') {
-            return $path;
-        }
-
-        if (str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
-            return $path;
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/app/')) {
-            $path = substr($path, strlen('storage/app/'));
-        }
-
-        if (str_starts_with($path, 'private/')) {
-            $path = substr($path, strlen('private/'));
-        }
-
-        return Storage::disk('local')->path($path);
-    }
 }
