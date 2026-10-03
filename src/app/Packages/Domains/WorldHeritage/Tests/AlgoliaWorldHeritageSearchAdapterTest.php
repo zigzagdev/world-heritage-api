@@ -52,6 +52,7 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
             'filters' =>
                 'state_party_codes:ECU AND study_region:"South America" AND category:"Natural" ' .
                 'AND year_inscribed >= 1978 AND year_inscribed <= 1980',
+            'attributesToRetrieve' => ['objectID', 'id'],
         ];
 
         $this->client
@@ -75,5 +76,49 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
         $this->assertSame(2, $result->total);
         $this->assertSame(2, $result->currentPage);
         $this->assertSame(1, $result->lastPage);
+    }
+
+    public function test_search_by_country_name_without_iso3_does_not_filter_on_state_party(): void
+    {
+        $indexName = 'world_heritage';
+        $adapter = new AlgoliaWorldHeritageSearchAdapter($this->client, $indexName);
+
+        $q = new AlgoliaSearchListQuery(
+            keyword: null,
+            countryName: 'Ecuador',
+            countryIso3: null,
+            region: null,
+            category: null,
+            yearFrom: null,
+            yearTo: null,
+            criteria: [],
+            isEndangered: null,
+            currentPage: 1,
+            perPage: 30,
+        );
+
+        $expectedParams = [
+            'query' => '',
+            'page' => 0,
+            'hitsPerPage' => 30,
+            'filters' => '(country:"Ecuador" OR country_name_jp:"Ecuador")',
+            'attributesToRetrieve' => ['objectID', 'id'],
+        ];
+
+        $this->client
+            ->shouldReceive('searchSingleIndex')
+            ->once()
+            ->with($indexName, $expectedParams)
+            ->andReturn([
+                'hits' => [],
+                'nbHits' => 0,
+                'nbPages' => 0,
+                'page' => 0,
+                'hitsPerPage' => 30,
+            ]);
+
+        $result = $adapter->search($q, currentPage: 1, perPage: 30);
+
+        $this->assertSame([], $result->ids);
     }
 }
