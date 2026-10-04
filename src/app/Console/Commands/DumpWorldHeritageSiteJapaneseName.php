@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\ResolvesLocalDiskPaths;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -10,6 +11,8 @@ use DOMXPath;
 
 class DumpWorldHeritageSiteJapaneseName extends Command
 {
+    use ResolvesLocalDiskPaths;
+
     /**
      * The name and signature of the console command.
      *
@@ -51,7 +54,7 @@ class DumpWorldHeritageSiteJapaneseName extends Command
         $pretty = (bool) $this->option('pretty');
         $dryRun = (bool) $this->option('dry-run');
 
-        $inPath = $this->resolvePath($in);
+        $inPath = $this->resolvePathToFile($in);
         if (!is_file($inPath)) {
             $this->error("Input not found: {$inPath}");
             return self::FAILURE;
@@ -359,42 +362,4 @@ class DumpWorldHeritageSiteJapaneseName extends Command
         usleep($ms * 1000);
     }
 
-    private function resolvePath(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '') {
-            return $path;
-        }
-
-        if (str_starts_with($path, '/')) {
-            return $path;
-        }
-
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
-            return $path;
-        }
-
-        $path = $this->normalizeLocalDiskPath($path);
-        return Storage::disk('local')->path($path);
-    }
-
-    private function normalizeLocalDiskPath(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '') {
-            return '';
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/app/')) {
-            $path = substr($path, strlen('storage/app/'));
-        }
-
-        if (str_starts_with($path, 'private/')) {
-            $path = substr($path, strlen('private/'));
-        }
-
-        return $path;
-    }
 }

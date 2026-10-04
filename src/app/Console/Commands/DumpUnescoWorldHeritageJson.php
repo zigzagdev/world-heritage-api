@@ -2,12 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\ResolvesLocalDiskPaths;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class DumpUnescoWorldHeritageJson extends Command
 {
+    use ResolvesLocalDiskPaths;
+
     protected $signature = 'world-heritage:dump-unesco
         {--country= : single country}
         {--countries= : comma-separated countries (Japan,France,Canada)}
@@ -408,26 +411,6 @@ class DumpUnescoWorldHeritageJson extends Command
         }
 
         return $single !== '' ? [$single] : [];
-    }
-
-    private function normalizeLocalDiskPath(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '') {
-            return '';
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/app/')) {
-            $path = substr($path, strlen('storage/app/'));
-        }
-
-        if (str_starts_with($path, 'private/')) {
-            $path = substr($path, strlen('private/'));
-        }
-
-        return $path;
     }
 
     private function slugifyCountry(string $country): string
