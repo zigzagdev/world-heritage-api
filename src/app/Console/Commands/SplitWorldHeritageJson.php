@@ -371,79 +371,61 @@ class SplitWorldHeritageJson extends Command
         ksort($countries, SORT_STRING);
         ksort($pivot, SORT_STRING);
 
-        $sitesPayload = [
-            'meta' => [
-                'schema' => 'world_heritage_sites.import.v1',
-                'source_raw' => $in,
-                'generated_at' => now()->toIso8601String(),
-                'rows_scanned' => count($results),
-                'sites' => count($sites),
-                'target_table' => 'world_heritage_sites',
-            ],
-            'results' => array_values($sites),
-        ];
+        $sitesPayload = $this->buildPayload(
+            'world_heritage_sites.import.v1',
+            ['sites' => count($sites), 'target_table' => 'world_heritage_sites'],
+            array_values($sites),
+            count($results),
+            $in,
+        );
 
-        $countriesPayload = [
-            'meta' => [
-                'schema' => 'countries.import.v1',
-                'source_raw' => $in,
-                'generated_at' => now()->toIso8601String(),
-                'rows_scanned' => count($results),
-                'countries' => count($countries),
-                'target_table' => 'countries',
-            ],
-            'results' => array_values($countries),
-        ];
+        $countriesPayload = $this->buildPayload(
+            'countries.import.v1',
+            ['countries' => count($countries), 'target_table' => 'countries'],
+            array_values($countries),
+            count($results),
+            $in,
+        );
 
-        $pivotPayload = [
-            'meta' => [
-                'schema' => 'site_state_parties.import.v1',
-                'source_raw' => $in,
-                'generated_at' => now()->toIso8601String(),
-                'rows_scanned' => count($results),
-                'relations' => count($pivot),
-                'target_table' => 'site_state_parties',
-            ],
-            'results' => array_values($pivot),
-        ];
+        $pivotPayload = $this->buildPayload(
+            'site_state_parties.import.v1',
+            ['relations' => count($pivot), 'target_table' => 'site_state_parties'],
+            array_values($pivot),
+            count($results),
+            $in,
+        );
 
-        $imagesPayload = [
-            'meta' => [
-                'schema' => 'world_heritage_site_images.import.v1',
-                'source_raw' => $in,
-                'generated_at' => now()->toIso8601String(),
-                'rows_scanned' => count($results),
+        $imagesPayload = $this->buildPayload(
+            'world_heritage_site_images.import.v1',
+            [
                 'images' => count($images),
                 'target_table' => 'world_heritage_site_images',
                 'rule' => 'only_sites_with_multiple_images',
             ],
-            'results' => $images,
-        ];
+            $images,
+            count($results),
+            $in,
+        );
 
-        $judgementsPayload = [
-            'meta' => [
-                'schema' => 'site_country_judgements.v1',
-                'source_raw' => $in,
-                'generated_at' => now()->toIso8601String(),
-                'rows_scanned' => count($results),
+        $judgementsPayload = $this->buildPayload(
+            'site_country_judgements.v1',
+            [
                 'judgements' => count($siteJudgements),
                 'country_code_standard' => 'alpha-3',
                 'status_values' => ['ok', 'unresolved'],
             ],
-            'results' => $siteJudgements,
-        ];
+            $siteJudgements,
+            count($results),
+            $in,
+        );
 
-        $exceptionsPayload = [
-            'meta' => [
-                'schema' => 'site_country_exceptions.v1',
-                'source_raw' => $in,
-                'generated_at' => now()->toIso8601String(),
-                'rows_scanned' => count($results),
-                'exceptions' => count($exceptions),
-                'limit' => $exceptionsLimit,
-            ],
-            'results' => $exceptions,
-        ];
+        $exceptionsPayload = $this->buildPayload(
+            'site_country_exceptions.v1',
+            ['exceptions' => count($exceptions), 'limit' => $exceptionsLimit],
+            $exceptions,
+            count($results),
+            $in,
+        );
 
         $written = [
             'world_heritage_sites.json' => $sitesPayload,
@@ -576,6 +558,19 @@ class SplitWorldHeritageJson extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    private function buildPayload(string $schema, array $extraMeta, array $results, int $rowsScanned, string $sourceRaw): array
+    {
+        return [
+            'meta' => array_merge([
+                'schema' => $schema,
+                'source_raw' => $sourceRaw,
+                'generated_at' => now()->toIso8601String(),
+                'rows_scanned' => $rowsScanned,
+            ], $extraMeta),
+            'results' => $results,
+        ];
     }
 
     private function buildJudgement(
