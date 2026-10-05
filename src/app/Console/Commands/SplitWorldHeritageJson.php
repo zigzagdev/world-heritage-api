@@ -94,6 +94,231 @@ class SplitWorldHeritageJson extends Command
             $this->warn('Dry-run enabled: will NOT write any files.');
         }
 
+        $processed = $this->processRows($results, $exceptionsLimit, $strict, $logLimit);
+
+        $sites = $processed['sites'];
+        $countries = $processed['countries'];
+        $pivot = $processed['pivot'];
+        $images = $processed['images'];
+        $siteJudgements = $processed['siteJudgements'];
+        $exceptions = $processed['exceptions'];
+        $invalid = $processed['invalid'];
+        $rowsMissingId = $processed['rowsMissingId'];
+        $rowsNonNumericId = $processed['rowsNonNumericId'];
+        $rowsMissingCodes = $processed['rowsMissingCodes'];
+        $rowsUnknownCodes = $processed['rowsUnknownCodes'];
+        $transnationalCount = $processed['transnationalCount'];
+        $transnationalExamples = $processed['transnationalExamples'];
+        $logged = $processed['logged'];
+
+        if ($strict) {
+            $fail = ($invalid > 0)
+                || ($rowsMissingId > 0)
+                || ($rowsNonNumericId > 0)
+                || ($rowsMissingCodes > 0)
+                || ($rowsUnknownCodes > 0);
+
+            if ($fail) {
+                $this->error('Strict mode: invalid rows or unresolved country judgements exist.');
+                return self::FAILURE;
+            }
+        }
+
+        ksort($sites, SORT_NUMERIC);
+        ksort($countries, SORT_STRING);
+        ksort($pivot, SORT_STRING);
+
+        $sitesPayload = $this->buildPayload(
+            'world_heritage_sites.import.v1',
+            ['sites' => count($sites), 'target_table' => 'world_heritage_sites'],
+            array_values($sites),
+            count($results),
+            $in,
+        );
+
+        $countriesPayload = $this->buildPayload(
+            'countries.import.v1',
+            ['countries' => count($countries), 'target_table' => 'countries'],
+            array_values($countries),
+            count($results),
+            $in,
+        );
+
+        $pivotPayload = $this->buildPayload(
+            'site_state_parties.import.v1',
+            ['relations' => count($pivot), 'target_table' => 'site_state_parties'],
+            array_values($pivot),
+            count($results),
+            $in,
+        );
+
+        $imagesPayload = $this->buildPayload(
+            'world_heritage_site_images.import.v1',
+            [
+                'images' => count($images),
+                'target_table' => 'world_heritage_site_images',
+                'rule' => 'only_sites_with_multiple_images',
+            ],
+            $images,
+            count($results),
+            $in,
+        );
+
+        $judgementsPayload = $this->buildPayload(
+            'site_country_judgements.v1',
+            [
+                'judgements' => count($siteJudgements),
+                'country_code_standard' => 'alpha-3',
+                'status_values' => ['ok', 'unresolved'],
+            ],
+            $siteJudgements,
+            count($results),
+            $in,
+        );
+
+        $exceptionsPayload = $this->buildPayload(
+            'site_country_exceptions.v1',
+            ['exceptions' => count($exceptions), 'limit' => $exceptionsLimit],
+            $exceptions,
+            count($results),
+            $in,
+        );
+
+        $written = [
+            'world_heritage_sites.json' => $sitesPayload,
+            'countries.json' => $countriesPayload,
+            'site_state_parties.json' => $pivotPayload,
+            'world_heritage_site_images.json' => $imagesPayload,
+        ];
+
+        foreach ($written as $filename => $payload) {
+            $encoded = $this->encodeJson($payload, $pretty);
+            if ($encoded === null) {
+                $this->error("Failed to encode: {$filename}");
+                return self::FAILURE;
+            }
+
+            $filePath = rtrim($outDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
+
+            if ($dryRun) {
+                $this->info("[dry] would write {$filePath} (" . count($payload['results'] ?? []) . " records)");
+                continue;
+            }
+
+            $ok = @file_put_contents($filePath, $encoded);
+            if ($ok === false) {
+                $this->error("Failed to write: {$filePath}");
+                return self::FAILURE;
+            }
+
+            $this->info("Wrote {$filePath} (" . count($payload['results'] ?? []) . " records)");
+        }
+
+        $judgementsPath = $this->resolvePathToFile($siteJudgementsOut);
+        $exceptionsPath = $this->resolvePathToFile($exceptionsOut);
+
+        $encodedJudgements = $this->encodeJson($judgementsPayload, $pretty);
+        if ($encodedJudgements === null) {
+            $this->error('Failed to encode judgements JSON');
+            return self::FAILURE;
+        }
+
+        $encodedExceptions = $this->encodeJson($exceptionsPayload, $pretty);
+        if ($encodedExceptions === null) {
+            $this->error('Failed to encode exceptions JSON');
+            return self::FAILURE;
+        }
+
+        if ($dryRun) {
+            $this->info("[dry] would write {$judgementsPath} (" . count($judgementsPayload['results']) . " records)");
+            $this->info("[dry] would write {$exceptionsPath} (" . count($exceptionsPayload['results']) . " records)");
+        } else {
+            if (@file_put_contents($judgementsPath, $encodedJudgements) === false) {
+                $this->error("Failed to write: {$judgementsPath}");
+                return self::FAILURE;
+            }
+            $this->info("Wrote {$judgementsPath} (" . count($judgementsPayload['results']) . " records)");
+
+            if (@file_put_contents($exceptionsPath, $encodedExceptions) === false) {
+                $this->error("Failed to write: {$exceptionsPath}");
+                return self::FAILURE;
+            }
+            $this->info("Wrote {$exceptionsPath} (" . count($exceptionsPayload['results']) . " records)");
+        }
+
+        $this->line('----');
+        $this->info('Sites (unique id_no): ' . count($sites));
+        $this->info('Countries (unique ISO3): ' . count($countries));
+        $this->info('Site-State relations: ' . count($pivot));
+        $this->info('Site images (rows): ' . count($images));
+        $this->info('Site country judgements (rows): ' . count($siteJudgements));
+        $this->info('Exceptions collected: ' . count($exceptions));
+        $this->info("Invalid: {$invalid}");
+        $this->info("Missing id_no: {$rowsMissingId}, Non-numeric id_no: {$rowsNonNumericId}");
+        $this->info("Missing/empty iso_codes or iso3: {$rowsMissingCodes}, Unknown iso_codes: {$rowsUnknownCodes}");
+        $this->info("Transnational rows detected (countries>=2): {$transnationalCount}");
+
+        if ($transnationalExamples !== []) {
+            $this->warn('Transnational examples (up to 25):');
+            foreach ($transnationalExamples as $ex) {
+                $this->line('- ' . json_encode($ex, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            }
+        }
+
+        if ($logLimit > 0 && $logged >= $logLimit) {
+            $this->warn("Skip logs truncated (log-limit={$logLimit})");
+        }
+
+        $summary = [
+            'meta' => [
+                'source_raw' => $in,
+                'input_path_resolved' => $inPath,
+                'output_dir_resolved' => $outDir,
+                'split_at' => now()->toIso8601String(),
+                'dry_run' => $dryRun,
+                'clean' => $clean,
+                'strict' => $strict,
+            ],
+            'counts' => [
+                'input_rows' => count($results),
+                'sites' => count($sites),
+                'countries' => count($countries),
+                'site_state_relations' => count($pivot),
+                'site_images' => count($images),
+                'site_country_judgements' => count($siteJudgements),
+                'exceptions' => count($exceptions),
+                'invalid' => $invalid,
+                'missing_id_no' => $rowsMissingId,
+                'non_numeric_id_no' => $rowsNonNumericId,
+                'missing_or_empty_iso' => $rowsMissingCodes,
+                'unknown_iso' => $rowsUnknownCodes,
+                'transnational_rows' => $transnationalCount,
+            ],
+            'transnational_examples' => $transnationalExamples,
+        ];
+
+        if ($summaryFile !== '') {
+            $summaryPath = $this->resolvePathToFile($summaryFile);
+            $encodedSummary = $this->encodeJson($summary, true);
+            if ($encodedSummary === null) {
+                $this->warn("Failed to encode summary JSON: {$summaryPath}");
+            } elseif (!$dryRun) {
+                $ok = @file_put_contents($summaryPath, $encodedSummary);
+                if ($ok === false) {
+                    $this->warn("Failed to write summary: {$summaryPath}");
+                } else {
+                    $this->info("Wrote summary: {$summaryPath}");
+                }
+            } else {
+                $this->info("[dry] would write summary: {$summaryPath}");
+            }
+        }
+
+        return self::SUCCESS;
+    }
+
+    private function processRows(array $results, int $exceptionsLimit, bool $strict, int $logLimit): array
+    {
         $normalizer = app(CountryCodeNormalizer::class);
 
         $logged = 0;
@@ -354,210 +579,22 @@ class SplitWorldHeritageJson extends Command
             }
         }
 
-        if ($strict) {
-            $fail = ($invalid > 0)
-                || ($rowsMissingId > 0)
-                || ($rowsNonNumericId > 0)
-                || ($rowsMissingCodes > 0)
-                || ($rowsUnknownCodes > 0);
-
-            if ($fail) {
-                $this->error('Strict mode: invalid rows or unresolved country judgements exist.');
-                return self::FAILURE;
-            }
-        }
-
-        ksort($sites, SORT_NUMERIC);
-        ksort($countries, SORT_STRING);
-        ksort($pivot, SORT_STRING);
-
-        $sitesPayload = $this->buildPayload(
-            'world_heritage_sites.import.v1',
-            ['sites' => count($sites), 'target_table' => 'world_heritage_sites'],
-            array_values($sites),
-            count($results),
-            $in,
-        );
-
-        $countriesPayload = $this->buildPayload(
-            'countries.import.v1',
-            ['countries' => count($countries), 'target_table' => 'countries'],
-            array_values($countries),
-            count($results),
-            $in,
-        );
-
-        $pivotPayload = $this->buildPayload(
-            'site_state_parties.import.v1',
-            ['relations' => count($pivot), 'target_table' => 'site_state_parties'],
-            array_values($pivot),
-            count($results),
-            $in,
-        );
-
-        $imagesPayload = $this->buildPayload(
-            'world_heritage_site_images.import.v1',
-            [
-                'images' => count($images),
-                'target_table' => 'world_heritage_site_images',
-                'rule' => 'only_sites_with_multiple_images',
-            ],
-            $images,
-            count($results),
-            $in,
-        );
-
-        $judgementsPayload = $this->buildPayload(
-            'site_country_judgements.v1',
-            [
-                'judgements' => count($siteJudgements),
-                'country_code_standard' => 'alpha-3',
-                'status_values' => ['ok', 'unresolved'],
-            ],
-            $siteJudgements,
-            count($results),
-            $in,
-        );
-
-        $exceptionsPayload = $this->buildPayload(
-            'site_country_exceptions.v1',
-            ['exceptions' => count($exceptions), 'limit' => $exceptionsLimit],
-            $exceptions,
-            count($results),
-            $in,
-        );
-
-        $written = [
-            'world_heritage_sites.json' => $sitesPayload,
-            'countries.json' => $countriesPayload,
-            'site_state_parties.json' => $pivotPayload,
-            'world_heritage_site_images.json' => $imagesPayload,
+        return [
+            'sites' => $sites,
+            'countries' => $countries,
+            'pivot' => $pivot,
+            'images' => $images,
+            'siteJudgements' => $siteJudgements,
+            'exceptions' => $exceptions,
+            'invalid' => $invalid,
+            'rowsMissingId' => $rowsMissingId,
+            'rowsNonNumericId' => $rowsNonNumericId,
+            'rowsMissingCodes' => $rowsMissingCodes,
+            'rowsUnknownCodes' => $rowsUnknownCodes,
+            'transnationalCount' => $transnationalCount,
+            'transnationalExamples' => $transnationalExamples,
+            'logged' => $logged,
         ];
-
-        foreach ($written as $filename => $payload) {
-            $encoded = $this->encodeJson($payload, $pretty);
-            if ($encoded === null) {
-                $this->error("Failed to encode: {$filename}");
-                return self::FAILURE;
-            }
-
-            $filePath = rtrim($outDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
-
-            if ($dryRun) {
-                $this->info("[dry] would write {$filePath} (" . count($payload['results'] ?? []) . " records)");
-                continue;
-            }
-
-            $ok = @file_put_contents($filePath, $encoded);
-            if ($ok === false) {
-                $this->error("Failed to write: {$filePath}");
-                return self::FAILURE;
-            }
-
-            $this->info("Wrote {$filePath} (" . count($payload['results'] ?? []) . " records)");
-        }
-
-        $judgementsPath = $this->resolvePathToFile($siteJudgementsOut);
-        $exceptionsPath = $this->resolvePathToFile($exceptionsOut);
-
-        $encodedJudgements = $this->encodeJson($judgementsPayload, $pretty);
-        if ($encodedJudgements === null) {
-            $this->error('Failed to encode judgements JSON');
-            return self::FAILURE;
-        }
-
-        $encodedExceptions = $this->encodeJson($exceptionsPayload, $pretty);
-        if ($encodedExceptions === null) {
-            $this->error('Failed to encode exceptions JSON');
-            return self::FAILURE;
-        }
-
-        if ($dryRun) {
-            $this->info("[dry] would write {$judgementsPath} (" . count($judgementsPayload['results']) . " records)");
-            $this->info("[dry] would write {$exceptionsPath} (" . count($exceptionsPayload['results']) . " records)");
-        } else {
-            if (@file_put_contents($judgementsPath, $encodedJudgements) === false) {
-                $this->error("Failed to write: {$judgementsPath}");
-                return self::FAILURE;
-            }
-            $this->info("Wrote {$judgementsPath} (" . count($judgementsPayload['results']) . " records)");
-
-            if (@file_put_contents($exceptionsPath, $encodedExceptions) === false) {
-                $this->error("Failed to write: {$exceptionsPath}");
-                return self::FAILURE;
-            }
-            $this->info("Wrote {$exceptionsPath} (" . count($exceptionsPayload['results']) . " records)");
-        }
-
-        $this->line('----');
-        $this->info('Sites (unique id_no): ' . count($sites));
-        $this->info('Countries (unique ISO3): ' . count($countries));
-        $this->info('Site-State relations: ' . count($pivot));
-        $this->info('Site images (rows): ' . count($images));
-        $this->info('Site country judgements (rows): ' . count($siteJudgements));
-        $this->info('Exceptions collected: ' . count($exceptions));
-        $this->info("Invalid: {$invalid}");
-        $this->info("Missing id_no: {$rowsMissingId}, Non-numeric id_no: {$rowsNonNumericId}");
-        $this->info("Missing/empty iso_codes or iso3: {$rowsMissingCodes}, Unknown iso_codes: {$rowsUnknownCodes}");
-        $this->info("Transnational rows detected (countries>=2): {$transnationalCount}");
-
-        if ($transnationalExamples !== []) {
-            $this->warn('Transnational examples (up to 25):');
-            foreach ($transnationalExamples as $ex) {
-                $this->line('- ' . json_encode($ex, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-            }
-        }
-
-        if ($logLimit > 0 && $logged >= $logLimit) {
-            $this->warn("Skip logs truncated (log-limit={$logLimit})");
-        }
-
-        $summary = [
-            'meta' => [
-                'source_raw' => $in,
-                'input_path_resolved' => $inPath,
-                'output_dir_resolved' => $outDir,
-                'split_at' => now()->toIso8601String(),
-                'dry_run' => $dryRun,
-                'clean' => $clean,
-                'strict' => $strict,
-            ],
-            'counts' => [
-                'input_rows' => count($results),
-                'sites' => count($sites),
-                'countries' => count($countries),
-                'site_state_relations' => count($pivot),
-                'site_images' => count($images),
-                'site_country_judgements' => count($siteJudgements),
-                'exceptions' => count($exceptions),
-                'invalid' => $invalid,
-                'missing_id_no' => $rowsMissingId,
-                'non_numeric_id_no' => $rowsNonNumericId,
-                'missing_or_empty_iso' => $rowsMissingCodes,
-                'unknown_iso' => $rowsUnknownCodes,
-                'transnational_rows' => $transnationalCount,
-            ],
-            'transnational_examples' => $transnationalExamples,
-        ];
-
-        if ($summaryFile !== '') {
-            $summaryPath = $this->resolvePathToFile($summaryFile);
-            $encodedSummary = $this->encodeJson($summary, true);
-            if ($encodedSummary === null) {
-                $this->warn("Failed to encode summary JSON: {$summaryPath}");
-            } elseif (!$dryRun) {
-                $ok = @file_put_contents($summaryPath, $encodedSummary);
-                if ($ok === false) {
-                    $this->warn("Failed to write summary: {$summaryPath}");
-                } else {
-                    $this->info("Wrote summary: {$summaryPath}");
-                }
-            } else {
-                $this->info("[dry] would write summary: {$summaryPath}");
-            }
-        }
-
-        return self::SUCCESS;
     }
 
     private function buildPayload(string $schema, array $extraMeta, array $results, int $rowsScanned, string $sourceRaw): array
