@@ -2,11 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\ResolvesLocalDiskPaths;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
 class MakeManualSiteNamesJson extends Command
 {
+    use ResolvesLocalDiskPaths;
+
     protected $signature = 'world-heritage:make-manual-names-json
         {--in=storage/app/private/unesco/manual_input.txt : Input text file}
         {--out=storage/app/private/unesco/site_names_manual.json : Output JSON file}
@@ -22,7 +25,7 @@ class MakeManualSiteNamesJson extends Command
         $pretty = (bool) $this->option('pretty');
         $strict = (bool) $this->option('strict');
 
-        $inPath = $this->resolvePath($in);
+        $inPath = $this->resolvePathToFile($in);
         if (!is_file($inPath)) {
             $this->error("Input not found: {$inPath}");
             return self::FAILURE;
@@ -213,22 +216,6 @@ class MakeManualSiteNamesJson extends Command
         }
 
         return preg_match('/[\(（]\s*\d{4}.*[\)）]\s*$/u', $line) === 1;
-    }
-
-    private function resolvePath(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '') {
-            return $path;
-        }
-        if (str_starts_with($path, '/')) {
-            return $path;
-        }
-        if (preg_match('/^[A-Za-z]:\\\\/', $path) === 1) {
-            return $path;
-        }
-
-        return base_path($path);
     }
 
     private function toLocalDiskPath(string $path): string
