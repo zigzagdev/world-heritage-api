@@ -90,14 +90,14 @@ class MakeManualSiteNamesJson extends Command
             return self::FAILURE;
         }
 
-        $outDiskPath = $this->toLocalDiskPath($out);
+        $outDiskPath = $this->normalizeLocalDiskPath($out);
         if ($outDiskPath === '') {
             $this->error("Output path is empty.");
             return self::FAILURE;
         }
 
         Storage::disk('local')->put($outDiskPath, $json);
-        $this->info("Wrote: storage/app/{$outDiskPath} (count=" . count($rows) . ")");
+        $this->info('Wrote: ' . Storage::disk('local')->path($outDiskPath) . ' (count=' . count($rows) . ')');
 
         return self::SUCCESS;
     }
@@ -218,17 +218,4 @@ class MakeManualSiteNamesJson extends Command
         return preg_match('/[\(（]\s*\d{4}.*[\)）]\s*$/u', $line) === 1;
     }
 
-    private function toLocalDiskPath(string $path): string
-    {
-        $trimPath = trim($path);
-        if ($trimPath === '') {
-            return $trimPath;
-        }
-
-        if (str_starts_with($trimPath, 'storage/app/')) {
-            return substr($trimPath, strlen('storage/app/'));
-        }
-
-        return ltrim($trimPath, '/');
-    }
 }
