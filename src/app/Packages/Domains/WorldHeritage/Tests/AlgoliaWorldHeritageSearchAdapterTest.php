@@ -45,8 +45,9 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
         );
 
         // Arrange: Algolia expects 0-based page indexing, so currentPage=2 becomes page=1.
+        // The keyword must stay intact even though a country filter is also present.
         $expectedParams = [
-            'query' => '',
+            'query' => 'galapagos',
             'page' => 1,
             'hitsPerPage' => 30,
             'filters' =>
@@ -120,5 +121,49 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
         $result = $adapter->search($q, currentPage: 1, perPage: 30);
 
         $this->assertSame([], $result->ids);
+    }
+
+    public function test_search_combines_keyword_with_country_iso3_filter_instead_of_dropping_keyword(): void
+    {
+        $indexName = 'world_heritage';
+        $adapter = new AlgoliaWorldHeritageSearchAdapter($this->client, $indexName);
+
+        $q = new AlgoliaSearchListQuery(
+            keyword: 'temple',
+            countryName: null,
+            countryIso3: 'JPN',
+            region: null,
+            category: null,
+            yearFrom: null,
+            yearTo: null,
+            criteria: [],
+            isEndangered: null,
+            currentPage: 1,
+            perPage: 30,
+        );
+
+        $expectedParams = [
+            'query' => 'temple',
+            'page' => 0,
+            'hitsPerPage' => 30,
+            'filters' => 'state_party_codes:JPN',
+            'attributesToRetrieve' => ['objectID', 'id'],
+        ];
+
+        $this->client
+            ->shouldReceive('searchSingleIndex')
+            ->once()
+            ->with($indexName, $expectedParams)
+            ->andReturn([
+                'hits' => [['id' => 913], ['id' => 1277]],
+                'nbHits' => 2,
+                'nbPages' => 1,
+                'page' => 0,
+                'hitsPerPage' => 30,
+            ]);
+
+        $result = $adapter->search($q, currentPage: 1, perPage: 30);
+
+        $this->assertSame([913, 1277], $result->ids);
     }
 }
