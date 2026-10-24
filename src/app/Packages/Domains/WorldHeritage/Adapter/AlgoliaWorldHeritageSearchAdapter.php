@@ -31,29 +31,39 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
         $filters = [];
 
         /**
+         * Optional filters: unlike $filters, these never exclude a record —
+         * they only boost the ranking of records that match. Used when a
+         * country has not been confirmed via ISO3, so an input that fails to
+         * resolve to a real country (e.g. "Jap") still falls back to plain
+         * full-text search instead of returning 0 results.
+         */
+        $optionalFilters = [];
+
+        /**
          * Country filtering strategy:
          * - If ISO3 is explicitly provided, filter by state_party_codes:<ISO3>.
+         *   This is a confirmed country, so it narrows results like any other filter.
          * - Otherwise, attempt to treat the provided countryName as one of:
          *   - English country name (e.g. "Japan" / "japan")
          *   - Japanese name (e.g. "日本")
          *   - ISO3 (e.g. "JPN")
          *
-         * In that case we build an OR-filter across relevant fields.
+         *   This is unconfirmed, so it goes into $optionalFilters: matching
+         *   records rank higher, but a non-matching countryName does not
+         *   reduce the full-text search results to zero.
          *
-         * The country filter never blanks out the keyword: like every other filter
-         * (region/category/year/criteria/is_endangered), it narrows the keyword search
-         * via AND rather than replacing it. A keyword that happens to also be a country
-         * name (e.g. "Japan") already matches the same records via full-text search on
-         * the indexed country/country_name_jp/state_party_codes attributes, so keeping
-         * it is harmless; a keyword combined with an explicit country param (e.g.
-         * keyword="temple" & country_iso3=JPN) must narrow by both.
+         * Either way, the country signal never blanks out the keyword: like
+         * every other filter (region/category/year/criteria/is_endangered),
+         * it narrows/boosts alongside the keyword search rather than
+         * replacing it. A keyword combined with an explicit country param
+         * (e.g. keyword="temple" & country_iso3=JPN) must narrow by both.
          */
         $queryString = $query->keyword ?? '';
 
         if ($this->hasValue($query->countryIso3)) {
             $filters[] = 'state_party_codes:' . $this->escapeToken($query->countryIso3);
         } elseif ($this->hasValue($query->countryName)) {
-            $filters[] = $this->buildCountryOrFilter($query->countryName);
+            $optionalFilters[] = $this->buildCountryOrFilter($query->countryName);
         }
 
         /**
@@ -102,13 +112,14 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 
         /**
          * Guardrail:
-         * Never execute Algolia with query='' AND no filters,
+         * Never execute Algolia with query='' AND no filters AND no optional filters,
          * otherwise you will get "top results" unrelated to the user input.
          */
         $hasAnyFilter = $filters !== [];
+        $hasOptionalFilter = $optionalFilters !== [];
         $hasQueryText = $this->hasValue($queryString);
 
-        if (!$hasAnyFilter && !$hasQueryText) {
+        if (!$hasAnyFilter && !$hasOptionalFilter && !$hasQueryText) {
             // Prefer returning empty result rather than misleading "top hits".
             return new HeritageSearchResult(
                 ids: [],
@@ -127,6 +138,7 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
                     'page' => $firstPage,
                     'hitsPerPage' => $perPage,
                     'filters' => $hasAnyFilter ? implode(' AND ', $filters) : null,
+                    'optionalFilters' => $hasOptionalFilter ? $optionalFilters : null,
                     /**
                      * Only the id is ever read from the response (see below):
                      * the full record is re-fetched from the DB via findByIdsPreserveOrder.
@@ -161,10 +173,13 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
     }
 
     /**
-     * Build an OR-filter that can match different country input shapes:
+     * Build an OR-expression that can match different country input shapes:
      * - English: country (exact match)
      * - Japanese: country_name_jp (exact match)
      * - ISO3-like: state_party_codes:<ISO3>
+     *
+     * Used as an entry in $optionalFilters (not $filters): a non-match
+     * does not exclude a record, it just skips the ranking boost.
      *
      * Example output:
      * (country:"Japan" OR country_name_jp:"日本" OR state_party_codes:JPN)
