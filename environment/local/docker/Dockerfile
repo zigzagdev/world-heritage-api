@@ -9,10 +9,8 @@ FROM php:8.2-fpm-bookworm
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx ca-certificates curl tzdata gettext-base \
     git unzip \
-    libpng-dev libjpeg62-turbo-dev libfreetype6-dev libzip-dev libonig-dev libxml2-dev \
-    libicu-dev \
- && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring bcmath exif gd zip intl \
+    libonig-dev \
+ && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
