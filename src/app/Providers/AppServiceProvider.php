@@ -31,6 +31,13 @@ class AppServiceProvider extends ServiceProvider
 
             return new AlgoliaWorldHeritageSearchAdapter(client: $client, indexName: config('algolia.algolia_index'));
         });
+
+        // Write-key client for index administration (e.g. algolia:sync-index-settings).
+        // Resolved lazily via the container so callers only pay for it, and tests
+        // can swap it out, when they actually reach a code path that needs it.
+        $this->app->bind(SearchClient::class, function () {
+            return SearchClient::create(config('algolia.algolia_app_id'), config('algolia.algolia_write_api_key'));
+        });
     }
 
     /**
