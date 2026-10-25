@@ -34,19 +34,21 @@ class AlgoliaSyncIndexSettings extends Command
 
     public function handle(): int
     {
-        $appId = config('algolia.algolia_app_id');
-        $apiKey = config('algolia.algolia_write_api_key');
         $indexName = config('algolia.algolia_index');
 
-        if (!$appId || !$apiKey || !$indexName) {
-            $this->error('Missing ALGOLIA_APP_ID / ALGOLIA_WRITE_API_KEY / ALGOLIA_INDEX');
-            return self::FAILURE;
-        }
-
+        // Dry-run never talks to Algolia, so it must not depend on credentials being configured.
         if ($this->option('dry-run')) {
             $this->info('[dry-run] would set attributesForFaceting on index: ' . $indexName);
             $this->line(json_encode(self::ATTRIBUTES_FOR_FACETING, JSON_PRETTY_PRINT));
             return self::SUCCESS;
+        }
+
+        $appId = config('algolia.algolia_app_id');
+        $apiKey = config('algolia.algolia_write_api_key');
+
+        if (!$appId || !$apiKey || !$indexName) {
+            $this->error('Missing ALGOLIA_APP_ID / ALGOLIA_WRITE_API_KEY / ALGOLIA_INDEX');
+            return self::FAILURE;
         }
 
         $client = SearchClient::create($appId, $apiKey);
