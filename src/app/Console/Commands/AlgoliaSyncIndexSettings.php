@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Algolia\AlgoliaSearch\Api\SearchClient;
+use App\Packages\Domains\WorldHeritage\Adapter\AlgoliaIndexSettingsSyncer;
 use Illuminate\Console\Command;
 
 class AlgoliaSyncIndexSettings extends Command
@@ -51,16 +52,10 @@ class AlgoliaSyncIndexSettings extends Command
             return self::FAILURE;
         }
 
-        $client = SearchClient::create($appId, $apiKey);
-
-        $res = $client->setSettings($indexName, [
-            'attributesForFaceting' => self::ATTRIBUTES_FOR_FACETING,
-        ]);
-
-        $taskId = $res['taskID'] ?? null;
-        if ($taskId !== null) {
-            $client->waitForTask($indexName, $taskId);
-        }
+        // Resolved lazily (only reached once credentials are confirmed present) so
+        // dry-run and the missing-credentials path never touch the container binding.
+        $syncer = new AlgoliaIndexSettingsSyncer($this->laravel->make(SearchClient::class));
+        $syncer->syncAttributesForFaceting($indexName, self::ATTRIBUTES_FOR_FACETING);
 
         $this->info("Done: attributesForFaceting synced on index={$indexName}");
 
