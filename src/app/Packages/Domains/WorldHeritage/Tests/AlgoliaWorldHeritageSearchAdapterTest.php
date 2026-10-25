@@ -6,8 +6,9 @@ use Algolia\AlgoliaSearch\Api\SearchClient;
 use App\Enums\StudyRegion;
 use App\Packages\Domains\WorldHeritage\Adapter\AlgoliaWorldHeritageSearchAdapter;
 use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
+use Illuminate\Support\Facades\Log;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
 {
@@ -214,6 +215,53 @@ class AlgoliaWorldHeritageSearchAdapterTest extends TestCase
         // The point of optionalFilters: a non-matching country term does not
         // force an empty result via the adapter's own guardrail.
         $this->assertSame([7, 8], $result->ids);
+    }
+
+    public function test_search_logs_and_skips_a_hit_with_a_non_numeric_id_instead_of_silently_dropping_it(): void
+    {
+        $indexName = 'world_heritage';
+        $adapter = new AlgoliaWorldHeritageSearchAdapter($this->client, $indexName);
+
+        $q = new AlgoliaSearchListQuery(
+            keyword: 'temple',
+            countryName: null,
+            countryIso3: null,
+            region: null,
+            category: null,
+            yearFrom: null,
+            yearTo: null,
+            criteria: [],
+            isEndangered: null,
+            currentPage: 1,
+            perPage: 30,
+        );
+
+        $this->client
+            ->shouldReceive('searchSingleIndex')
+            ->once()
+            ->andReturn([
+                'hits' => [
+                    ['id' => 10],
+                    ['id' => 'not-a-number', 'objectID' => 'broken-1'],
+                ],
+                'nbHits' => 2,
+                'nbPages' => 1,
+                'page' => 0,
+                'hitsPerPage' => 30,
+            ]);
+
+        Log::shouldReceive('warning')
+            ->once()
+            ->with('Algolia search hit has a non-numeric id', [
+                'id' => 'not-a-number',
+                'objectID' => 'broken-1',
+            ]);
+
+        $result = $adapter->search($q, currentPage: 1, perPage: 30);
+
+        // The valid hit survives; the broken one is logged and skipped rather
+        // than silently coerced to 0 and dropped via array_filter.
+        $this->assertSame([10], $result->ids);
     }
 
     public function test_search_combines_keyword_with_country_iso3_filter_instead_of_dropping_keyword(): void
