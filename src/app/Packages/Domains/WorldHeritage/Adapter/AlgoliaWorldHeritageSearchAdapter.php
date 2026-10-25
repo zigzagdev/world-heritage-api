@@ -6,6 +6,7 @@ use Algolia\AlgoliaSearch\Api\SearchClient;
 use App\Packages\Domains\WorldHeritage\Ports\Dto\HeritageSearchResult;
 use App\Packages\Domains\WorldHeritage\Ports\WorldHeritageSearchPort;
 use App\Packages\Features\QueryUseCases\ListQuery\AlgoliaSearchListQuery;
+use Illuminate\Support\Facades\Log;
 
 class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 {
@@ -152,11 +153,26 @@ class AlgoliaWorldHeritageSearchAdapter implements WorldHeritageSearchPort
 
         $hits = $response['hits'] ?? [];
 
-        $ids = array_values(array_filter(array_map(static function (array $h) {
-            return isset($h['id'])
-                ? (int) $h['id']
-                : (isset($h['objectID']) ? (int) $h['objectID'] : null);
-        }, $hits)));
+        $ids = [];
+        foreach ($hits as $hit) {
+            $rawId = $hit['id'] ?? $hit['objectID'] ?? null;
+
+            if ($rawId === null) {
+                continue;
+            }
+
+            if (!is_numeric($rawId)) {
+                // Don't silently coerce a non-numeric id to 0 and drop it via
+                // array_filter: that would hide an Algolia/DB data inconsistency.
+                Log::warning('Algolia search hit has a non-numeric id', [
+                    'id' => $hit['id'] ?? null,
+                    'objectID' => $hit['objectID'] ?? null,
+                ]);
+                continue;
+            }
+
+            $ids[] = (int) $rawId;
+        }
 
         $nbHits = (int) ($response['nbHits'] ?? 0);
         $nbPages = (int) ($response['nbPages'] ?? 0);
