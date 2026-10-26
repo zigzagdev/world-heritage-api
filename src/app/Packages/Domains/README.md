@@ -52,3 +52,17 @@ SearchResult (Ports)
     ↓
 Dto
 ```
+
+---
+
+## Algolia Index Settings
+
+`attributesForFaceting` is managed as code via `App\Console\Commands\AlgoliaSyncIndexSettings::ATTRIBUTES_FOR_FACETING`,
+applied with `php artisan algolia:sync-index-settings` (use `--dry-run` to preview without writing).
+Every attribute that `AlgoliaWorldHeritageSearchAdapter` filters or optional-filters on must be
+listed there, or Algolia rejects the request.
+
+All currently declared attributes are plain facets (facet counts enabled), none use `filterOnly()`.
+`country_names_jp`, `region`, and `study_regions` are not used as filters by the Adapter today, so
+they are candidates for `filterOnly()` to shrink the index — but this has not been changed yet,
+since whether the frontend relies on their facet counts has not been confirmed.
